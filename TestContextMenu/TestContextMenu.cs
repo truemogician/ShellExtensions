@@ -5,15 +5,16 @@ using System.Runtime.InteropServices;
 using SharpShell.Attributes;
 using System.Linq;
 using System.Diagnostics;
-using System;
 
-namespace RegisterShellExtension {
+namespace TestContextMenu {
     using static System.Environment;
 
     [ComVisible(true)]
-    [COMServerAssociation(AssociationType.ClassOfExtension,".dll")]
-    public class RegisterShellExtension : SharpContextMenu {
+    [COMServerAssociation(AssociationType.ClassOfExtension, ".dll")]
+    public class TestContextMenu : SharpContextMenu {
         protected string HostArch = "x64";
+        protected string Regasm32Path = null;
+        protected string Regasm64Path = null;
         protected override bool CanShowMenu() {
             if (SelectedItemPaths.Count() > 1)
                 return false;
@@ -44,13 +45,21 @@ namespace RegisterShellExtension {
             menu.Items.Add(item);
             return menu;
         }
-        protected void Register(string action, string targetArch) {
-            string registrationHandler = @"D:\Program Files\Shell Extensions\Context Menu\RegisterShellExtension\RegistrationHandler.exe";
+        protected bool Register(string action, string targetArch) {
+            string regasm = null;
+            if (HostArch == "x64")
+                regasm = Regasm64Path;
+            else if (HostArch == "x86")
+                regasm = Regasm32Path;
+            if (string.IsNullOrEmpty(regasm))
+                return false;
             Process.Start(new ProcessStartInfo {
-                FileName = registrationHandler,
-                Arguments = $"{action} \"{SelectedItemPaths.First()}\" {HostArch} {targetArch}",
-                Verb="runas"
+                FileName = regasm,
+                Arguments = $"{(action == "Register" ? " / codebase" : " / u")} \"{SelectedItemPaths.First()}\"",
+                Verb = "runas",
+                UseShellExecute = true,
             });
+            return true;
         }
     }
 }
