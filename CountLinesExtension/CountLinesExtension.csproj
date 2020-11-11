@@ -34,7 +34,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>CountLinesExtension_AllFiles.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>CountLinesExtension.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -77,8 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CountLinesExtension.snk" />
-    <None Include="CountLinesExtension_AllFiles.snk" />
-    <None Include="CountLines_true_mogician.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using SharpShell.SharpContextMenu;
@@ -20,7 +18,7 @@ namespace CountLinesExtension {
 
             //  Create a 'count lines' item
             var itemCountLines = new ToolStripMenuItem {
-                Text = "CountLines_true_mogician"
+                Text = "Count Lines"
             };
 
             //  When we click, we'll call the 'CountLines' function
