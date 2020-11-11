@@ -1,0 +1,25 @@
+Windows 7 64 Bit
+================
+
+To register, the C:\Windows\Microsoft.NET\Framework64\ version of regasm 
+must be used, this corresponds to what is used when running the 64 bit 
+visual studio command prompt from the menu.
+
+Context Menus
+=============
+
+Require:
+
+* Reference to SharpShell
+* Derive from SharpContextMenu (and implement)
+
+Supports:
+
+* Menu Items
+* Separators
+* Menu Items with Dropdowns
+* Menu Item Images
+
+Notes
+
+* Guid not required explicitly, COMVisible is. 
