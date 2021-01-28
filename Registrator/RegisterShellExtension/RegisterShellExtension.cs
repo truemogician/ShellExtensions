@@ -1,19 +1,18 @@
-﻿using System.IO;
-using System.Windows.Forms;
+﻿using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
-using System.Runtime.InteropServices;
-using SharpShell.Attributes;
-using System.Linq;
 using System.Diagnostics;
-using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace RegisterShellExtension {
-    using static System.Environment;
 
     [ComVisible(true)]
-    [COMServerAssociation(AssociationType.ClassOfExtension,".dll")]
+    [COMServerAssociation(AssociationType.ClassOfExtension, ".dll")]
     public class RegisterShellExtension : SharpContextMenu {
         protected string HostArch = "x64";
+
         protected override bool CanShowMenu() {
             if (SelectedItemPaths.Count() > 1)
                 return false;
@@ -24,6 +23,7 @@ namespace RegisterShellExtension {
                 return false;
             return true;
         }
+
         protected override ContextMenuStrip CreateMenu() {
             var menu = new ContextMenuStrip();
             var item = new ToolStripMenuItem {
@@ -44,12 +44,13 @@ namespace RegisterShellExtension {
             menu.Items.Add(item);
             return menu;
         }
+
         protected void Register(string action, string targetArch) {
-            string registrationHandler = @"D:\Program Files\Shell Extensions\Context Menu\RegisterShellExtension\RegistrationHandler.exe";
+            string registrationHandler = @"D:\Program Files\Shell Extensions\Registrator\RegistrationHandler.exe";
             Process.Start(new ProcessStartInfo {
                 FileName = registrationHandler,
                 Arguments = $"{action} \"{SelectedItemPaths.First()}\" {HostArch} {targetArch}",
-                Verb="runas"
+                Verb = "runas"
             });
         }
     }
