@@ -1,0 +1,1786 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Extension</name>
+    </assembly>
+    <members>
+        <member name="T:Extension.DragDropTool">
+            <summary>
+            Common methods for drag drop events
+            </summary>
+        </member>
+        <member name="M:Extension.DragDropTool.GetFilename(System.Windows.Forms.DragEventArgs)">
+            <summary>
+            Get the filename from the drag drop source
+            </summary>
+            <param name="e"></param>
+            <returns>return empty string if source contains multiple files</returns>
+        </member>
+        <member name="T:Extension.IconTool">
+            <summary>
+            图标工具
+            </summary>
+        </member>
+        <member name="F:Extension.IconTool.iconExtensions">
+            <summary>
+            Windows支持的图标扩展名
+            </summary>
+        </member>
+        <member name="F:Extension.IconTool.imageExtensions">
+            <summary>
+            图片类型扩展名
+            </summary>
+        </member>
+        <member name="T:Extension.IconTool.DefaultIcons">
+             <summary>
+            默认图标
+             </summary>
+        </member>
+        <member name="P:Extension.IconTool.DefaultIcons.FolderLarge">
+            <summary>
+            大图标
+            </summary>
+        </member>
+        <member name="T:Extension.IconTool.IconInfo">
+            <summary>
+            Icon图像信息类
+            </summary>
+        </member>
+        <member name="M:Extension.IconTool.IconInfo.#ctor">
+            <summary>
+            创建默认的Icon图像数据结构
+            </summary>
+        </member>
+        <member name="M:Extension.IconTool.GetRectangle(System.Drawing.Image,System.Int32,System.Int32)">
+            <summary>
+            获取图像原始大小对应的矩形
+            </summary>
+            <param name="image">图像</param>
+            <param name="x">左上角横坐标</param>
+            <param name="y">左上角纵坐标</param>
+            <returns>对应的矩形</returns>
+        </member>
+        <member name="M:Extension.IconTool.GetIconInfo(System.Drawing.Image,System.Int32)">
+            <summary>
+            创建正方形图标信息(两侧多余部分用透明像素填充)
+            </summary>
+            <param name="image">图像</param>
+            <param name="length">图标边长</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.IconTool.GetIconInfo(System.Drawing.Image,System.Int32,System.Int32)">
+            <summary>
+            创建图标信息
+            </summary>
+            <param name="image">图像</param>
+            <param name="width">图标宽度</param>
+            <param name="height">图标高度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.IconTool.IsImageFile(System.String)">
+            <summary>
+            判断文件是否为支持的图片文件类型
+            </summary>
+            <param name="path">文件路径或其拓展名（含句点）</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.IconTool.IsIconFile(System.String)">
+            <summary>
+            判断文件是否为Windows支持的图标文件类型
+            </summary>
+            <param name="path">文件路径或其拓展名（含句点）</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.IconTool.CreateDefaultIni(System.String,System.String)">
+            <summary>
+            在指定目录下创建默认参数的desktop.ini文件
+            </summary>
+            <param name="path">指定的目录</param>
+            <param name="iniName">创建的文件名，默认为desktop.ini</param>
+        </member>
+        <member name="M:Extension.IconTool.SaveAsIcon(System.Drawing.Image,System.String)">
+            <summary>
+            将图像以原大小保存为图标文件
+            </summary>
+            <param name="image">图像</param>
+            <param name="fileName">图标文件路径</param>
+        </member>
+        <member name="M:Extension.IconTool.SaveAsIcon(System.Drawing.Image,System.String,System.Double)">
+            <summary>
+            将图像以一定放缩比例保存为图标文件
+            </summary>
+            <param name="image">图像</param>
+            <param name="fileName">图标文件路径</param>
+            <param name="scale">放缩比例</param>
+        </member>
+        <member name="M:Extension.IconTool.SaveAsIcon(System.Drawing.Image,System.String,System.Int32,System.Boolean)">
+            <summary>
+            将图像以特定大小保存为图标文件
+            </summary>
+            <param name="image">图像</param>
+            <param name="fileName">图标文件路径</param>
+            <param name="maxLength">图标长度或宽度的最大值</param>
+            <param name="fillTransparentPixel">是否用透明像素填充成正方形图标</param>
+        </member>
+        <member name="M:Extension.IconTool.SaveAsIcon(System.Drawing.Image,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            将图像以特定大小保存为图标文件
+            </summary>
+            <param name="image">图像</param>
+            <param name="fileName">图标文件路径</param>
+            <param name="width">图标宽度</param>
+            <param name="height">图标高度</param>
+            <param name="fillTransparentPixel">是否用透明像素填充(外部调用不可更改)</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String)">
+            <summary>
+            将图片文件转换为和原图大小相同的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.String)">
+            <summary>
+            将图片文件转换为和原图大小相同的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="icoPath">图标文件路径</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.Double)">
+            <summary>
+            将图片文件以一定放缩比例转换为图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="scale">放缩比例</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.String,System.Double)">
+            <summary>
+            将图片文件以一定放缩比例转换为图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="icoPath">图标文件路径</param>
+            <param name="scale">放缩比例</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.Int32,System.Boolean)">
+            <summary>
+            将图片文件转换为特定大小的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="maxLength">图标长度或宽度的最大值</param>
+            <param name="fillTransparentPixel">是否用透明像素填充成正方形图标</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.String,System.Int32,System.Boolean)">
+            <summary>
+            将图片文件转换为特定大小的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="icoPath">图标文件路径</param>
+            <param name="maxLength">图标长度或宽度的最大值</param>
+            <param name="fillTransparentPixel">是否用透明像素填充成正方形图标</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.Int32,System.Int32)">
+            <summary>
+            将图片文件转换为特定大小的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="width">图标宽度</param>
+            <param name="height">图标高度</param>
+        </member>
+        <member name="M:Extension.IconTool.ConvertToIcon(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            将图片文件转换为特定大小的图标文件
+            </summary>
+            <param name="imgPath">图片文件路径</param>
+            <param name="icoPath">图标文件路径</param>
+            <param name="width">图标宽度</param>
+            <param name="height">图标高度</param>
+        </member>
+        <member name="T:Extension.IconTool.Directory">
+            <summary>
+            文件夹图标操作
+            </summary>
+        </member>
+        <member name="M:Extension.IconTool.Directory.Customized(System.String)">
+            <summary>
+            文件夹图标是否被自定义
+            </summary>
+            <param name="path">文件夹路径</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.IconTool.Directory.GetIconFile(System.String)">
+            <summary>
+            获取文件夹图标文件路径
+            </summary>
+            <param name="path">文件夹路径（绝对路径）</param>
+            <returns>图标文件路径</returns>
+        </member>
+        <member name="M:Extension.IconTool.Directory.GetIcon(System.String,System.Boolean)">
+            <summary>
+            获取文件夹图标
+            </summary>
+            <param name="path">文件夹路径</param>
+            <param name="useDefaultIcon">是否返回默认图标</param>
+            <returns>文件夹图标</returns>
+        </member>
+        <member name="M:Extension.IconTool.Directory.SetIcon(System.String,System.String)">
+            <summary>
+            通过改写desktop.ini设置文件夹图标
+            </summary>
+            <param name="path">文件夹绝对路径</param>
+            <param name="icon">图标路径</param>
+        </member>
+        <member name="M:Extension.IconTool.Directory.SetIcon(System.String)">
+            <summary>
+            通过改写desktop.ini设置文件夹图标
+            </summary>
+            <param name="path">文件夹绝对路径(需要保证文件夹中有且仅有一个图标文件)</param>
+        </member>
+        <member name="T:Extension.ImageTool">
+            <summary>
+            Collection of image processing functions
+            </summary>
+        </member>
+        <member name="F:Extension.ImageTool.imageExtensions">
+            <summary>
+            Common image extensions
+            </summary>
+        </member>
+        <member name="M:Extension.ImageTool.IsImage(System.String)">
+            <summary>
+            Judge whether the file is an image file.
+            </summary>
+            <param name="path">file path or file extension (including period)</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.ImageTool.ResizeImage(System.Drawing.Image,System.Int32,System.Int32)">
+            <summary>
+            Resize image
+            </summary>
+            <param name="image">Source image</param>
+            <param name="width"></param>
+            <param name="height"></param>
+            <returns>Resized image</returns>
+        </member>
+        <member name="M:Extension.ImageTool.ResizeCanvas(System.Drawing.Image,System.Int32,System.Int32,System.Drawing.ContentAlignment)">
+            <summary>
+            Resize the background canvas size of the image, filling extra area with transparent pixels
+            </summary>
+            <param name="image">Source image</param>
+            <param name="width">Canvas width, required to be no shorter than the width of image</param>
+            <param name="height">Canvas width, required to be no shorter than the width of image</param>
+            <param name="alignment">The way how the source image is positioned</param>
+            <returns>Image width resized canvas</returns>
+        </member>
+        <member name="M:Extension.ImageTool.ResizeToFit(System.Drawing.Image,System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="image"></param>
+            <param name="width"></param>
+            <param name="height"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Extension.MathTool">
+            <summary>
+            Extended useful math tools
+            </summary>
+        </member>
+        <member name="M:Extension.MathTool.BitLength(System.Int64)">
+            <summary>
+            Calculate the bit length of an integer
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Extension.PathTool">
+            <summary>
+            文件路径工具
+            </summary>
+        </member>
+        <member name="F:Extension.PathTool.InvalidChars">
+            <summary>
+            路径非法字符集
+            </summary>
+        </member>
+        <member name="T:Extension.PathTool.PathType">
+            <summary>
+            路径类型
+            </summary>
+        </member>
+        <member name="F:Extension.PathTool.PathType.Invalid">
+            <summary>
+            非法路径
+            </summary>
+        </member>
+        <member name="F:Extension.PathTool.PathType.Relative">
+            <summary>
+            相对路径
+            </summary>
+        </member>
+        <member name="F:Extension.PathTool.PathType.Absolute">
+            <summary>
+            绝对路径
+            </summary>
+        </member>
+        <member name="M:Extension.PathTool.GetPathType(System.String)">
+            <summary>
+            判断路径类型
+            </summary>
+            <param name="path">路径</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.PathTool.IsValid(System.String)">
+            <summary>
+            判断路径是否合法
+            </summary>
+            <param name="path">路径</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.PathTool.IsRelative(System.String)">
+            <summary>
+            判断路径是否为相对路径
+            </summary>
+            <param name="path">路径</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.PathTool.IsAbsolute(System.String)">
+            <summary>
+            判断路径是否为绝对路径
+            </summary>
+            <param name="path">路径</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.PathTool.GetCommonPath(System.String,System.String)">
+            <summary>
+            计算两个绝对路径的最长公共路径
+            </summary>
+            <param name="path1">第一个路径，以路径分隔符结尾视为目录</param>
+            <param name="path2">第二个路径，以路径分隔符结尾视为目录</param>
+            <returns>最长公共路径，以路径分隔符结尾，无公共路径返回空字符串</returns>
+        </member>
+        <member name="M:Extension.PathTool.GetCommonPath(System.String[])">
+            <summary>
+            计算多个绝对路径的最长公共路径
+            </summary>
+            <param name="paths">路径，以路径分隔符结尾视为目录</param>
+            <returns>最长公共路径，以路径分隔符结尾，无公共路径返回空字符串</returns>
+        </member>
+        <member name="M:Extension.PathTool.ToRelative(System.String,System.String,System.Nullable{System.Boolean})">
+            <summary>
+            将绝对路径转化为相对路径
+            </summary>
+            <param name="basePath">基路径，以路径分隔符结尾视为目录</param>
+            <param name="path">目标路径</param>
+            <param name="isDirectory">基路径是否为目录</param>
+            <returns>转化的相对路径，如果驱动器不同，则返回空字符串</returns>
+        </member>
+        <member name="M:Extension.PathTool.ToAbsolute(System.String,System.String,System.Nullable{System.Boolean})">
+            <summary>
+            将相对路径转化为绝对路径
+            </summary>
+            <param name="basePath">基路径，以路径分隔符结尾视为目录</param>
+            <param name="path">目标路径</param>
+            <param name="isDirectory">基路径是否为目录</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.PathTool.GetDepth(System.String)">
+            <summary>
+            计算路径深度，规定盘符根路径深度为0
+            </summary>
+            <param name="path">路径</param>
+            <returns>深度</returns>
+        </member>
+        <member name="M:Extension.PathTool.GetDriverLetter(System.String)">
+            <summary>
+            获取路径的盘符
+            </summary>
+            <param name="path">路径</param>
+            <returns>盘符</returns>
+        </member>
+        <member name="M:Extension.PathTool.GetAncestorPath(System.String,System.Int32)">
+            <summary>
+            截取一定层级的祖先路径
+            </summary>
+            <param name="path">路径</param>
+            <param name="level">层级</param>
+            <returns>祖先路径，以路径分隔符结尾</returns>
+        </member>
+        <member name="M:Extension.PathTool.GetAncestorName(System.String,System.Int32)">
+            <summary>
+            截取一定层级的祖先目录名称
+            </summary>
+            <param name="path">路径</param>
+            <param name="level">层级</param>
+            <returns>祖先目录名称</returns>
+        </member>
+        <member name="M:Extension.PathTool.ChangeName(System.String,System.String)">
+            <summary>
+            更改文件或路径名称
+            </summary>
+            <param name="path">路径</param>
+            <param name="newName">新名称</param>
+            <returns></returns>
+        </member>
+        <member name="T:Extension.ReadingTool">
+            <summary>
+            控制台读入工具
+            </summary>
+        </member>
+        <member name="M:Extension.ReadingTool.ReadInt(System.String,System.Int32@)">
+            <summary>
+            读取字符串中第一个整数
+            </summary>
+            <param name="content">被读取的字符串</param>
+            <param name="result">读取的整数</param>
+            <returns>读取之后字符串的剩余部分</returns>
+        </member>
+        <member name="T:Extension.WebBrowserTool">
+            <summary>
+            WebBrowser控件扩展
+            </summary>
+        </member>
+        <member name="M:Extension.WebBrowserTool.SetWebBrowserFeatures(System.Int32)">
+            <summary>
+            修改注册表信息来兼容当前程序 
+            </summary>
+            <param name="ieVersion">IE版本</param>
+        </member>
+        <member name="M:Extension.WebBrowserTool.GetBrowserVersion">
+            <summary>  
+            获取浏览器的版本  
+            </summary>  
+            <returns></returns>  
+        </member>
+        <member name="M:Extension.WebBrowserTool.GetEmulationMode(System.Int32)">
+            <summary>  
+            通过版本得到浏览器模式的值  
+            </summary>  
+            <param name="browserVersion">浏览器版本</param>  
+            <returns></returns>  
+        </member>
+        <member name="T:Extension.WindowTool">
+            <summary>
+            窗口操作工具（导引自user32.dll)
+            </summary>
+        </member>
+        <member name="M:Extension.WindowTool.GetDeviceContext(System.IntPtr)">
+            <summary>
+            获取设备场景
+            </summary>
+            <param name="hWnd"></param>
+            <returns>设备场景句柄</returns>
+        </member>
+        <member name="M:Extension.WindowTool.FindWindow(System.String,System.String)">
+            <summary>
+            获取窗口句柄
+            </summary>
+            <param name="className">类名称</param>
+            <param name="windowName">窗口标题</param>
+            <returns>窗口句柄，未找到返回null</returns>
+        </member>
+        <member name="M:Extension.WindowTool.FindWindowEx(System.IntPtr,System.Int32,System.String,System.String)">
+            <summary>
+            获得一个窗口的句柄，该窗口的类名和窗口名与给定的字符串相匹配；这个函数查找子窗口，从排在给定的子窗口后面的下一个子窗口开始；在查找时不区分大小写
+            </summary>
+            <param name="hWndParent">要查找子窗口的父窗口句柄。如果为null，则函数以桌面窗口为父窗口，查找桌面窗口的所有子窗口</param>
+            <param name="hWndChild">子窗口句柄。查找从在Z序中的下一个子窗口开始。子窗口必须为hWndParent窗口的直接子窗口而非后代窗口；如果为null，则查找从hWndParent的第一个子窗口开始；如果hWndParent和hWndChildAfter同时为null，则查找所有的顶层窗口及消息窗口</param>
+            <param name="lpszClass">指向一个指定了类名的空结束字符串，或一个标识类名字符串的成员的指针。如果该参数为一个成员，则它必须为前次调用theGlobaIAddAtom函数产生的全局成员；该成员为16位，必须位于lpClassName的低16位，高位必须为0</param>
+            <param name="lpszWindow">指向一个指定了窗口标题的空结束字符串。如果为null，则为所有窗口全匹配</param>
+            <returns>如果成功，则返回具有指定类名和窗口名的窗口句柄。如果失败，返回null</returns>
+        </member>
+        <member name="M:Extension.WindowTool.GetForegroundWindow">
+            <summary>
+            获取顶部窗口句柄
+            </summary>
+            <returns>窗口句柄</returns>
+        </member>
+        <member name="M:Extension.WindowTool.SetForegroundWindow(System.IntPtr)">
+            <summary>
+            将指定窗口移到顶部
+            </summary>
+            <param name="hWnd"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.BringWindowToTop(System.IntPtr)">
+            <summary>
+            将指定窗口移到顶部
+            </summary>
+            <param name="hWnd"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.ShowWindow(System.IntPtr,System.Int32)">
+            <summary>
+            显示指定窗口
+            </summary>
+            <param name="hwnd">窗口句柄</param>
+            <param name="nCmdShow">显示模式</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.PostMessage(System.IntPtr,Extension.WindowTool.MessageConst,Extension.WindowTool.ParameterConst,System.Int32)">
+            <summary>
+            向指定窗口发送信息(执行后立刻返回)
+            </summary>
+            <param name="hWnd">窗口句柄</param>
+            <param name="wMsg">指定被发送的消息</param>
+            <param name="wParam">指定附加的消息指定信息</param>
+            <param name="lParam">指定附加的消息指定信息</param>
+            <returns>指定消息处理的结果</returns>
+        </member>
+        <member name="M:Extension.WindowTool.SendMessage(System.IntPtr,Extension.WindowTool.MessageConst,Extension.WindowTool.ParameterConst,System.Int32)">
+            <summary>
+            向指定窗口发送信息(执行后等到消息被处理后再返回)
+            </summary>
+            <param name="hWnd">窗口句柄</param>
+            <param name="wMsg">指定被发送的消息</param>
+            <param name="wParam">指定附加的消息指定信息</param>
+            <param name="lParam">指定附加的消息指定信息</param>
+            <returns>指定消息处理的结果</returns>
+        </member>
+        <member name="T:Extension.WindowTool.MessageConst">
+            <summary>
+            SendMessage-wMsg
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CREATE">
+            <summary>
+            创建一个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_DESTROY">
+            <summary>
+            当一个窗口被破坏时发送
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MOVE">
+            <summary>
+            移动一个窗口 
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SIZE">
+            <summary>
+            改变一个窗口的大小 
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ACTIVATE">
+            <summary>
+            一个窗口被激活或失去激活状态  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETFOCUS">
+            <summary>
+            一个窗口获得焦点  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_KILLFOCUS">
+            <summary>
+            一个窗口失去焦点  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ENABLE">
+            <summary>
+            一个窗口改变成Enable状态  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETREDRAW">
+            <summary>
+            设置窗口是否能重画  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETTEXT">
+            <summary>
+            应用程序发送此消息来设置一个窗口的文本  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETTEXT">
+            <summary>
+            应用程序发送此消息来复制对应窗口的文本到缓冲区  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETTEXTLENGTH">
+            <summary>
+            得到与一个窗口有关的文本的长度（不包含空字符）  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_PAINT">
+            <summary>
+            要求一个窗口重画自己  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CLOSE">
+            <summary>
+            当一个窗口或应用程序要关闭时发送一个信号  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_QUERYENDSESSION">
+            <summary>
+            当用户选择结束对话框或程序自己调用ExitWindows函数  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_QUIT">
+            <summary>
+            用来结束程序运行  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_QUERYOPEN">
+            <summary>
+            当用户窗口恢复以前的大小位置时，把此消息发送给某个图标  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ERASEBKGND">
+            <summary>
+            当窗口背景必须被擦除时（例在窗口改变大小时）  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSCOLORCHANGE">
+            <summary>
+            当系统颜色改变时，发送此消息给所有顶级窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ENDSESSION">
+            <summary>
+            当系统进程发出WM_QUERYENDSESSION消息后，此消息发送给应用程序，通知它对话是否结束  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SHOWWINDOW">
+            <summary>
+            当隐藏或显示窗口是发送此消息给这个窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ACTIVATEAPP">
+            <summary>
+            发此消息给应用程序哪个窗口是激活的，哪个是非激活的  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_FONTCHANGE">
+            <summary>
+            当系统的字体资源库变化时发送此消息给所有顶级窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_TIMECHANGE">
+            <summary>
+            当系统的时间变化时发送此消息给所有顶级窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CANCELMODE">
+            <summary>
+            发送此消息来取消某种正在进行的摸态（操作）  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETCURSOR">
+            <summary>
+            如果鼠标引起光标在某个窗口中移动且鼠标输入没有被捕获时，就发消息给某个窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MOUSEACTIVATE">
+            <summary>
+            当光标在某个非激活的窗口中而用户正按着鼠标的某个键发送此消息给//当前窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CHILDACTIVATE">
+            <summary>
+            发送此消息给MDI子窗口//当用户点击此窗口的标题栏，或//当窗口被激活，移动，改变大小  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_QUEUESYNC">
+            <summary>
+            此消息由基于计算机的训练程序发送，通过WH_JOURNALPALYBACK的hook程序分离出用户输入消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETMINMAXINFO">
+            <summary>
+            此消息发送给窗口当它将要改变大小或位置  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_PAINTICON">
+            <summary>
+            发送给最小化窗口当它图标将要被重画  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ICONERASEBKGND">
+            <summary>
+            此消息发送给某个最小化窗口，仅//当它在画图标前它的背景必须被重画  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NEXTDLGCTL">
+            <summary>
+            发送此消息给一个对话框程序去更改焦点位置  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SPOOLERSTATUS">
+            <summary>
+            每当打印管理列队增加或减少一条作业时发出此消息   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_DRAWITEM">
+            <summary>
+            当button，combobox，listbox，menu的可视外观改变时发送  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MEASUREITEM">
+            <summary>
+            当button, combo box, list box, list view control, or menu item 被创建时  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_VKEYTOITEM">
+            <summary>
+            此消息有一个LBS_WANTKEYBOARDINPUT风格的发出给它的所有者来响应WM_KEYDOWN消息   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CHARTOITEM">
+            <summary>
+            此消息由一个LBS_WANTKEYBOARDINPUT风格的列表框发送给他的所有者来响应WM_CHAR消息   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETFONT">
+            <summary>
+            当绘制文本时程序发送此消息得到控件要用的颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETFONT">
+            <summary>
+            应用程序发送此消息得到当前控件绘制文本的字体  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETHOTKEY">
+            <summary>
+            应用程序发送此消息让一个窗口与一个热键相关连   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETHOTKEY">
+            <summary>
+            应用程序发送此消息来判断热键与某个窗口是否有关联  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_QUERYDRAGICON">
+            <summary>
+            此消息发送给最小化窗口，当此窗口将要被拖放而它的类中没有定义图标，应用程序能返回一个图标或光标的句柄，当用户拖放图标时系统显示这个图标或光标  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_COMPAREITEM">
+            <summary>
+            发送此消息来判定combobox或listbox新增加的项的相对位置  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_COMPACTING">
+            <summary>
+            显示内存已经很少了  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_WINDOWPOSCHANGING">
+            <summary>
+            发送此消息给那个窗口的大小和位置将要被改变时，来调用setwindowpos函数或其它窗口管理函数  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_WINDOWPOSCHANGED">
+            <summary>
+            发送此消息给那个窗口的大小和位置已经被改变时，来调用setwindowpos函数或其它窗口管理函数  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_POWER">
+            <summary>
+            当系统将要进入暂停状态时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_COPYDATA">
+            <summary>
+            当一个应用程序传递数据给另一个应用程序时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CANCELJOURNA">
+            <summary>
+            当某个用户取消程序日志激活状态，提交此消息给程序  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NOTIFY">
+            <summary>
+            当某个控件的某个事件已经发生或这个控件需要得到一些信息时，发送此消息给它的父窗口   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_INPUTLANGCHANGEREQUEST">
+            <summary>
+            当用户选择某种输入语言，或输入语言的热键改变  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_INPUTLANGCHANGE">
+            <summary>
+            当平台现场已经被改变后发送此消息给受影响的最顶级窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_TCARD">
+            <summary>
+            当程序已经初始化windows帮助例程时发送此消息给应用程序  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_HELP">
+            <summary>
+            此消息显示用户按下了F1，如果某个菜单是激活的，就发送此消息个此窗口关联的菜单，否则就发送给有焦点的窗口，如果//当前都没有焦点，就把此消息发送给//当前激活的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_USERCHANGED">
+            <summary>
+            当用户已经登入或退出后发送此消息给所有的窗口，//当用户登入或退出时系统更新用户的具体设置信息，在用户更新设置时系统马上发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NOTIFYFORMAT">
+            <summary>
+            公用控件，自定义控件和他们的父窗口通过此消息来判断控件是使用ANSI还是UNICODE结构  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_STYLECHANGING">
+            <summary>
+            当用户某个窗口中点击了一下右键就发送此消息给这个窗口  
+            </summary>
+            <summary>
+             WM_CONTEXTMENU = ??,  
+            </summary>
+            <summary>
+            当调用SETWINDOWLONG函数将要改变一个或多个 窗口的风格时发送此消息给那个窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_STYLECHANGED">
+            <summary>
+            当调用SETWINDOWLONG函数一个或多个 窗口的风格后发送此消息给那个窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_DISPLAYCHANGE">
+            <summary>
+            当显示器的分辨率改变后发送此消息给所有的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETICON">
+            <summary>
+            此消息发送给某个窗口来返回与某个窗口有关连的大图标或小图标的句柄  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SETICON">
+            <summary>
+            程序发送此消息让一个新的大图标或小图标与某个窗口关联  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCCREATE">
+            <summary>
+            当某个窗口第一次被创建时，此消息在WM_CREATE消息发送前发送  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCDESTROY">
+            <summary>
+            此消息通知某个窗口，非客户区正在销毁   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCCALCSIZE">
+            <summary>
+            当某个窗口的客户区域必须被核算时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCHITTEST">
+            <summary>
+            移动鼠标，按住或释放鼠标时发生  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCPAINT">
+            <summary>
+            程序发送此消息给某个窗口当它（窗口）的框架必须被绘制时  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCACTIVATE">
+            <summary>
+            此消息发送给某个窗口仅当它的非客户区需要被改变来显示是激活还是非激活状态  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_GETDLGCODE">
+            <summary>
+            发送此消息给某个与对话框程序关联的控件，widdows控制方位键和TAB键使输入进入此控件通过应  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCMOUSEMOVE">
+            <summary>
+            当光标在一个窗口的非客户区内移动时发送此消息给这个窗口 非客户区为：窗体的标题栏及窗 的边框体  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCLBUTTONDOWN">
+            <summary>
+            当光标在一个窗口的非客户区同时按下鼠标左键时提交此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCLBUTTONUP">
+            <summary>
+            当用户释放鼠标左键同时光标某个窗口在非客户区十发送此消息   
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCLBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标左键同时光标某个窗口在非客户区十发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCRBUTTONDOWN">
+            <summary>
+            当用户按下鼠标右键同时光标又在窗口的非客户区时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCRBUTTONUP">
+            <summary>
+            当用户释放鼠标右键同时光标又在窗口的非客户区时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCRBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标右键同时光标某个窗口在非客户区十发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCMBUTTONDOWN">
+            <summary>
+            当用户按下鼠标中键同时光标又在窗口的非客户区时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCMBUTTONUP">
+            <summary>
+            当用户释放鼠标中键同时光标又在窗口的非客户区时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_NCMBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标中键同时光标又在窗口的非客户区时发送此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_KEYDOWN">
+            <summary>
+            WM_KEYDOWN 按下一个键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_KEYUP">
+            <summary>
+            释放一个键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CHAR">
+            <summary>
+            按下某键，并已发出WM_KEYDOWN， WM_KEYUP消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_DEADCHAR">
+            <summary>
+            当用translatemessage函数翻译WM_KEYUP消息时发送此消息给拥有焦点的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSKEYDOWN">
+            <summary>
+            当用户按住ALT键同时按下其它键时提交此消息给拥有焦点的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSKEYUP">
+            <summary>
+            当用户释放一个键同时ALT 键还按着时提交此消息给拥有焦点的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSCHAR">
+            <summary>
+            当WM_SYSKEYDOWN消息被TRANSLATEMESSAGE函数翻译后提交此消息给拥有焦点的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSDEADCHAR">
+            <summary>
+            当WM_SYSKEYDOWN消息被TRANSLATEMESSAGE函数翻译后发送此消息给拥有焦点的窗口  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_INITDIALOG">
+            <summary>
+            在一个对话框程序被显示前发送此消息给它，通常用此消息初始化控件和执行其它任务  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_COMMAND">
+            <summary>
+            当用户选择一条菜单命令项或当某个控件发送一条消息给它的父窗口，一个快捷键被翻译  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_SYSCOMMAND">
+            <summary>
+            当用户选择窗口菜单的一条命令或//当用户选择最大化或最小化时那个窗口会收到此消息  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_TIMER">
+            <summary>
+            发生了定时器事件  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_HSCROLL">
+            <summary>
+            当一个窗口标准水平滚动条产生一个滚动事件时发送此消息给那个窗口，也发送给拥有它的控件  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_VSCROLL">
+            <summary>
+            当一个窗口标准垂直滚动条产生一个滚动事件时发送此消息给那个窗口也，发送给拥有它的控件  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_INITMENU">
+            <summary>
+            当一个菜单将要被激活时发送此消息，它发生在用户菜单条中的某项或按下某个菜单键，它允许程序在显示前更改菜单  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_INITMENUPOPUP">
+            <summary>
+            当一个下拉菜单或子菜单将要被激活时发送此消息，它允许程序在它显示前更改菜单，而不要改变全部  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MENUSELECT">
+            <summary>
+            当用户选择一条菜单项时发送此消息给菜单的所有者（一般是窗口）  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MENUCHAR">
+            <summary>
+            当菜单已被激活用户按下了某个键（不同于加速键），发送此消息给菜单的所有者  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_ENTERIDLE">
+            <summary>
+            当一个模态对话框或菜单进入空载状态时发送此消息给它的所有者，一个模态对话框或菜单进入空载状态就是在处理完一条或几条先前的消息后没有消息它的列队中等待  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORMSGBOX">
+            <summary>
+            在windows绘制消息框前发送此消息给消息框的所有者窗口，通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置消息框的文本和背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLOREDIT">
+            <summary>
+            当一个编辑型控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置编辑框的文本和背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORLISTBOX">
+            <summary>
+            当一个列表框控件将要被绘制前发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置列表框的文本和背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORBTN">
+            <summary>
+            当一个按钮控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置按纽的文本和背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORDLG">
+            <summary>
+            当一个对话框控件将要被绘制前发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置对话框的文本背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORSCROLLBAR">
+            <summary>
+            当一个滚动条控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置滚动条的背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_CTLCOLORSTATIC">
+            <summary>
+            当一个静态控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以 通过使用给定的相关显示设备的句柄来设置静态控件的文本和背景颜色  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MOUSEWHEEL">
+            <summary>
+            当鼠标轮子转动时发送此消息个当前有焦点的控件  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MBUTTONDBLCLK">
+            <summary>
+            双击鼠标中键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MBUTTONUP">
+            <summary>
+            释放鼠标中键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MOUSEMOVE">
+            <summary>
+            移动鼠标时发生，同WM_MOUSEFIRST  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_LBUTTONDOWN">
+            <summary>
+            按下鼠标左键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_LBUTTONUP">
+            <summary>
+            释放鼠标左键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_LBUTTONDBLCLK">
+            <summary>
+            双击鼠标左键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_RBUTTONDOWN">
+            <summary>
+            按下鼠标右键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_RBUTTONUP">
+            <summary>
+            释放鼠标右键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_RBUTTONDBLCLK">
+            <summary>
+            双击鼠标右键  
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.MessageConst.WM_MBUTTONDOWN">
+            <summary>
+            按下鼠标中键  
+            </summary>
+        </member>
+        <member name="T:Extension.WindowTool.ParameterConst">
+            <summary>
+            SendMessage-wParam
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_KEYDOWN">
+            <summary>
+            WM_KEYDOWN 按下一个键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_KEYUP">
+            <summary>
+            释放一个键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CHAR">
+            <summary>
+            按下某键，并已发出WM_KEYDOWN， WM_KEYUP消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_DEADCHAR">
+            <summary>
+            当用translatemessage函数翻译WM_KEYUP消息时发送此消息给拥有焦点的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSKEYDOWN">
+            <summary>
+            当用户按住ALT键同时按下其它键时提交此消息给拥有焦点的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSKEYUP">
+            <summary>
+            当用户释放一个键同时ALT 键还按着时提交此消息给拥有焦点的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSCHAR">
+            <summary>
+            当WM_SYSKEYDOWN消息被TRANSLATEMESSAGE函数翻译后提交此消息给拥有焦点的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSDEADCHAR">
+            <summary>
+            当WM_SYSKEYDOWN消息被TRANSLATEMESSAGE函数翻译后发送此消息给拥有焦点的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_INITDIALOG">
+            <summary>
+            在一个对话框程序被显示前发送此消息给它，通常用此消息初始化控件和执行其它任务
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_COMMAND">
+            <summary>
+            当用户选择一条菜单命令项或当某个控件发送一条消息给它的父窗口，一个快捷键被翻译
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSCOMMAND">
+            <summary>
+            当用户选择窗口菜单的一条命令或//当用户选择最大化或最小化时那个窗口会收到此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_TIMER">
+            <summary>
+            发生了定时器事件
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_HSCROLL">
+            <summary>
+            当一个窗口标准水平滚动条产生一个滚动事件时发送此消息给那个窗口，也发送给拥有它的控件
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_VSCROLL">
+            <summary>
+            当一个窗口标准垂直滚动条产生一个滚动事件时发送此消息给那个窗口也，发送给拥有它的控件
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_INITMENU">
+            <summary>
+            当一个菜单将要被激活时发送此消息，它发生在用户菜单条中的某项或按下某个菜单键，它允许程序在显示前更改菜单
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_INITMENUPOPUP">
+            <summary>
+            当一个下拉菜单或子菜单将要被激活时发送此消息，它允许程序在它显示前更改菜单，而不要改变全部
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MENUSELECT">
+            <summary>
+            当用户选择一条菜单项时发送此消息给菜单的所有者（一般是窗口）
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MENUCHAR">
+            <summary>
+            当菜单已被激活用户按下了某个键（不同于加速键），发送此消息给菜单的所有者
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ENTERIDLE">
+            <summary>
+            当一个模态对话框或菜单进入空载状态时发送此消息给它的所有者，一个模态对话框或菜单进入空载状态就是在处理完一条或几条先前的消息后没有消息它的列队中等待
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORMSGBOX">
+            <summary>
+            在windows绘制消息框前发送此消息给消息框的所有者窗口，通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置消息框的文本和背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLOREDIT">
+            <summary>
+            当一个编辑型控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置编辑框的文本和背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORLISTBOX">
+            <summary>
+            当一个列表框控件将要被绘制前发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置列表框的文本和背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORBTN">
+            <summary>
+            当一个按钮控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置按纽的文本和背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORDLG">
+            <summary>
+            当一个对话框控件将要被绘制前发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置对话框的文本背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORSCROLLBAR">
+            <summary>
+            当一个滚动条控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以通过使用给定的相关显示设备的句柄来设置滚动条的背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CTLCOLORSTATIC">
+            <summary>
+            当一个静态控件将要被绘制时发送此消息给它的父窗口通过响应这条消息，所有者窗口可以 通过使用给定的相关显示设备的句柄来设置静态控件的文本和背景颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MOUSEWHEEL">
+            <summary>
+            当鼠标轮子转动时发送此消息个当前有焦点的控件
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MBUTTONDBLCLK">
+            <summary>
+            双击鼠标中键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MBUTTONUP">
+            <summary>
+            释放鼠标中键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MOUSEMOVE">
+            <summary>
+            移动鼠标时发生，同WM_MOUSEFIRST
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_LBUTTONDOWN">
+            <summary>
+            按下鼠标左键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_LBUTTONUP">
+            <summary>
+            释放鼠标左键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_LBUTTONDBLCLK">
+            <summary>
+            双击鼠标左键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_RBUTTONDOWN">
+            <summary>
+            按下鼠标右键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_RBUTTONUP">
+            <summary>
+            释放鼠标右键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_RBUTTONDBLCLK">
+            <summary>
+            双击鼠标右键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MBUTTONDOWN">
+            <summary>
+            按下鼠标中键
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CREATE">
+            <summary>
+            创建一个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_DESTROY">
+            <summary>
+            当一个窗口被破坏时发送
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MOVE">
+            <summary>
+            移动一个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SIZE">
+            <summary>
+            改变一个窗口的大小
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ACTIVATE">
+            <summary>
+            一个窗口被激活或失去激活状态
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETFOCUS">
+            <summary>
+            一个窗口获得焦点
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_KILLFOCUS">
+            <summary>
+            一个窗口失去焦点
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ENABLE">
+            <summary>
+            一个窗口改变成Enable状态
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETREDRAW">
+            <summary>
+            设置窗口是否能重画
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETTEXT">
+            <summary>
+            应用程序发送此消息来设置一个窗口的文本
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETTEXT">
+            <summary>
+            应用程序发送此消息来复制对应窗口的文本到缓冲区
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETTEXTLENGTH">
+            <summary>
+            得到与一个窗口有关的文本的长度（不包含空字符）
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_PAINT">
+            <summary>
+            要求一个窗口重画自己
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CLOSE">
+            <summary>
+            当一个窗口或应用程序要关闭时发送一个信号
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_QUERYENDSESSION">
+            <summary>
+            当用户选择结束对话框或程序自己调用ExitWindows函数
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_QUIT">
+            <summary>
+            用来结束程序运行
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_QUERYOPEN">
+            <summary>
+            当用户窗口恢复以前的大小位置时，把此消息发送给某个图标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ERASEBKGND">
+            <summary>
+            当窗口背景必须被擦除时（例在窗口改变大小时）
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SYSCOLORCHANGE">
+            <summary>
+            当系统颜色改变时，发送此消息给所有顶级窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ENDSESSION">
+            <summary>
+            当系统进程发出WM_QUERYENDSESSION消息后，此消息发送给应用程序，通知它对话是否结束
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SHOWWINDOW">
+            <summary>
+            当隐藏或显示窗口是发送此消息给这个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ACTIVATEAPP">
+            <summary>
+            发此消息给应用程序哪个窗口是激活的，哪个是非激活的
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_FONTCHANGE">
+            <summary>
+            当系统的字体资源库变化时发送此消息给所有顶级窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_TIMECHANGE">
+            <summary>
+            当系统的时间变化时发送此消息给所有顶级窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CANCELMODE">
+            <summary>
+            发送此消息来取消某种正在进行的摸态（操作）
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETCURSOR">
+            <summary>
+            如果鼠标引起光标在某个窗口中移动且鼠标输入没有被捕获时，就发消息给某个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MOUSEACTIVATE">
+            <summary>
+            当光标在某个非激活的窗口中而用户正按着鼠标的某个键发送此消息给//当前窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CHILDACTIVATE">
+            <summary>
+            发送此消息给MDI子窗口//当用户点击此窗口的标题栏，或//当窗口被激活，移动，改变大小
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_QUEUESYNC">
+            <summary>
+            此消息由基于计算机的训练程序发送，通过WH_JOURNALPALYBACK的hook程序分离出用户输入消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETMINMAXINFO">
+            <summary>
+            此消息发送给窗口当它将要改变大小或位置
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_PAINTICON">
+            <summary>
+            发送给最小化窗口当它图标将要被重画
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_ICONERASEBKGND">
+            <summary>
+            此消息发送给某个最小化窗口，仅//当它在画图标前它的背景必须被重画
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NEXTDLGCTL">
+            <summary>
+            发送此消息给一个对话框程序去更改焦点位置
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SPOOLERSTATUS">
+            <summary>
+            每当打印管理列队增加或减少一条作业时发出此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_DRAWITEM">
+            <summary>
+            当button，combobox，listbox，menu的可视外观改变时发送
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_MEASUREITEM">
+            <summary>
+            当button, combo box, list box, list view control, or menu item 被创建时
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_VKEYTOITEM">
+            <summary>
+            此消息有一个LBS_WANTKEYBOARDINPUT风格的发出给它的所有者来响应WM_KEYDOWN消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CHARTOITEM">
+            <summary>
+            此消息由一个LBS_WANTKEYBOARDINPUT风格的列表框发送给他的所有者来响应WM_CHAR消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETFONT">
+            <summary>
+            当绘制文本时程序发送此消息得到控件要用的颜色
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETFONT">
+            <summary>
+            应用程序发送此消息得到当前控件绘制文本的字体
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETHOTKEY">
+            <summary>
+            应用程序发送此消息让一个窗口与一个热键相关连
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETHOTKEY">
+            <summary>
+            应用程序发送此消息来判断热键与某个窗口是否有关联
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_QUERYDRAGICON">
+            <summary>
+            此消息发送给最小化窗口，当此窗口将要被拖放而它的类中没有定义图标，应用程序能返回一个图标或光标的句柄，当用户拖放图标时系统显示这个图标或光标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_COMPAREITEM">
+            <summary>
+            发送此消息来判定combobox或listbox新增加的项的相对位置
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_COMPACTING">
+            <summary>
+            显示内存已经很少了
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_WINDOWPOSCHANGING">
+            <summary>
+            发送此消息给那个窗口的大小和位置将要被改变时，来调用setwindowpos函数或其它窗口管理函数
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_WINDOWPOSCHANGED">
+            <summary>
+            发送此消息给那个窗口的大小和位置已经被改变时，来调用setwindowpos函数或其它窗口管理函数
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_POWER">
+            <summary>
+            当系统将要进入暂停状态时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_COPYDATA">
+            <summary>
+            当一个应用程序传递数据给另一个应用程序时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_CANCELJOURNA">
+            <summary>
+            当某个用户取消程序日志激活状态，提交此消息给程序
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NOTIFY">
+            <summary>
+            当某个控件的某个事件已经发生或这个控件需要得到一些信息时，发送此消息给它的父窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_INPUTLANGCHANGEREQUEST">
+            <summary>
+            当用户选择某种输入语言，或输入语言的热键改变
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_INPUTLANGCHANGE">
+            <summary>
+            当平台现场已经被改变后发送此消息给受影响的最顶级窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_TCARD">
+            <summary>
+            当程序已经初始化windows帮助例程时发送此消息给应用程序
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_HELP">
+            <summary>
+            此消息显示用户按下了F1，如果某个菜单是激活的，就发送此消息个此窗口关联的菜单，否则就发送给有焦点的窗口，如果//当前都没有焦点，就把此消息发送给//当前激活的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_USERCHANGED">
+            <summary>
+            当用户已经登入或退出后发送此消息给所有的窗口，//当用户登入或退出时系统更新用户的具体设置信息，在用户更新设置时系统马上发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NOTIFYFORMAT">
+            <summary>
+            公用控件，自定义控件和他们的父窗口通过此消息来判断控件是使用ANSI还是UNICODE结构
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_STYLECHANGING">
+            <summary>
+            当用户某个窗口中点击了一下右键就发送此消息给这个窗口
+            </summary>
+            <summary>
+             WM_CONTEXTMENU = ??,
+            </summary>
+            <summary>
+            当调用SETWINDOWLONG函数将要改变一个或多个 窗口的风格时发送此消息给那个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_STYLECHANGED">
+            <summary>
+            当调用SETWINDOWLONG函数一个或多个 窗口的风格后发送此消息给那个窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_DISPLAYCHANGE">
+            <summary>
+            当显示器的分辨率改变后发送此消息给所有的窗口
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETICON">
+            <summary>
+            此消息发送给某个窗口来返回与某个窗口有关连的大图标或小图标的句柄
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_SETICON">
+            <summary>
+            程序发送此消息让一个新的大图标或小图标与某个窗口关联
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCCREATE">
+            <summary>
+            当某个窗口第一次被创建时，此消息在WM_CREATE消息发送前发送
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCDESTROY">
+            <summary>
+            此消息通知某个窗口，非客户区正在销毁
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCCALCSIZE">
+            <summary>
+            当某个窗口的客户区域必须被核算时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCHITTEST">
+            <summary>
+            移动鼠标，按住或释放鼠标时发生
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCPAINT">
+            <summary>
+            程序发送此消息给某个窗口当它（窗口）的框架必须被绘制时
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCACTIVATE">
+            <summary>
+            此消息发送给某个窗口仅当它的非客户区需要被改变来显示是激活还是非激活状态
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_GETDLGCODE">
+            <summary>
+            发送此消息给某个与对话框程序关联的控件，widdows控制方位键和TAB键使输入进入此控件通过应
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCMOUSEMOVE">
+            <summary>
+            当光标在一个窗口的非客户区内移动时发送此消息给这个窗口 非客户区为：窗体的标题栏及窗 的边框体
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCLBUTTONDOWN">
+            <summary>
+            当光标在一个窗口的非客户区同时按下鼠标左键时提交此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCLBUTTONUP">
+            <summary>
+            当用户释放鼠标左键同时光标某个窗口在非客户区十发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCLBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标左键同时光标某个窗口在非客户区十发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCRBUTTONDOWN">
+            <summary>
+            当用户按下鼠标右键同时光标又在窗口的非客户区时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCRBUTTONUP">
+            <summary>
+            当用户释放鼠标右键同时光标又在窗口的非客户区时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCRBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标右键同时光标某个窗口在非客户区十发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCMBUTTONDOWN">
+            <summary>
+            当用户按下鼠标中键同时光标又在窗口的非客户区时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCMBUTTONUP">
+            <summary>
+            当用户释放鼠标中键同时光标又在窗口的非客户区时发送此消息
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.ParameterConst.WM_NCMBUTTONDBLCLK">
+            <summary>
+            当用户双击鼠标中键同时光标又在窗口的非客户区时发送此消息
+            </summary>
+        </member>
+        <member name="M:Extension.WindowTool.GetPixel(System.IntPtr,System.Drawing.Point)">
+            <summary>
+            获取指定坐标颜色
+            </summary>
+            <param name="hdc">窗口句柄</param>
+            <param name="p">定点坐标</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.GetWindowRect(System.IntPtr,Extension.WindowTool.Rect@)">
+            <summary>
+            获取窗口坐标
+            </summary>
+            <param name="hWnd">窗口句柄</param>
+            <param name="lpRect">窗口坐标数据</param>
+            <returns></returns>
+        </member>
+        <member name="T:Extension.WindowTool.Rect">
+            <summary>
+            窗口矩形坐标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.Rect.Left">
+            <summary>
+            左侧坐标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.Rect.Top">
+            <summary>
+            上侧坐标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.Rect.Right">
+            <summary>
+            右侧坐标
+            </summary>
+        </member>
+        <member name="F:Extension.WindowTool.Rect.Bottom">
+            <summary>
+            下侧坐标
+            </summary>
+        </member>
+        <member name="M:Extension.WindowTool.WindowFromPoint(System.Int32,System.Int32)">
+            <summary>
+            获取指定坐标处窗口句柄
+            </summary>
+            <param name="xPoint">横坐标</param>
+            <param name="yPoint">纵坐标</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.GetWindowTextLength(System.IntPtr)">
+            <summary>
+            获取窗口标题字符串长度
+            </summary>
+            <param name="hWnd">窗口句柄</param>
+            <returns></returns>
+        </member>
+        <member name="M:Extension.WindowTool.GetWindowText(System.IntPtr,System.Text.StringBuilder,System.Int32)">
+            <summary>
+            获取窗口标题
+            </summary>
+            <param name="hWnd">窗口句柄</param>
+            <param name="text">窗口标题</param>
+            <param name="nMaxCount">标题字符串长度</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
