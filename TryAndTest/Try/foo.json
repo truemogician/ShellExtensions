@@ -1,9 +1,0 @@
-{
-	"bar1": 1,
-	"bar2": "str",
-	"bar3": {
-		"bar1": 2,
-		"bar2": "sdf",
-		"bar3": null
-	}
-}
