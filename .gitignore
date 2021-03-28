@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Custom files
+/Demonstration
+/TryAndTest
+/SharpShell Source Code
+/DateStatusManager/DateStatusCopier.Test/test
+*.snk
+
 # User-specific files
 *.rsuser
 *.suo
