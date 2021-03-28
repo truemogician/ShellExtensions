@@ -60,7 +60,7 @@ namespace DateStatusCopier {
                         Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path),"universal.date-status"),content);
                     }),
                     new ToolStripMenuItem("通用（应用于子结构）", DateStatusIcons.Universal, (sender, e) => {
-                        var content = Generator.Generate(path, recursive:true);
+                        var content = Generator.Generate(path, includesChildren:true);
                         Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path),"universal.date-status"),content);
                     }),
                     new ToolStripMenuItem(Directory.Exists(path)?"专用（仅文件夹）":"专用", DateStatusIcons.Special, (sender, e) => {
