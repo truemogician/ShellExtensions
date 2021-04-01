@@ -57,6 +57,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Windows">
+      <HintPath>C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.19041.0\Windows.winmd</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdvancedGenerator.cs">
@@ -74,6 +77,11 @@
       <DependentUpon>DateStatusModifier.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
     <Compile Include="ShellExtension.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +95,37 @@
     <EmbeddedResource Include="DateStatusModifier.resx">
       <DependentUpon>DateStatusModifier.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\packages\UwpDesktop-Updated.10.0.17763.132\analyzers\dotnet\UwpDesktopAnalyzer.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Icon\date-status.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Icon\Special.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Icon\Universal.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Image\Advanced.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Image\Help.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Image\Globe.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Image\Aim.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Asset\Image\Config.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
