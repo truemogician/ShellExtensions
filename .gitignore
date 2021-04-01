@@ -8,6 +8,7 @@
 /TryAndTest
 /SharpShell Source Code
 /DateStatusManager/DateStatusCopier.Test/test
+/DateStatusManager/DateStatusCopier/Asset/Material
 *.snk
 
 # User-specific files
