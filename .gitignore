@@ -7,8 +7,8 @@
 /Demonstration
 /TryAndTest
 /SharpShell Source Code
-/DateStatusManager/DateStatusCopier.Test/test
-/DateStatusManager/DateStatusCopier/Asset/Material
+/FileDateManager/FileDateCopier.Test/experiment
+/FileDateManager/FileDateCopier/Asset/Material
 *.snk
 
 # User-specific files
