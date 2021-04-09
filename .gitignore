@@ -6,7 +6,7 @@
 # Custom files
 /Demonstration
 /TryAndTest
-/SharpShell Source Code
+/SharpShell
 /FileDateManager/FileDateCopier.Test/experiment
 /FileDateManager/FileDateCopier/Asset/Material
 *.snk
