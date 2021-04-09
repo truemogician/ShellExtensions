@@ -1,50 +1,30 @@
-﻿using System;
-using System.IO;
-using System.Diagnostics;
+﻿using System.IO;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace RegistrationHandler {
-    using static System.Environment;
-    class Program {
-        static string AnotherArchitecture(string arch) {
-            if (arch == "x64")
-                return "x86";
-            else if (arch == "x86")
-                return "x64";
-            throw new ArgumentException("Wrong architecture name");
-        }
-        static void Main(string[] mainArgs) {
-            if (mainArgs.Length < 4)
-                return;
-            string action = mainArgs[0], dllFile = mainArgs[1], hostArch = mainArgs[2], targetArch = mainArgs[3];
-            string VSCommandPromptDirectory = Path.Combine(GetFolderPath(SpecialFolder.CommonPrograms), @"Visual Studio 2019\Visual Studio Tools\VC");
-            string[] links = Directory.GetFiles(VSCommandPromptDirectory);
-            string target = null;
-            foreach (string link in links) {
-                string linkName = Path.GetFileName(link);
-                if (linkName.Substring(0, 3) == hostArch) {
-                    if (targetArch == hostArch && linkName.IndexOf(AnotherArchitecture(targetArch)) == -1) {
-                        target = link;
-                        break;
-                    }
-                    else if (targetArch == AnotherArchitecture(hostArch) && linkName.IndexOf(targetArch) != -1) {
-                        target = link;
-                        break;
-                    }
-                }
-            }
-            if (string.IsNullOrEmpty(target))
-                return;
-            using (var process = Process.Start(new ProcessStartInfo {
-                FileName = "cmd.exe",
-                Arguments = $"/c \"{target}\"",
-                Verb = "runas",
-                UseShellExecute = false,
-                RedirectStandardInput = true,
-            })) {
-                process.StandardInput.WriteLine($"Regasm.exe {(action == "Register" ? "/codebase" : "/u")} \"{dllFile}\"");
-                process.StandardInput.WriteLine("exit");
-                process.WaitForExit();
-            }
-        }
-    }
+
+	internal class Program {
+		private static void Main(string[] args) {
+			string errMessage = null;
+			if (args.Length < 2 || args.Length > 3)
+				errMessage = string.Format("参数过{0}", args.Length < 2 ? "少" : "多");
+			else if (!new Regex(@"^r(egister)?|u(nregister)?$", RegexOptions.IgnoreCase).IsMatch(args[0]))
+				errMessage = "行为未定义";
+			else if (!File.Exists(args[1]))
+				errMessage = "目标DLL不存在";
+			else if (args.Length == 3 && !new Regex(@"^[xX]?(86|64)$").IsMatch(args[2]))
+				errMessage = "架构无法识别";
+			if (!string.IsNullOrEmpty(errMessage)) {
+				MessageBox.Show(errMessage, "参数错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			bool? is64bit = args.Length == 3 ? args[2].EndsWith("64") : null;
+			if (args[0][0] == 'r' || args[0][0] == 'R')
+				RegAsm.Register(args[1], is64bit: is64bit);
+			else
+				RegAsm.Unregister(args[1], is64bit);
+		}
+	}
 }
