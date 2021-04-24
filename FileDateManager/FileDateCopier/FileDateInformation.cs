@@ -61,28 +61,39 @@ namespace FileDateCopier {
 				return (bool)isFile ? File.GetCreationTime(path) : Directory.GetCreationTime(path);
 			}
 		};
+		public static FileAttributes UnlockFile(string path) {
+			var attr = File.GetAttributes(path);
+			File.SetAttributes(path, FileAttributes.Normal);
+			return attr;
+		}
 		public delegate void DateTimeSetter(string path, DateTime value, bool? isFile = null);
 		public static DateTimeSetter[] SetDateTime = {
 			(path, value, isFile) => {
 				if (!isFile.HasValue)
 					isFile = GetPathType(path,true)==PathType.File;
+				var attr = UnlockFile(path);
 				((bool)isFile ? (Action<string,DateTime>)(File.SetLastAccessTime) : Directory.SetLastAccessTime)(path,value);
+				File.SetAttributes(path,attr);
 			},
 			(path, value, isFile) => {
 				if (!isFile.HasValue)
 					isFile = GetPathType(path,true)==PathType.File;
+				var attr = UnlockFile(path);
 				((bool)isFile ? (Action<string,DateTime>)(File.SetLastWriteTime) : Directory.SetLastWriteTime)(path,value);
+				File.SetAttributes(path,attr);
 			},
 			(path, value, isFile) => {
 				if (!isFile.HasValue)
 					isFile = GetPathType(path,true)==PathType.File;
+				var attr = UnlockFile(path);
 				((bool)isFile ? (Action<string,DateTime>)(File.SetCreationTime) : Directory.SetCreationTime)(path,value);
+				File.SetAttributes(path,attr);
 			}
 		};
 		public string Path { get; set; } = null;
 		public bool? IsDirectory { get; set; } = null;
 		[JsonIgnore]
-		public bool Universal { get => Path == null; }
+		public bool General { get => Path == null; }
 		[JsonIgnore]
 		public bool IncludesChildren { get => Files != null || Directories != null; }
 		public DateType TimeType { get; set; } = DateType.None;
