@@ -1,31 +1,114 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
+﻿using FileDateCopier.Dialog;
 using SharpShell.Attributes;
-using SharpShell.Interop;
 using SharpShell.SharpContextMenu;
 using SharpShell.SharpDropHandler;
 using SharpShell.SharpIconHandler;
-using SharpShell.SharpIconOverlayHandler;
-using Extension;
-using FileDateCopier.Dialog;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace FileDateCopier {
-	static internal class ContextMenuStripItems {
-		static readonly ToolStripSeparator Seperator = new ToolStripSeparator();
-		static readonly ToolStripMenuItem Help = new ToolStripMenuItem("帮助文档", Resource.Help, (sender, e) => {
-			throw new NotImplementedException();
-		});
-		static ToolStripMenuItem Advanced(string[] paths)
+	[ComVisible(true)]
+	[COMServerAssociation(AssociationType.AllFilesAndFolders)]
+	public class FileFolderContextMenu : SharpContextMenu {
+		protected override bool CanShowMenu() => true;
+
+		protected override ContextMenuStrip CreateMenu() {
+			string[] selectedPaths = SelectedItemPaths.ToArray();
+			var menu = new ContextMenuStrip();
+			if (selectedPaths.Length == 1) {
+				menu.Items.Add(ContextMenu.SingleMenu(selectedPaths[0]));
+				if (Path.GetExtension(selectedPaths[0]) == ".fdi") {
+					menu.Items.Add(new ToolStripSeparator());
+					menu.Items.Add(ContextMenu.FileDateInformationMenu(selectedPaths[0]));
+				}
+			}
+			else
+				menu.Items.AddRange(ContextMenu.MultipleMenu(selectedPaths));
+			return menu;
+		}
+	}
+
+	[ComVisible(true)]
+	[COMServerAssociation(AssociationType.DirectoryBackground)]
+	public class BackgroundContextMenu : SharpContextMenu {
+		protected override bool CanShowMenu() => true;
+
+		protected override ContextMenuStrip CreateMenu() => new ContextMenuStrip {
+			Items = { ContextMenu.SingleMenu(FolderPath, true) }
+		};
+	}
+
+	[ComVisible(true)]
+	[COMServerAssociation(AssociationType.ClassOfExtension, ".fdi")]
+	public class DropHandler : SharpDropHandler {
+		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
+
+		protected override void Drop(DragEventArgs dragEventArgs) {
+			Applier.Apply(DragItems.ToArray(), SelectedItemPath);
+			MessageBox.Show("日期导入完毕");
+		}
+	}
+
+	[ComVisible(true)]
+	[COMServerAssociation(AssociationType.ClassOfExtension, ".fdi")]
+	public class IconHandler : SharpIconHandler {
+		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Resource.Main;
+	}
+
+	//[ComVisible(true)]
+	//public class IconOverlayHandler : SharpIconOverlayHandler {
+	//	protected override bool CanShowOverlay(string path, FILE_ATTRIBUTE attributes) {
+	//		if (Path.GetExtension(path) != ".fdi")
+	//			return false;
+	//		using var reader = new StreamReader(path);
+	//		char applyToChildren = (char)reader.Read();
+	//		reader.Close();
+	//		return applyToChildren == '1';
+	//	}
+
+	//	protected override Icon GetOverlayIcon() => Resource.Hierarchy;
+
+	//	protected override int GetPriority() => 0;
+	//}
+
+	static internal class ContextMenu {
+		private static ToolStripSeparator Separator() => new ToolStripSeparator();
+
+		private static ToolStripMenuItem Help()
+			=> new ToolStripMenuItem("帮助文档", Resource.Help, (sender, e) => new Progress().ShowDialog());
+
+		private static ToolStripMenuItem Advanced(string[] paths)
 			=> new ToolStripMenuItem("高级设置", Resource.Advanced, (sender, e) => new AdvancedGenerator(paths).ShowDialog());
-		static ToolStripMenuItem Manual()
+
+		private static ToolStripMenuItem Manual()
 			=> new ToolStripMenuItem("手动配置", Resource.Manual, (sender, e) => new ManualGenerator().ShowDialog());
 
-		static internal ToolStripMenuItem SingleMenu(string path, bool manulCreation = false) {
+		private static string GenerateFileName(string path, bool isGeneral) {
+			string suffix = (isGeneral ? ".general" : ".special") + ".fdi";
+			string directory = Path.GetDirectoryName(path);
+			string srcname = Path.GetFileNameWithoutExtension(path);
+			string filename = srcname;
+			int index = 1;
+			while (File.Exists(Path.Combine(directory, filename + suffix)))
+				filename = srcname + $"({++index})";
+			return filename + suffix;
+		}
+		private static string GenerateFileName(string[] paths) {
+			string suffix = ".special.fdi";
+			string directory = Path.GetDirectoryName(paths[0]);
+			string srcname = Path.GetFileName(directory);
+			string filename = srcname;
+			int index = 1;
+			while (File.Exists(Path.Combine(directory, filename + suffix)))
+				filename = srcname + $"({++index})";
+			return filename + suffix;
+		}
+
+		internal static ToolStripMenuItem SingleMenu(string path, bool dirBackground = false) {
+			string dstDirectory = dirBackground ? path : Path.GetDirectoryName(path);
 			var pathType = FileDateInformation.GetPathType(path, true);
 			var result = new ToolStripMenuItem {
 				Text = "生成日期文件",
@@ -33,119 +116,77 @@ namespace FileDateCopier {
 				DropDownItems = {
 					new ToolStripMenuItem("通用（仅拖放内容）", Resource.Globe, (sender, e) => {
 						var content = Generator.Generate(path);
-						Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path), "universal.fdi"), content);
+						Generator.WriteFile(Path.Combine(dstDirectory, GenerateFileName(path,true)), content);
 					}),
-					new ToolStripMenuItem("通用（包括子结构）", Resource.Globe, (sender, e) => {
+					new ToolStripMenuItem("通用（含子结构）", Resource.Globe, (sender, e) => {
 						var content = Generator.Generate(path, includesChildren:true);
-						Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path), "universal.fdi"), content, true);
+						Generator.WriteFile(Path.Combine(dstDirectory, GenerateFileName(path,true)), content, true);
 					}),
-					new ToolStripMenuItem(pathType == PathType.Directory ? "专用（仅文件夹）":"专用（仅文件）", Resource.Aim, (sender, e) => {
+					new ToolStripMenuItem(pathType == PathType.Directory ? "匹配路径（仅文件夹）":"匹配路径", Resource.Aim, (sender, e) => {
 						var content = Generator.Generate(path, true);
-						Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path),"special.fdi"), content);
+						Generator.WriteFile(Path.Combine(dstDirectory, GenerateFileName(path,false)), content);
 					})
 				}
 			};
 			if (pathType == PathType.Directory)
-				result.DropDownItems.Add(new ToolStripMenuItem("专用（包括子结构）", Resource.Aim, (sender, e) => {
+				result.DropDownItems.Add(new ToolStripMenuItem("匹配路径（含子结构）", Resource.Aim, (sender, e) => {
 					var content = Generator.Generate(path, true, true);
-					Generator.WriteFile(Path.Combine(Path.GetDirectoryName(path), "special.fdi"), content, true);
+					Generator.WriteFile(Path.Combine(dstDirectory, GenerateFileName(path, false)), content, true);
 				}));
-			result.DropDownItems.Add(Seperator);
-			if (manulCreation)
+			result.DropDownItems.Add(Separator());
+			if (dirBackground)
 				result.DropDownItems.Add(Manual());
 			result.DropDownItems.Add(Advanced(new string[] { path }));
-			result.DropDownItems.Add(Help);
+			result.DropDownItems.Add(Help());
 			return result;
 		}
-		static internal ToolStripMenuItem[] MultipleMenu(string[] paths) {
+
+		internal static ToolStripMenuItem[] MultipleMenu(string[] paths) {
 			bool hasDirectory = paths.Any(path => Directory.Exists(path));
 			var geneMenu = new ToolStripMenuItem("生成日期文件", Resource.Generate);
-			var syncMenu = new ToolStripMenuItem {
-				Text = "同步文件日期",
-				Image = Resource.Sync,
-				DropDownItems = {
-					new ToolStripMenuItem(hasDirectory ? "专用（仅文件夹本身）":"专用", Resource.Aim, (sender, e) => new Synchronizer().ShowDialog())
-				}
-			};
-			if (hasDirectory) {
-				geneMenu.DropDownItems.AddRange(new ToolStripMenuItem[]{
-					new ToolStripMenuItem("专用（仅文件夹本身）", Resource.Aim, (sender, e) => {
-						var content = Generator.Generate(paths);
-						Generator.WriteFile(Path.Combine(PathTool.GetCommonPath(paths), "special.fdi"), content);
-					}),
-					new ToolStripMenuItem("专用（包括子结构）", Resource.Aim, (sender, e) => {
-						var content = Generator.Generate(paths, true);
-						Generator.WriteFile(Path.Combine(PathTool.GetCommonPath(paths), "special.fdi"), content, true);
-					})
-				});
-			}
-			else {
-				geneMenu.Click += (sender, e) => {
+			geneMenu.DropDownItems.Add(new ToolStripMenuItem(
+				hasDirectory ? "匹配路径（仅文件夹）" : "匹配路径",
+				Resource.Aim,
+				(sender, e) => {
 					var content = Generator.Generate(paths);
-					Generator.WriteFile(Path.Combine(PathTool.GetCommonPath(paths), "special.fdi"), content);
-				};
-			}
-			geneMenu.DropDownItems.Add(Seperator);
-			geneMenu.DropDownItems.Add(Advanced(paths));
-			geneMenu.DropDownItems.Add(Help);
-			return new ToolStripMenuItem[] { geneMenu, syncMenu };
-		}
-		static internal ToolStripMenuItem FileDateInformationMenu(string path) =>
-			new ToolStripMenuItem("更改日期配置", Resource.Configuration, (sender, e) => new FdiModifier(path).ShowDialog());
-	}
-
-	[ComVisible(true)]
-	[COMServerAssociation(AssociationType.AllFilesAndFolders)]
-	class FileFolderContextMenu : SharpContextMenu {
-		protected override bool CanShowMenu() => true;
-		protected override ContextMenuStrip CreateMenu() {
-			string[] selectedPaths = SelectedItemPaths.ToArray();
-			var menu = new ContextMenuStrip();
-			if (selectedPaths.Length == 1) {
-				menu.Items.Add(ContextMenuStripItems.SingleMenu(selectedPaths[0]));
-				if (Path.GetExtension(selectedPaths[0]) == ".fdi") {
-					menu.Items.Add(new ToolStripSeparator());
-					menu.Items.Add(ContextMenuStripItems.FileDateInformationMenu(selectedPaths[0]));
+					Generator.WriteFile(Path.Combine(Path.GetDirectoryName(paths[0]), GenerateFileName(paths)), content);
 				}
+			));
+			if (hasDirectory)
+				geneMenu.DropDownItems.Add(new ToolStripMenuItem(
+					"匹配路径（含子结构）",
+					Resource.Aim,
+					(sender, e) => {
+						var content = Generator.Generate(paths, true);
+						Generator.WriteFile(Path.Combine(Path.GetDirectoryName(paths[0]), GenerateFileName(paths)), content, true);
+					}
+				));
+			var syncMenu = new ToolStripMenuItem("同步文件日期", Resource.Sync);
+			if (paths.Length <= 16) {
+				foreach (string path in paths) {
+					var dsts = paths.ToList();
+					dsts.Remove(path);
+					syncMenu.DropDownItems.Add(new ToolStripMenuItem(
+						$"同步到{Path.GetFileName(path)}",
+						Resource.Sync,
+						(sender, e) => Synchronizor.Synchronize(dsts.ToArray(), path, applyToChildren: true)
+					));
+				}
+				syncMenu.DropDownItems.Add(new ToolStripMenuItem(
+					"高级设置",
+					Resource.Advanced,
+					(sender, e) => new DetailedSynchronizer(paths).ShowDialog()
+				));
 			}
 			else
-				menu.Items.AddRange(ContextMenuStripItems.MultipleMenu(selectedPaths));
-			return menu;
+				syncMenu.Click += (sender, e) => new DetailedSynchronizer(paths).ShowDialog();
+			geneMenu.DropDownItems.Add(Separator());
+			geneMenu.DropDownItems.Add(Advanced(paths));
+			geneMenu.DropDownItems.Add(Help());
+			return new ToolStripMenuItem[] { geneMenu, syncMenu };
 		}
-	}
 
-	[ComVisible(true)]
-	[COMServerAssociation(AssociationType.DirectoryBackground)]
-	class BackgroundContextMenu : SharpContextMenu {
-		protected override bool CanShowMenu() => true;
-		protected override ContextMenuStrip CreateMenu() => new ContextMenuStrip {
-			Items = { ContextMenuStripItems.SingleMenu(FolderPath, true) }
-		};
-	}
-
-	[ComVisible(true)]
-	[COMServerAssociation(AssociationType.ClassOfExtension, ".fdi")]
-	class DropHandler : SharpDropHandler {
-		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
-		protected override void Drop(DragEventArgs dragEventArgs) => Applier.Apply(DragItems.ToArray(), SelectedItemPath);
-	}
-
-	[ComVisible(true)]
-	[COMServerAssociation(AssociationType.ClassOfExtension, ".fdi")]
-	class IconHandler : SharpIconHandler {
-		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Resource.Main;
-	}
-
-	[ComVisible(true)]
-	[COMServerAssociation(AssociationType.ClassOfExtension, ".fdi")]
-	class IconOverlayHandler : SharpIconOverlayHandler {
-		protected override bool CanShowOverlay(string path, FILE_ATTRIBUTE attributes) {
-			using var reader = new StreamReader(path);
-			char applyToChildren = (char)reader.Read();
-			reader.Close();
-			return applyToChildren == '1';
-		}
-		protected override Icon GetOverlayIcon() => Resource.Hierarchy;
-		protected override int GetPriority() => 0;
+		internal static ToolStripMenuItem FileDateInformationMenu(string path) =>
+			new ToolStripMenuItem("更改配置", Resource.Configuration, (sender, e) => new FdiModifier(path).ShowDialog());
 	}
 }
