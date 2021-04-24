@@ -8,8 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace FileDateCopier.Dialog {
-	public partial class Synchronizer : Form {
-		public Synchronizer() {
+	public partial class Progress : Form {
+		public Progress() {
 			InitializeComponent();
 		}
 	}

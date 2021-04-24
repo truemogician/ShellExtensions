@@ -1,6 +1,6 @@
 ﻿
 namespace FileDateCopier.Dialog {
-	partial class Synchronizer {
+	partial class DetailedSynchronizer {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
