@@ -36,7 +36,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>FileDateCopier.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>FileDateCopier.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Extension">
@@ -74,12 +74,19 @@
     <Compile Include="Dialog\ManualGenerator.Designer.cs">
       <DependentUpon>ManualGenerator.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialog\Synchronizer.cs">
+    <Compile Include="Dialog\Progress.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialog\Synchronizer.Designer.cs">
-      <DependentUpon>Synchronizer.cs</DependentUpon>
+    <Compile Include="Dialog\Progress.Designer.cs">
+      <DependentUpon>Progress.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\DetailedSynchronizer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\DetailedSynchronizer.Designer.cs">
+      <DependentUpon>DetailedSynchronizer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FileHeader.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="FileDateInformation.cs" />
     <Compile Include="Dialog\FdiModifier.cs">
@@ -97,7 +104,7 @@
     <Compile Include="ShellExtension.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FileDateCopier.pfx" />
+    <None Include="FileDateCopier.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -149,4 +156,12 @@
     <None Include="Asset\Icon\Hierarchy.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"D:\Code\Visual Studio\Solutions\Shell Extensions\Registrator\RegistrationHandler\bin\Debug\RegistrationHandler.exe" r "D:\Code\Visual Studio\Solutions\Shell Extensions\FileDateManager\FileDateCopier\bin\Debug\FileDateCopier.dll"
+"D:\Code\Visual Studio\Solutions\Shell Extensions\Utility\PathSelector\bin\Release\PathSelector.exe" "D:\Code\Visual Studio\Solutions\Shell Extensions\FileDateManager\FileDateCopier\bin\Debug\FileDateCopier.dll"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
