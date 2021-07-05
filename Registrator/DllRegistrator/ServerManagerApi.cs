@@ -8,7 +8,6 @@ using System.IO;
 using System.Windows.Forms;
 
 namespace ServerManager {
-
 	/// <summary>
 	/// Helper class for dealing with servers.
 	/// </summary>
@@ -38,31 +37,35 @@ namespace ServerManager {
 					}
 					catch (Exception exception) {
 						Trace.TraceError($"An exception occurred loading a server: ${exception}");
-						servers.Add(new ServerEntry {
-							ServerName = "Invalid",
-							ServerPath = path,
-							ServerType = ServerType.None,
-							ClassId = new Guid(),
-							Server = null,
-							IsInvalid = true
-						});
+						servers.Add(
+							new ServerEntry {
+								ServerName = "Invalid",
+								ServerPath = path,
+								ServerType = ServerType.None,
+								ClassId = new Guid(),
+								Server = null,
+								IsInvalid = true
+							}
+						);
 						continue;
 					}
 
 					//  Yield a server entry for the server type.
-					servers.Add(new ServerEntry {
-						ServerName = server.DisplayName,
-						ServerPath = path,
-						ServerType = server.ServerType,
-						ClassId = server.ServerClsid,
-						Server = server
-					});
+					servers.Add(
+						new ServerEntry {
+							ServerName = server.DisplayName,
+							ServerPath = path,
+							ServerType = server.ServerType,
+							ClassId = server.ServerClsid,
+							Server = server
+						}
+					);
 				}
 			}
 			catch (Exception exception) {
 				//  It's almost certainly not a COM server.
 				Logging.Error("ServerManager: Failed to load SharpShell server", exception);
-				MessageBox.Show("The file '" + Path.GetFileName(path) + "' is not a SharpShell Server.", "Warning");
+				throw;
 			}
 
 			//  Return the servers.
