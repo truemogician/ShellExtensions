@@ -9,7 +9,6 @@
 /SharpShell
 /*/*.Test
 /packages
-*.snk
 
 # User-specific files
 *.rsuser
@@ -228,7 +227,6 @@ ClientBin/
 *.dbmdl
 *.dbproj.schemaview
 *.jfm
-*.pfx
 *.publishsettings
 orleans.codegen.cs
 
