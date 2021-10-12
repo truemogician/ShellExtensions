@@ -7,8 +7,8 @@
 /Demonstration
 /TryAndTest
 /SharpShell
-/FileDateManager/FileDateCopier.Test/lab
-/FileDateManager/FileDateCopier/Asset/Material
+/*/*.Test
+/packages
 *.snk
 
 # User-specific files
