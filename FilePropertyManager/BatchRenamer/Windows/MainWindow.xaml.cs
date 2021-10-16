@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -10,6 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using TrueMogician.Extensions.Enumerable;
 
 #nullable enable
@@ -47,6 +49,7 @@ public partial class MainWindow {
 			)
 			.ToList();
 		InitializeComponent();
+		Icon = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "MainWindow.png")));
 		EntitiesBox.Document = new FlowDocument(EntitiesParagraph);
 		ResultsBox.Document = new FlowDocument(ResultsParagraph);
 	}
