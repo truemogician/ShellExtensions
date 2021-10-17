@@ -13,7 +13,10 @@ namespace BatchRenamer {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.AllFilesAndFolders)]
 	public class FilesAndFoldersMenu : SharpContextMenu {
-		protected override bool CanShowMenu() => true;
+		protected override bool CanShowMenu() {
+			using var enumerator = SelectedItemPaths.GetEnumerator();
+			return enumerator.MoveNext() && enumerator.MoveNext();
+		}
 
 		protected override ContextMenuStrip CreateMenu()
 			=> new() {
@@ -30,7 +33,10 @@ namespace BatchRenamer {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.DirectoryBackground)]
 	public class DirectoryBackgroundMenu : SharpContextMenu {
-		protected override bool CanShowMenu() => true;
+		protected override bool CanShowMenu() {
+			using var enumerator = Directory.EnumerateFileSystemEntries(FolderPath).GetEnumerator();
+			return enumerator.MoveNext() && enumerator.MoveNext();
+		}
 
 		protected override ContextMenuStrip CreateMenu()
 			=> new() {
