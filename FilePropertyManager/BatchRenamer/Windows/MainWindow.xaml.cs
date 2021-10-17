@@ -53,6 +53,8 @@ namespace BatchRenamer.Windows {
 			ResultsBox.Document = new FlowDocument(ResultsParagraph);
 		}
 
+		public MainWindow(string directory) : this(Directory.GetFileSystemEntries(directory)) { }
+
 		public List<string> Entities { get; }
 
 		public List<EntityType> EntitiesTypes { get; }
@@ -146,7 +148,7 @@ namespace BatchRenamer.Windows {
 					if (match.Index + match.Length < name.Length)
 						target.Inlines.Add(new Run(name[(match.Index + match.Length)..]) {Foreground = baseColor, FontStyle = style});
 				}
-				target.Inlines.Add(new LineBreak() {Background = Brushes.Aqua});
+				target.Inlines.Add(new LineBreak {Background = Brushes.Aqua});
 			}
 			foreach ((var matches, int index) in MatchCollections.ToIndexed()) {
 				if (matches.Count > 0)
@@ -157,7 +159,7 @@ namespace BatchRenamer.Windows {
 						FontStyle = EntitiesTypes[index] == EntityType.Directory ? FontStyles.Italic : FontStyles.Normal
 					}
 				);
-				target.Inlines.Add(new LineBreak() {Background = Brushes.Aqua});
+				target.Inlines.Add(new LineBreak {Background = Brushes.Aqua});
 			}
 		}
 
