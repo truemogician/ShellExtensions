@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using BatchRenamer.Windows;
@@ -16,7 +20,7 @@ namespace BatchRenamer {
 				Items = {
 					new ToolStripMenuItem(
 						"批量重命名",
-						null,
+						Resource.Icon,
 						(_, _) => new MainWindow(SelectedItemPaths).ShowDialog()
 					)
 				}
@@ -33,10 +37,34 @@ namespace BatchRenamer {
 				Items = {
 					new ToolStripMenuItem(
 						"批量重命名",
-						null,
+						Resource.Icon,
 						(_, _) => new MainWindow(Directory.GetFileSystemEntries(FolderPath)).ShowDialog()
 					)
 				}
 			};
+	}
+
+	internal static class Resource {
+		internal static Image Icon = Resize(new Bitmap(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "MainWindow.png")), 24, 24);
+
+		private static Image Resize(Image src, int width, int height) {
+			var destRect = new Rectangle(0, 0, width, height);
+			var destImage = new Bitmap(width, height);
+
+			destImage.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+
+			using var graphics = Graphics.FromImage(destImage);
+			graphics.CompositingMode = CompositingMode.SourceCopy;
+			graphics.CompositingQuality = CompositingQuality.HighQuality;
+			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
+			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+			using var wrapMode = new ImageAttributes();
+			wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+			graphics.DrawImage(src, destRect, 0, 0, src.Width, src.Height, GraphicsUnit.Pixel, wrapMode);
+
+			return destImage;
+		}
 	}
 }
