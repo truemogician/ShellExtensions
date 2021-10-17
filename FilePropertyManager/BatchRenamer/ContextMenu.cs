@@ -38,7 +38,7 @@ namespace BatchRenamer {
 					new ToolStripMenuItem(
 						"批量重命名",
 						Resource.Icon,
-						(_, _) => new MainWindow(Directory.GetFileSystemEntries(FolderPath)).ShowDialog()
+						(_, _) => new MainWindow(FolderPath).ShowDialog()
 					)
 				}
 			};
