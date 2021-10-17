@@ -39,7 +39,11 @@ namespace BatchRenamer.Windows {
 				)
 				.ToList();
 			var tmp = Entities.IndexJoin(EntitiesTypes).ToList();
-			tmp.Sort((a, b) => (int)b.Second - (int)a.Second);
+			tmp.Sort(
+				(a, b) => b.Second == a.Second
+					? string.Compare(a.First, b.First, StringComparison.Ordinal)
+					: (int)b.Second - (int)a.Second
+			);
 			Entities = tmp.Select(x => x.First).ToList();
 			EntitiesTypes = tmp.Select(x => x.Second).ToList();
 			FileNames = Entities.Select(
