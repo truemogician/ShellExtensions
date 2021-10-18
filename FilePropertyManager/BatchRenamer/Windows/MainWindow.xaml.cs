@@ -175,7 +175,28 @@ namespace BatchRenamer.Windows {
 				if (newEntity is null || !PathExtensions.IsFullPathValid(newEntity))
 					continue;
 				Directory.CreateDirectory(Path.GetDirectoryName(newEntity)!);
-				(type == EntityType.File ? (Action<string, string>)File.Move : Directory.Move)(entity, newEntity);
+				if (type == EntityType.File) {
+					FileInfo? info = null;
+					if (PreserveEntityDate.IsChecked == true)
+						info = new FileInfo(entity);
+					File.Move(entity, newEntity);
+					if (PreserveEntityDate.IsChecked == true) {
+						File.SetCreationTime(newEntity, info!.CreationTime);
+						File.SetLastWriteTime(newEntity, info.LastWriteTime);
+						File.SetLastAccessTime(newEntity, info.LastAccessTime);
+					}
+				}
+				else {
+					DirectoryInfo? info = null;
+					if (PreserveEntityDate.IsChecked == true)
+						info = new DirectoryInfo(entity);
+					Directory.Move(entity, newEntity);
+					if (PreserveEntityDate.IsChecked == true) {
+						Directory.SetCreationTime(newEntity, info!.CreationTime);
+						Directory.SetLastWriteTime(newEntity, info.LastWriteTime);
+						Directory.SetLastAccessTime(newEntity, info.LastAccessTime);
+					}
+				}
 			}
 		}
 
