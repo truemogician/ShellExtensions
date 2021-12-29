@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "TryAndTest\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchRenamer.Test", "FilePropertyManager\BatchRenamer.Test\BatchRenamer.Test.csproj", "{A2C398CC-EACD-467D-98D9-BAB96A6C38C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NcmConverter", "Miscellany\NcmConverter\NcmConverter.csproj", "{9AEE89AE-FD7F-4823-BF57-81270B2726D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -183,6 +185,14 @@ Global
 		{A2C398CC-EACD-467D-98D9-BAB96A6C38C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2C398CC-EACD-467D-98D9-BAB96A6C38C4}.Release|x64.ActiveCfg = Release|Any CPU
 		{A2C398CC-EACD-467D-98D9-BAB96A6C38C4}.Release|x64.Build.0 = Release|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -203,6 +213,7 @@ Global
 		{F22E2391-2147-43BE-B8E5-7F5B5FE5FDEB} = {8644CC00-D572-4FEA-B447-B1B60C5FFADB}
 		{A1D5751A-A691-47D5-A4FD-1CFCA14358D5} = {CB150B9F-175D-4CED-A3A7-D92B16545A37}
 		{A2C398CC-EACD-467D-98D9-BAB96A6C38C4} = {8644CC00-D572-4FEA-B447-B1B60C5FFADB}
+		{9AEE89AE-FD7F-4823-BF57-81270B2726D7} = {2E553268-CDAD-40D9-85F1-73381ABE06CC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D1F6194D-3D2F-4BDB-AF94-188DF194EF8F}
