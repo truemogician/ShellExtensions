@@ -16,7 +16,7 @@ internal static class Program {
 		else if (args.Length == 3 && !new Regex(@"^[xX]?(86|64)$").IsMatch(args[2]))
 			errMessage = "架构无法识别";
 		if (!string.IsNullOrEmpty(errMessage)) {
-			MessageBox.Show(errMessage, "参数错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(errMessage, @"参数错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			return;
 		}
 
