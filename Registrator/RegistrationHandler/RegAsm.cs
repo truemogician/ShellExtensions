@@ -56,9 +56,9 @@ public static class RegAsm {
 		return Execute(FindRegAsmPath64(), args);
 	}
 
-	public static bool Unregister(string assemblyPath, bool? is64bit = null) {
-		is64bit ??= Environment.Is64BitOperatingSystem;
-		return (bool)is64bit ? Unregister64(assemblyPath) : Unregister32(assemblyPath);
+	public static bool Unregister(string assemblyPath, bool? is64Bit = null) {
+		is64Bit ??= Environment.Is64BitOperatingSystem;
+		return (bool)is64Bit ? Unregister64(assemblyPath) : Unregister32(assemblyPath);
 	}
 
 	private static bool Execute(string regasmPath, string arguments) {
@@ -77,9 +77,9 @@ public static class RegAsm {
 		string stdout = regasm.StandardOutput.ReadToEnd();
 		string stderr = regasm.StandardError.ReadToEnd();
 		if (string.IsNullOrEmpty(stderr))
-			MessageBox.Show(stdout, "注册成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			MessageBox.Show(stdout, @"注册成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		else
-			MessageBox.Show(stderr, "注册失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(stderr, @"注册失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		return regasm.ExitCode == 0;
 	}
 
