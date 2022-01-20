@@ -1,11 +1,11 @@
-﻿using SharpShell.Attributes;
-using SharpShell.SharpPropertySheet;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using SharpShell.Attributes;
+using SharpShell.SharpPropertySheet;
 
-namespace FileDateSetter {
-    [ComVisible(true)]
+namespace EntryDateSetter {
+	[ComVisible(true)]
     [COMServerAssociation(AssociationType.AllFilesAndFolders)]
     public class PropertySheet : SharpPropertySheet {
         protected override bool CanShowSheet() => true;
