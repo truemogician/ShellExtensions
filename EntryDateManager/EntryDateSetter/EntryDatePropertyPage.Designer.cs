@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
-using System.Drawing;
 using Extension.Forms;
-namespace FileDateSetter {
+
+namespace EntryDateSetter {
     partial class FileDateInformationPropertyPage {
         /// <summary>
         /// Required designer variable.
