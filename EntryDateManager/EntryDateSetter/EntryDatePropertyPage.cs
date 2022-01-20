@@ -54,14 +54,14 @@ namespace EntryDateSetter {
 		#endregion
 
 		#region Constructors
-		public FileDateInformationPropertyPage(string path) => new FileDateInformationPropertyPage(new[] { path });
+		public FileDateInformationPropertyPage(string path) : this(new[] { path }) { }
 
 		public FileDateInformationPropertyPage(string[] paths) {
 			InitializeComponent();
 			CheckBoxes = new[] { lastAccessCheckBox, lastWriteCheckBox, creationCheckBox };
 			Pickers = new[] { lastAccessDateTimePicker, lastWriteDateTimePicker, creationDateTimePicker };
 			if (paths.Length == 0)
-				throw new ArgumentNullException("paths", "Empty array");
+				throw new ArgumentNullException(nameof(paths), "Empty array");
 			Paths = paths;
 		}
 		#endregion
@@ -112,34 +112,39 @@ namespace EntryDateSetter {
 		}
 
 		protected override void OnPropertySheetApply() {
-			var originals = new DateTime[3];
-			var isFile = new bool[3];
-			foreach (string path in Paths) {
-				for (var i = 0; i < 3; ++i) {
-					isFile[i] = File.Exists(path);
-					if (!isFile[i] && !Directory.Exists(path))
-						throw new FileNotFoundException("File or directory doesn't exist", path);
-					originals[i] = GetDateTime[MappedIndex[i]](path, isFile[i]);
-				}
-				for (var i = 0; i < 3; ++i)
-					if (Pickers[i].HasUnknown) {
-						var @new = Pickers[i].Value;
-						var comp = DateTimeComponent.Year;
-						do {
-							if (Pickers[i].UnknownComponent.HasFlag(comp))
-								@new = SetDateTimeComponent[comp](@new, GetDateTimeComponent[comp](originals[i]));
-							comp = (DateTimeComponent)((int)comp << 1);
-						} while (comp <= DateTimeComponent.Second);
-						SetDateTime[i](path, isFile[i], @new);
+			try {
+				var originals = new DateTime[3];
+				var isFile = new bool[3];
+				foreach (string path in Paths) {
+					for (var i = 0; i < 3; ++i) {
+						isFile[i] = File.Exists(path);
+						if (!isFile[i] && !Directory.Exists(path))
+							throw new FileNotFoundException("File or directory doesn't exist", path);
+						originals[i] = GetDateTime[MappedIndex[i]](path, isFile[i]);
 					}
-					else
-						SetDateTime[i](path, isFile[i], Pickers[i].Value);
+					for (var i = 0; i < 3; ++i)
+						if (Pickers[i].HasUnknown) {
+							var @new = Pickers[i].Value;
+							var comp = DateTimeComponent.Year;
+							do {
+								if (Pickers[i].UnknownComponent.HasFlag(comp))
+									@new = SetDateTimeComponent[comp](@new, GetDateTimeComponent[comp](originals[i]));
+								comp = (DateTimeComponent)((int)comp << 1);
+							} while (comp <= DateTimeComponent.Second);
+							SetDateTime[i](path, isFile[i], @new);
+						}
+						else
+							SetDateTime[i](path, isFile[i], Pickers[i].Value);
+				}
+				for (var i = 0; i < 3; ++i) {
+					Current[i] = new DateTimeExtended(Pickers[i].Value, Pickers[i].UnknownComponent);
+					MappedIndex[i] = i;
+				}
+				recoverDateButton.Enabled = false;
 			}
-			for (var i = 0; i < 3; ++i) {
-				Current[i] = new DateTimeExtended(Pickers[i].Value, Pickers[i].UnknownComponent);
-				MappedIndex[i] = i;
+			catch (Exception ex) {
+				MessageBox.Show(ex.Message);
 			}
-			recoverDateButton.Enabled = false;
 		}
 
 		protected override void OnPropertySheetOK() {
