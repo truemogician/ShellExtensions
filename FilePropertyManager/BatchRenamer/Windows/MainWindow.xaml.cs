@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -342,10 +343,14 @@ namespace BatchRenamer.Windows {
 		public static bool IsFullPathValid(string path) => FullPathPattern.IsMatch(path);
 	}
 
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
+	[SuppressMessage("ReSharper", "IdentifierTypo")]
 	internal static class WindowExtensions {
-		private const int GWL_STYLE = -16,
-			WS_MAXIMIZEBOX = 0x10000,
-			WS_MINIMIZEBOX = 0x20000;
+		private const int GWL_STYLE = -16;
+
+		private const int WS_MAXIMIZEBOX = 0x10000;
+
+		private const int WS_MINIMIZEBOX = 0x20000;
 
 		[DllImport("user32.dll")]
 		private static extern int GetWindowLong(IntPtr hWnd, int index);
