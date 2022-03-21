@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,9 +12,10 @@ using SharpShell.Attributes;
 using SharpShell.ServerRegistration;
 using SharpShell.SharpContextMenu;
 
-namespace DllRegistrator; 
+namespace DllRegistrator;
 
 [Flags]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 internal enum RegistrationStatus {
 	Unknown = 0,
 
@@ -87,7 +89,7 @@ public class ContextMenu : SharpContextMenu {
 		Process.Start(
 			new ProcessStartInfo {
 				FileName = registrationHandler,
-				Arguments = $"{action} \"{SelectedItemPaths.First()}\" {targetArch}",
+				Arguments = $"\"{SelectedItemPaths.First()}\" --action {action} --arch {targetArch}",
 				Verb = "runas"
 			}
 		);
