@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
+#nullable enable
 namespace Sv2v {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.AllFiles)]
@@ -16,7 +17,7 @@ namespace Sv2v {
 		protected override ContextMenuStrip CreateMenu() {
 			var menu = new ContextMenuStrip();
 			menu.Items.Add(new ToolStripMenuItem("转换为Verilog", null, (sender, e) => {
-				var converterPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Converter\sv2v.exe");
+				string converterPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, @"Converter\sv2v.exe");
 				var filesArgument = new StringBuilder();
 				foreach (string path in SelectedItemPaths)
 					filesArgument.Append($"\"{path}\" ");
@@ -27,7 +28,7 @@ namespace Sv2v {
 					UseShellExecute = false,
 					RedirectStandardError=true
 				});
-				process.WaitForExit();
+				process!.WaitForExit();
 				string error = process.StandardError.ReadToEnd();
 				if (!string.IsNullOrEmpty(error))
 					MessageBox.Show(error, "转换错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
