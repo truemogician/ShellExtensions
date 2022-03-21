@@ -39,14 +39,7 @@ namespace BatchRenamer.Windows {
 						Directory.Exists(e) ? EntityType.Directory : throw new FileNotFoundException(null, e)
 				)
 				.ToList();
-			var tmp = Entities.IndexJoin(EntitiesTypes).ToList();
-			tmp.Sort(
-				(a, b) => b.Second == a.Second
-					? string.Compare(a.First, b.First, StringComparison.Ordinal)
-					: (int)b.Second - (int)a.Second
-			);
-			Entities = tmp.Select(x => x.First).ToList();
-			EntitiesTypes = tmp.Select(x => x.Second).ToList();
+			SortEntities();
 			FileNames = Entities.Select(
 					(e, i) =>
 						EntitiesTypes[i] == EntityType.File ? Path.GetFileNameWithoutExtension(e) : Path.GetFileName(e)
@@ -60,9 +53,9 @@ namespace BatchRenamer.Windows {
 
 		public MainWindow(string directory) : this(Directory.GetFileSystemEntries(directory)) { }
 
-		public List<string> Entities { get; }
+		public List<string> Entities { get; private set; }
 
-		public List<EntityType> EntitiesTypes { get; }
+		public List<EntityType> EntitiesTypes { get; private set; }
 
 		public Regex? Pattern {
 			get => _pattern;
@@ -82,6 +75,17 @@ namespace BatchRenamer.Windows {
 
 		private event EventHandler PatternChanged = delegate { };
 
+		private void SortEntities() {
+			var tmp = Entities.IndexJoin(EntitiesTypes).ToList();
+			tmp.Sort(
+				(a, b) => b.Second == a.Second
+					? string.Compare(a.First, b.First, StringComparison.Ordinal)
+					: (int)b.Second - (int)a.Second
+			);
+			Entities = tmp.Select(x => x.First).ToList();
+			EntitiesTypes = tmp.Select(x => x.Second).ToList();
+		}
+
 		private string? GetNewEntity(int index) {
 			if (MatchCollections![index].Count == 0)
 				return null;
@@ -97,6 +101,26 @@ namespace BatchRenamer.Windows {
 				(false, true)  => Path.GetDirectoryName(entity) + Path.DirectorySeparatorChar + replaced,
 				(false, false) => Path.GetDirectoryName(entity) + Path.DirectorySeparatorChar + replaced + (type == EntityType.File ? Path.GetExtension(entity) : string.Empty),
 				_              => throw new ArgumentOutOfRangeException()
+			};
+		}
+
+		private void UpdateFileNames() {
+			FileNames = (IncludePath.IsChecked, IncludeExtension.IsChecked) switch {
+				(true, true) => Entities,
+				(true, false) => Entities.Select(
+						(e, i) => Path.Combine(
+							Path.GetDirectoryName(e)!,
+							EntitiesTypes[i] == EntityType.File ? Path.GetFileNameWithoutExtension(e) : Path.GetFileName(e)
+						)
+					)
+					.ToList(),
+				(false, true) => Entities.Select(Path.GetFileName).ToList(),
+				(false, false) => Entities.Select(
+						(e, i) =>
+							EntitiesTypes[i] == EntityType.File ? Path.GetFileNameWithoutExtension(e) : Path.GetFileName(e)
+					)
+					.ToList(),
+				_ => throw new ArgumentOutOfRangeException()
 			};
 		}
 
@@ -168,11 +192,13 @@ namespace BatchRenamer.Windows {
 			}
 		}
 
-		private void Apply() {
+		private string?[] Apply() {
+			var result = new string?[Entities.Count];
 			for (var i = 0; i < Entities.Count; ++i) {
 				string? entity = Entities[i];
 				var type = EntitiesTypes[i];
 				string? newEntity = GetNewEntity(i);
+				result[i] = newEntity;
 				if (newEntity is null || !PathExtensions.IsFullPathValid(newEntity))
 					continue;
 				Directory.CreateDirectory(Path.GetDirectoryName(newEntity)!);
@@ -199,6 +225,7 @@ namespace BatchRenamer.Windows {
 					}
 				}
 			}
+			return result;
 		}
 
 		private void RefreshPreview() {
@@ -244,23 +271,7 @@ namespace BatchRenamer.Windows {
 		private void IgnoreCaseChanged(object sender, RoutedEventArgs args) => UpdatePattern();
 
 		private void TargetChanged(object sender, RoutedEventArgs args) {
-			FileNames = (IncludePath.IsChecked, IncludeExtension.IsChecked) switch {
-				(true, true) => Entities,
-				(true, false) => Entities.Select(
-						(e, i) => Path.Combine(
-							Path.GetDirectoryName(e)!,
-							EntitiesTypes[i] == EntityType.File ? Path.GetFileNameWithoutExtension(e) : Path.GetFileName(e)
-						)
-					)
-					.ToList(),
-				(false, true) => Entities.Select(Path.GetFileName).ToList(),
-				(false, false) => Entities.Select(
-						(e, i) =>
-							EntitiesTypes[i] == EntityType.File ? Path.GetFileNameWithoutExtension(e) : Path.GetFileName(e)
-					)
-					.ToList(),
-				_ => throw new ArgumentOutOfRangeException()
-			};
+			UpdateFileNames();
 			UpdatePattern();
 			if (Equals(sender, IncludePath)) {
 				EntitiesBox.HorizontalScrollBarVisibility = ResultsBox.HorizontalScrollBarVisibility =
@@ -332,8 +343,21 @@ namespace BatchRenamer.Windows {
 		private void PreviewButtonClick(object sender, RoutedEventArgs e) => RefreshPreview();
 
 		private void ApplyButtonClick(object sender, RoutedEventArgs e) {
-			Apply();
-			Close();
+			string?[] map = Apply();
+			if (CloseAfterApplying.IsChecked == true)
+				Close();
+			else {
+				for (var i = 0; i < map.Length; ++i) {
+					string? value = map[i];
+					if (value is not null)
+						Entities[i] = value;
+				}
+				SortEntities();
+				UpdateFileNames();
+				MatchCollections?.Clear();
+				ResultsParagraph.Inlines.Clear();
+				Display(EntitiesParagraph, false);
+			}
 		}
 	}
 

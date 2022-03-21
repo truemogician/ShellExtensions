@@ -36,31 +36,34 @@
 			<TextBox Name="ReplaceBox" Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" VerticalContentAlignment="Center" TextChanged="ReplaceBoxTextChanged" KeyUp="ReplaceBoxKeyUp" TabIndex="1" />
 			<Button Name="ApplyButton" Grid.Row="1" Grid.Column="2" Margin="0,10,0,0" Padding="5,1,5,1" IsEnabled="False" Click="ApplyButtonClick">应用</Button>
 		</Grid>
-		<Grid Grid.Row="1" Grid.Column="0" Margin="0,15,0,15" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="7*" />
-				<ColumnDefinition Width="6*" />
-				<ColumnDefinition Width="7*" />
-				<ColumnDefinition Width="6*" />
-				<ColumnDefinition Width="8*" />
-				<ColumnDefinition Width="6*" />
-				<ColumnDefinition Width="6*" />
-			</Grid.ColumnDefinitions>
+		<Grid Grid.Row="1" Grid.Column="0" Margin="0,10" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+			<Grid.RowDefinitions>
+				<RowDefinition />
+				<RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+				<ColumnDefinition />
+				<ColumnDefinition />
+            </Grid.ColumnDefinitions>
 			<Grid.Resources>
 				<Style TargetType="CheckBox">
 					<Setter Property="FontSize" Value="12" />
 					<Setter Property="HorizontalAlignment" Value="Center" />
 					<Setter Property="VerticalContentAlignment" Value="Center" />
+					<Setter Property="Margin" Value="0,5" />
 				</Style>
 			</Grid.Resources>
-			<CheckBox Name="IgnoreCase" Grid.Column="0" Checked="IgnoreCaseChanged" Unchecked="IgnoreCaseChanged">忽略大小写</CheckBox>
-			<CheckBox Name="IncludePath" Grid.Column="1" Checked="TargetChanged" Unchecked="TargetChanged">包括路径</CheckBox>
-			<CheckBox Name="IncludeExtension" Grid.Column="2" Checked="TargetChanged" Unchecked="TargetChanged">包括扩展名</CheckBox>
-			<CheckBox Name="MatchAll" Grid.Column="3" Checked="MatchAllChanged" Unchecked="MatchAllChanged">匹配所有</CheckBox>
-			<CheckBox Name="PreserveEntityDate" Grid.Column="4" IsChecked="True">保留文件日期</CheckBox>
-			<CheckBox Name="ShowPreview" Grid.Column="5" IsChecked="True" Checked="ShowPreviewChecked" Unchecked="ShowPreviewUnchecked">显示预览</CheckBox>
-			<CheckBox Name="AutoPreview" Grid.Column="6" IsChecked="True" Checked="AutoPreviewChecked" Unchecked="AutoPreviewUnchecked">自动预览</CheckBox>
-		</Grid>
+            <CheckBox Name="IncludePath" Grid.Row="0" Grid.Column="0" Checked="TargetChanged" Unchecked="TargetChanged">包括路径</CheckBox>
+            <CheckBox Name="IncludeExtension" Grid.Row="0" Grid.Column="1" Checked="TargetChanged" Unchecked="TargetChanged">包括扩展名</CheckBox>
+            <CheckBox Name="MatchAll" Grid.Row="0" Grid.Column="2" Checked="MatchAllChanged" Unchecked="MatchAllChanged">匹配所有</CheckBox>
+            <CheckBox Name="IgnoreCase" Grid.Row="0" Grid.Column="3" Checked="IgnoreCaseChanged" Unchecked="IgnoreCaseChanged">忽略大小写</CheckBox>
+            <CheckBox Name="PreserveEntityDate" Grid.Row="1" Grid.Column="0" IsChecked="True">保留日期</CheckBox>
+            <CheckBox Name="ShowPreview" Grid.Row="1" Grid.Column="1" IsChecked="True" Checked="ShowPreviewChecked" Unchecked="ShowPreviewUnchecked">显示预览</CheckBox>
+            <CheckBox Name="AutoPreview" Grid.Row="1" Grid.Column="2" IsChecked="True" Checked="AutoPreviewChecked" Unchecked="AutoPreviewUnchecked">自动预览</CheckBox>
+            <CheckBox Name="CloseAfterApplying" Grid.Row="1" Grid.Column="3" IsChecked="True">应用后关闭</CheckBox>
+        </Grid>
 		<Grid Name="PreviewContainer" Grid.Row="2" Grid.Column="0" Margin="0,10,0,0" >
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="1*" />
