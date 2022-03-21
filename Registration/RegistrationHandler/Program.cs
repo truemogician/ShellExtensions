@@ -1,29 +1,50 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using CommandLine;
 
+#nullable enable
 namespace RegistrationHandler;
 
 internal static class Program {
 	private static void Main(string[] args) {
-		string errMessage = null;
-		if (args.Length is < 2 or > 3)
-			errMessage = $"参数过{(args.Length < 2 ? "少" : "多")}";
-		else if (!new Regex(@"^r(egister)?|u(nregister)?$", RegexOptions.IgnoreCase).IsMatch(args[0]))
-			errMessage = "行为未定义";
-		else if (!File.Exists(args[1]))
-			errMessage = "目标DLL不存在";
-		else if (args.Length == 3 && !new Regex(@"^[xX]?(86|64)$").IsMatch(args[2]))
-			errMessage = "架构无法识别";
-		if (!string.IsNullOrEmpty(errMessage)) {
-			MessageBox.Show(errMessage, @"参数错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			return;
-		}
-
-		bool? is64Bit = args.Length == 3 ? args[2].EndsWith("64") : null;
-		if (args[0][0] == 'r' || args[0][0] == 'R')
-			RegAsm.Register(args[1], is64Bit: is64Bit);
-		else
-			RegAsm.Unregister(args[1], is64Bit);
+		new Parser().ParseArguments<Options>(args)
+			.WithParsed(
+				options => {
+					string? errorMessage = null;
+					if (!new Regex(@"^r(egister)?|u(nregister)?$", RegexOptions.IgnoreCase).IsMatch(options.Action))
+						errorMessage = "action参数错误：应为r(register)或u(unregister)";
+					else if (!File.Exists(options.DllPath))
+						errorMessage = $"dll文件\"{options.DllPath}\"不存在";
+					else if (!new Regex(@"^[xX]?(86|64)$").IsMatch(options.Architecture))
+						errorMessage = "arch参数错误：应为x64或x86";
+					if (errorMessage is not null) {
+						MessageBox.Show(errorMessage, @"错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						return;
+					}
+					if (options.Action[0] is 'r' or 'R')
+						RegAsm.Register(options.DllPath, is64Bit: options.Architecture.EndsWith("64"));
+					else
+						RegAsm.Unregister(options.DllPath, options.Architecture.EndsWith("64"));
+				}
+			)
+			.WithNotParsed(
+				errors => {
+					foreach (var error in errors)
+						Console.WriteLine(Enum.GetName(typeof(Error), error.Tag));
+				}
+			);
 	}
+}
+
+public class Options {
+	[Value(0, Required = true)]
+	public string DllPath { get; set; } = null!;
+
+	[Option('a', "action", Default = "r")]
+	public string Action { get; set; } = null!;
+
+	[Option("arch", Default = "x64")]
+	public string Architecture { get; set; } = null!;
 }
