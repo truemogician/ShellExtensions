@@ -97,7 +97,3 @@ namespace EntryDateCopier {
 		All = Creation | Modification | Access
 	}
 }
-
-namespace System.Runtime.CompilerServices {
-	internal class IsExternalInit { }
-}

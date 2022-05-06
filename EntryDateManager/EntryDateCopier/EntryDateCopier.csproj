@@ -82,6 +82,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LanguageFix.cs" />
     <Compile Include="EdiConfiguration.cs" />
     <Compile Include="EdiFile.cs" />
     <Compile Include="Manager.cs" />
