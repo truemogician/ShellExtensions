@@ -7,13 +7,22 @@ using Newtonsoft.Json;
 #nullable enable
 namespace EntryDateCopier {
 	public class EntryDateInfo {
-		public EntryDateInfo(EntryDate value, string? path = null, IList<EntryDateInfo>? entries = null) {
+		public EntryDateInfo(EntryDate value, string? path, IList<EntryDateInfo>? entries, bool? isDirectory) {
 			Value = value;
 			Path = string.IsNullOrEmpty(path) ? null : path;
 			Entries = entries;
-			if (!IncludesChildren)
-				IsDirectory = true;
+			if (isDirectory is null && Path is not null)
+				throw new ArgumentException("Null directory flag is not allowed in non-general EntryDateInfo");
+			IsDirectory = isDirectory;
 		}
+
+		public EntryDate Value { get; }
+
+		public string? Path { get; }
+
+		public IList<EntryDateInfo>? Entries { get; }
+
+		public bool? IsDirectory { get; }
 
 		[JsonIgnore]
 		public bool General => Path is null;
@@ -30,19 +39,11 @@ namespace EntryDateCopier {
 		[JsonIgnore]
 		public DateTime? AccessDate => Value.Access;
 
-		public string? Path { get; set; }
-
-		public bool? IsDirectory { get; }
-
-		public EntryDate Value { get; }
-
 		[JsonIgnore]
 		public IEnumerable<EntryDateInfo>? Files => Entries?.Where(e => e.IsDirectory != true);
 
 		[JsonIgnore]
 		public IEnumerable<EntryDateInfo>? Directories => Entries?.Where(e => e.IsDirectory == true);
-
-		public IList<EntryDateInfo>? Entries { get; set; }
 
 		public bool Match(string path) {
 			if (!System.IO.Path.IsPathRooted(path))
