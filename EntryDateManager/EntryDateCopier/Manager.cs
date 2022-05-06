@@ -23,29 +23,27 @@ namespace EntryDateCopier {
 	}
 
 	public class ReadyEventArgs : EventArgs {
-		public ReadyEventArgs(Dictionary<string, EntryDate> map) => Map = map;
+		public ReadyEventArgs(IReadOnlyDictionary<string, EntryDate> map) => Map = map;
 
-		public Dictionary<string, EntryDate> Map { get; init; }
+		public IReadOnlyDictionary<string, EntryDate> Map { get; }
 	}
 
 	public class Applier {
-		public Applier(string path, string ediPath, bool appliesToChildren = true) : this(new[] { path }, ediPath, appliesToChildren) { }
+		public Applier(string path, string ediPath) : this(new[] { path }, ediPath) { }
 
-		public Applier(string[] paths, string ediPath, bool appliesToChildren = true) : this(paths, GetEntryDates(ediPath), appliesToChildren) { }
+		public Applier(IEnumerable<string> paths, string ediPath) : this(paths, GetEntryDates(ediPath)) { }
 
-		public Applier(string[] paths, EntryDateInfo[] entryDates, bool appliesToChildren) {
-			Paths = paths;
-			Array.Sort(Paths, (p1, p2) => string.CompareOrdinal(Path.GetFileName(p1), Path.GetFileName(p2)));
+		public Applier(IEnumerable<string> paths, EntryDateInfo[] entryDates) {
+			Paths = paths.OrderBy(Path.GetFileName).ToArray();
 			EntryDates = entryDates;
 			Sort(EntryDates, true);
-			AppliesToChildren = appliesToChildren;
 		}
 
 		public event EventHandler? Start;
 
 		public event EventHandler<ReadyEventArgs>? Ready;
 
-		public event EventHandler<EntryEventArgs>? SetEntryDates;
+		public event EventHandler<EntryEventArgs>? SetEntryDate;
 
 		public event EventHandler? Complete;
 
@@ -53,36 +51,35 @@ namespace EntryDateCopier {
 
 		public EntryDateInfo[] EntryDates { get; set; }
 
-		public bool AppliesToChildren { get; }
-
-		public async Task Apply() {
+		public async Task Apply(bool appliesToChildren = true) {
 			var newDates = new Dictionary<string, EntryDate>();
-			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, EntryDateInfo? @default = null) {
+			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
 				using var e = infos.GetEnumerator().ToExtended();
 				if (!e.MoveNext())
 					throw new EmptyCollectionException();
-				@default = e.Current!.General ? e.GetAndMoveNext() : @default;
+				var general = e.Current!.General ? e.GetAndMoveNext() : null;
 				if (e.Success && e.Current!.General)
-					throw new InvalidOperationException(@"More than one default entry date found");
+					throw new InvalidOperationException(@"More than one general EntryDateInfo found");
 				foreach (string path in paths) {
 					string? fileName = Path.GetFileName(path);
 					while (e.Success && string.CompareOrdinal(fileName, e.Current!.Path) < 0)
 						e.MoveNext();
-					if (!e.Success && @default is null)
+					if (!e.Success && general is null)
 						break;
-					if (fileName == e.Current!.Path && (e.Current.IsDirectory ?? false) == path.IsDirectory()) {
-						newDates[path] = e.Current.Value;
-						if (AppliesToChildren && e.Current.IncludesChildren && path.IsDirectory()) {
+					bool isDirectory = path.IsDirectory();
+					EntryDateInfo? srcInfo = null;
+					if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
+						srcInfo = e.Current;
+					else if (general is not null)
+						if (general.IsDirectory is null || general.IsDirectory == isDirectory)
+							srcInfo = general;
+					if (srcInfo is not null) {
+						newDates[path] = srcInfo.Value;
+						if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
 							string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
 							Array.Sort(entries);
-							Search(entries, e.Current.Entries!, @default);
+							Search(entries, srcInfo.Entries!);
 						}
-					}
-					else if (@default is not null) {
-						newDates[path] = @default.Value;
-						if (AppliesToChildren && path.IsDirectory())
-							foreach (string? entry in EnumerateFileSystemEntriesRecursively(path))
-								newDates[entry] = @default.Value;
 					}
 				}
 			}
@@ -94,7 +91,7 @@ namespace EntryDateCopier {
 						pair => Task.Run(
 							() => {
 								pair.Value.ApplyToEntry(pair.Key);
-								OnSetEntryDates(new EntryEventArgs(pair.Key, pair.Value));
+								OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
 							}
 						)
 					)
@@ -107,7 +104,7 @@ namespace EntryDateCopier {
 
 		protected virtual void OnReady(ReadyEventArgs e) => Ready?.Invoke(this, e);
 
-		protected virtual void OnSetEntryDates(EntryEventArgs e) => SetEntryDates?.Invoke(this, e);
+		protected virtual void OnSetEntryDate(EntryEventArgs e) => SetEntryDate?.Invoke(this, e);
 
 		protected virtual void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
 
@@ -116,13 +113,13 @@ namespace EntryDateCopier {
 				return EdiFile.Load(ediPath).Data;
 			}
 			catch (Exception ex) {
-				throw new InvalidDataException("edi file corrupted", ex);
+				throw new InvalidDataException("Corrupted edi file", ex);
 			}
 		}
 	}
 
 	public class Generator {
-		public Generator(IList<string> paths) => Paths = paths.AsArray();
+		public Generator(IEnumerable<string> paths) => Paths = paths.AsArray();
 
 		public Generator(string path) : this(new[] { path }) { }
 
@@ -136,12 +133,6 @@ namespace EntryDateCopier {
 
 		public EntryDateInfo[]? EntryDates { get; private set; }
 
-		public void OnStart(EventArgs? e = null) => Start?.Invoke(this, e ?? EventArgs.Empty);
-
-		public void OnReadEntryDate(EntryEventArgs e) => ReadEntryDate?.Invoke(this, e);
-
-		public void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
-
 		public static void SaveToFile(string path, EntryDateInfo src) => SaveToFile(path, new[] { src });
 
 		public static void SaveToFile(string path, EntryDateInfo[] srcs) => new EdiFile(srcs).Save(path);
@@ -149,40 +140,65 @@ namespace EntryDateCopier {
 		public void SaveToFile(string path) => SaveToFile(path, EntryDates ?? throw new InvalidOperationException("Generator not started yet."));
 
 		public EntryDateInfo[] Generate(bool matchBasePath = true, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All) {
+			if (Paths.Length > 1)
+				matchBasePath = true;
 			OnStart();
 			EntryDates = Paths.Select(path => Generate(path, matchBasePath, includesChildren, fields)).ToArray();
 			OnComplete();
 			return EntryDates;
 		}
 
+		public void OnStart(EventArgs? e = null) => Start?.Invoke(this, e ?? EventArgs.Empty);
+
+		public void OnReadEntryDate(EntryEventArgs e) => ReadEntryDate?.Invoke(this, e);
+
+		public void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
+
 		private EntryDateInfo Generate(string path, bool matchBasePath = false, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All) {
 			var dates = EntryDate.FromEntry(path, fields);
 			OnReadEntryDate(new EntryEventArgs(path, dates));
-			var result = new EntryDateInfo(dates, matchBasePath ? Path.GetFileName(path) : null);
-			if (path.IsDirectory() && includesChildren) {
+			List<EntryDateInfo>? entries = null;
+			if (includesChildren && path.IsDirectory()) {
 				var dirInfo = new DirectoryInfo(path);
-				result.Entries = dirInfo.EnumerateFileSystemInfos().Select(info => Generate(info.FullName, true, true, fields)).ToList();
-				Sort(result.Entries, true);
+				entries = dirInfo.EnumerateFileSystemInfos().Select(info => Generate(info.FullName, true, true, fields)).ToList();
+				Sort(entries, true);
 			}
-			return result;
+			return new EntryDateInfo(dates, matchBasePath ? Path.GetFileName(path) : null, entries, matchBasePath ? path.IsDirectory() : null);
 		}
 	}
 
 	public class Synchronizer {
-		public Synchronizer(IList<string> dsts, string src) {
+		public Synchronizer(IEnumerable<string> dsts, string src) {
 			DestinationPaths = dsts.AsArray();
 			SourcePath = src;
 		}
 
 		public Synchronizer(string dst, string src) : this(new[] { dst }, src) { }
 
+		public event EventHandler? Start;
+
+		public event EventHandler? ApplicationStart;
+
+		public event EventHandler<ReadyEventArgs>? ApplicationReady;
+
+		public event EventHandler<EntryEventArgs>? ApplicationSetEntryDate;
+
+		public event EventHandler? Complete;
+
 		public string SourcePath { get; set; }
 
 		public string[] DestinationPaths { get; set; }
 
-		public async Task Synchronize(bool includeChildren = true, bool appliesToChildren = false, EntryDateFields fields = EntryDateFields.All) {
-			var infos = new Generator(SourcePath).Generate(false, includeChildren, fields);
-			await new Applier(DestinationPaths, infos, appliesToChildren).Apply();
+		public async Task Synchronize(bool includesChildren = true, bool appliesToChildren = false, EntryDateFields fields = EntryDateFields.All) {
+			var generator = new Generator(SourcePath);
+			generator.Start += Start;
+			var infos = generator.Generate(false, includesChildren, fields);
+			var applier = new Applier(DestinationPaths, infos);
+			applier.Start += ApplicationStart;
+			applier.Ready += ApplicationReady;
+			applier.SetEntryDate += ApplicationSetEntryDate;
+			applier.Complete += Complete;
+			await applier.Apply(appliesToChildren);
 		}
 	}
 }
