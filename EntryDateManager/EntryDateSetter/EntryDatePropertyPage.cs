@@ -8,7 +8,7 @@ using Extension.Forms;
 using SharpShell.SharpPropertySheet;
 
 namespace EntryDateSetter {
-	public partial class FileDateInformationPropertyPage : SharpPropertyPage {
+	public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 		#region Constant Fields
 		protected static Func<string, bool, DateTime>[] GetDateTime = {
 			(path, isFile) => isFile ? File.GetLastAccessTime(path) : Directory.GetLastAccessTime(path),
@@ -54,9 +54,9 @@ namespace EntryDateSetter {
 		#endregion
 
 		#region Constructors
-		public FileDateInformationPropertyPage(string path) : this(new[] { path }) { }
+		public EntryDateInformationPropertyPage(string path) : this(new[] { path }) { }
 
-		public FileDateInformationPropertyPage(string[] paths) {
+		public EntryDateInformationPropertyPage(string[] paths) {
 			InitializeComponent();
 			CheckBoxes = new[] { lastAccessCheckBox, lastWriteCheckBox, creationCheckBox };
 			Pickers = new[] { lastAccessDateTimePicker, lastWriteDateTimePicker, creationDateTimePicker };

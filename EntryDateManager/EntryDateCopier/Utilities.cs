@@ -36,18 +36,18 @@ namespace EntryDateCopier {
 
 		public static bool IsDirectory(this string path) => GetEntryType(path, true) == EntryType.Directory;
 
-		public static void Sort(IList<EntryDateInfo>? fileDates, bool recursive = false, bool checkOrder = true) {
-			if (fileDates is null || fileDates.Count == 0 || checkOrder && IsSorted(fileDates))
+		public static void Sort(IList<EntryDateInfo>? entryDates, bool recursive = false, bool checkOrder = true) {
+			if (entryDates is null || entryDates.Count == 0 || checkOrder && IsSorted(entryDates))
 				return;
-			fileDates.Sort(Comparer);
+			entryDates.Sort(Comparer);
 			if (recursive)
-				foreach (var fileDate in fileDates.Where(info => info.IncludesChildren))
-					Sort(fileDate.Entries, true, checkOrder);
+				foreach (var entryDate in entryDates.Where(info => info.IncludesChildren))
+					Sort(entryDate.Entries, true, checkOrder);
 		}
 
-		public static bool IsSorted(IList<EntryDateInfo> fileDates) {
-			for (var i = 0; i < fileDates.Count - 1; ++i)
-				if (Comparer.Compare(fileDates[i], fileDates[i + 1]) > 0)
+		public static bool IsSorted(IList<EntryDateInfo> entryDates) {
+			for (var i = 0; i < entryDates.Count - 1; ++i)
+				if (Comparer.Compare(entryDates[i], entryDates[i + 1]) > 0)
 					return false;
 			return true;
 		}

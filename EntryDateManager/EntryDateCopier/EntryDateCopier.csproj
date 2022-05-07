@@ -126,8 +126,4 @@
     <Folder Include="Dialog\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>"D:\Code\Visual Studio\Solutions\Shell Extensions\Registrator\RegistrationHandler\bin\Debug\RegistrationHandler.exe" r "D:\Code\Visual Studio\Solutions\Shell Extensions\FileDateManager\FileDateCopier\bin\Debug\FileDateCopier.dll"
-"D:\Code\Visual Studio\Solutions\Shell Extensions\Utility\PathSelector\bin\Release\PathSelector.exe" "D:\Code\Visual Studio\Solutions\Shell Extensions\FileDateManager\FileDateCopier\bin\Debug\FileDateCopier.dll"</PostBuildEvent>
-  </PropertyGroup>
 </Project>
