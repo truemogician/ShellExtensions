@@ -220,14 +220,14 @@ namespace EntryDateCopier {
 				var dsts = paths.ToList();
 				dsts.Remove(path);
 				items.Add(
-					folderCount > (entryTypes[path] == EntryType.Directory ? 1 : 0)
-						? new ToolStripMenuItem($"同步到{Path.GetFileName(path)}", Resource.Sync) {
+					entryTypes[path] == EntryType.File || folderCount <= 1
+						? CreateSyncMenuItem($"同步到{Path.GetFileName(path)}", dsts, path, false, false)
+						: new ToolStripMenuItem($"同步到{Path.GetFileName(path)}", Resource.Sync) {
 							DropDownItems = {
 								CreateSyncMenuItem("仅所选内容", dsts, path, false, false),
 								CreateSyncMenuItem("包含子结构", dsts, path, true, true)
 							}
 						}
-						: CreateSyncMenuItem($"同步到{Path.GetFileName(path)}", dsts, path, false, false)
 				);
 			}
 			items.Add(Separator);
