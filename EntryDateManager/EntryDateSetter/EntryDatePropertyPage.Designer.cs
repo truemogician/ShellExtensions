@@ -2,7 +2,7 @@
 using Extension.Forms;
 
 namespace EntryDateSetter {
-    partial class FileDateInformationPropertyPage {
+    partial class EntryDateInformationPropertyPage {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -186,7 +186,7 @@ namespace EntryDateSetter {
             this.creationDateTimePicker.TabIndex = 12;
             this.creationDateTimePicker.ValueChanged += new System.EventHandler(this.DateTimePickerOnValueChanged);
             // 
-            // FileDateInformationPropertyPage
+            // EntryDateInformationPropertyPage
             // 
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.recoverDateButton);
@@ -201,7 +201,7 @@ namespace EntryDateSetter {
             this.Controls.Add(this.creationLabel);
             this.Controls.Add(this.lastWriteLabel);
             this.Controls.Add(this.lastAccessLabel);
-            this.Name = "FileDateInformationPropertyPage";
+            this.Name = "EntryDateInformationPropertyPage";
             this.PageTitle = "文件日期";
             this.Size = new System.Drawing.Size(511, 628);
             this.ResumeLayout(false);
