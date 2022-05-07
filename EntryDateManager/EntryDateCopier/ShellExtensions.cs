@@ -26,7 +26,7 @@ namespace EntryDateCopier {
 			if (selectedPaths.Length == 1)
 				menu.Items.Add(ContextMenu.CreateSingleMenu(selectedPaths[0], false));
 			else
-				menu.Items.AddRange(ContextMenu.CreateMultipleMenu(selectedPaths).OfType<ToolStripItem>().ToArray());
+				menu.Items.AddRange(ContextMenu.CreateMultipleMenus(selectedPaths).OfType<ToolStripItem>().ToArray());
 			return menu;
 		}
 	}
@@ -90,6 +90,24 @@ namespace EntryDateCopier {
 
 		private static ToolStripSeparator Separator { get; } = new();
 
+		private static ToolStripMenuItem GenerationFieldsConfigItem { get; } = CreateFieldsConfigMenuItem(
+			"设置生成的文件日期字段",
+			() => (EntryDateFields)Properties.Settings.Default.GenerationFields,
+			fields => {
+				Properties.Settings.Default.GenerationFields = (byte)fields;
+				Properties.Settings.Default.Save();
+			}
+		);
+
+		private static ToolStripMenuItem SyncFieldsConfigItem { get; } = CreateFieldsConfigMenuItem(
+			"设置同步的文件日期字段",
+			() => (EntryDateFields)Properties.Settings.Default.SyncFields,
+			fields => {
+				Properties.Settings.Default.SyncFields = (byte)fields;
+				Properties.Settings.Default.Save();
+			}
+		);
+
 		private static string GetFileName(string path, bool general) {
 			var suffix = $"{(general ? ".general" : ".special")}.edi";
 			string dir = Path.GetDirectoryName(path)!;
@@ -138,7 +156,6 @@ namespace EntryDateCopier {
 				);
 			result.DropDownItems.AddRange(
 				new ToolStripItem[] {
-					Separator,
 					new ToolStripMenuItem(
 						"通用（仅拖放内容）",
 						Resource.Globe,
@@ -148,13 +165,15 @@ namespace EntryDateCopier {
 						"通用（含子结构）",
 						Resource.Globe,
 						(_, _) => Generate(false, true)
-					)
+					),
+					Separator,
+					GenerationFieldsConfigItem
 				}
 			);
 			return result;
 		}
 
-		internal static IEnumerable<ToolStripMenuItem> CreateMultipleMenu(string[] paths) {
+		internal static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(string[] paths) {
 			string root = Path.GetDirectoryName(paths[0])!;
 			void Generate(bool includesChildren) =>
 				RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, includesChildren);
@@ -175,6 +194,8 @@ namespace EntryDateCopier {
 						(_, _) => Generate(true)
 					)
 				);
+			menu.DropDownItems.Add(Separator);
+			menu.DropDownItems.Add(GenerationFieldsConfigItem);
 			yield return menu;
 			if (paths.Length > MAX_SYNC_FILES)
 				yield break;
@@ -209,7 +230,11 @@ namespace EntryDateCopier {
 							);
 						};
 						dialog.DoWork += (_, _) => {
-							var task = synchronizer.Synchronize(includesChildren, appliesToChildren);
+							var task = synchronizer.Synchronize(
+								includesChildren,
+								appliesToChildren,
+								(EntryDateFields)Properties.Settings.Default.SyncFields
+							);
 							task.Wait();
 						};
 						dialog.Show();
@@ -233,7 +258,27 @@ namespace EntryDateCopier {
 						: CreateSyncMenuItem($"同步到{Path.GetFileName(path)}", dsts, path, false, false)
 				);
 			}
+			items.Add(Separator);
+			items.Add(SyncFieldsConfigItem);
 			yield return menu;
+		}
+
+		private static ToolStripMenuItem CreateFieldsConfigMenuItem(string text, Func<EntryDateFields> getter, Action<EntryDateFields> setter) {
+			ToolStripMenuItem CreateItem(string itemText, EntryDateFields field) {
+				var item = new ToolStripMenuItem(itemText, null) {
+					CheckOnClick = true,
+					Checked = getter().HasFlag(field)
+				};
+				item.CheckedChanged += (_, _) => setter(getter() & ~field);
+				return item;
+			}
+			return new ToolStripMenuItem(text, Resource.Configuration) {
+				DropDownItems = {
+					CreateItem("创建日期", EntryDateFields.Creation),
+					CreateItem("修改日期", EntryDateFields.Modification),
+					CreateItem("访问日期", EntryDateFields.Access)
+				}
+			};
 		}
 
 		private static void RunGeneration(IEnumerable<string> paths, string saveFile, bool matchBasePath, bool includesChildren) {
@@ -250,7 +295,7 @@ namespace EntryDateCopier {
 			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", $"文件：{args.Path}");
 			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", $"保存到{saveFile}");
 			dialog.DoWork += (_, _) => {
-				generator.Generate(matchBasePath, includesChildren);
+				generator.Generate(matchBasePath, includesChildren, (EntryDateFields)Properties.Settings.Default.GenerationFields);
 				generator.SaveToFile(saveFile);
 			};
 			dialog.Show();
