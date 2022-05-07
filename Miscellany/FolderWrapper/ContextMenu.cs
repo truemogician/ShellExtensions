@@ -36,7 +36,9 @@ namespace FolderWrapper {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.Folder)]
 	public class FoldersContextMenu : SharpContextMenu {
-		protected override bool CanShowMenu() => SelectedItemPaths.All(p => Directory.EnumerateFileSystemEntries(p).Any());
+		protected override bool CanShowMenu() => SelectedItemPaths.All(
+			p => FolderWrapper.IsDirectory(p) && Directory.EnumerateFileSystemEntries(p).Any()
+		);
 
 		protected override ContextMenuStrip CreateMenu() {
 			string[] paths = SelectedItemPaths.ToArray();
