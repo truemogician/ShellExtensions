@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using EntryDateCopier.Properties;
 using Ookii.Dialogs.Wpf;
@@ -12,8 +14,10 @@ using SharpShell.SharpContextMenu;
 using SharpShell.SharpDropHandler;
 using SharpShell.SharpIconHandler;
 using TrueMogician.Extensions.Enumerable;
-using static EntryDateCopier.Utilities;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
+using static EntryDateCopier.Utilities;
+
+// ReSharper disable LocalizableElement
 
 namespace EntryDateCopier {
 	[ComVisible(true)]
@@ -48,40 +52,35 @@ namespace EntryDateCopier {
 		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
 
 		protected override void Drop(DragEventArgs dragEventArgs) {
-			try {
-				var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
-				var dialog = new ProgressDialog {
-					MinimizeBox = true,
-					ShowCancelButton = false,
-					ShowTimeRemaining = true,
-					UseCompactPathsForText = true,
-					UseCompactPathsForDescription = true,
-					WindowTitle = "文件日期设置进度",
-					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
-				};
-				int total = 0, current = 0;
-				applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", "");
-				applier.Ready += (_, args) => {
-					total = args.Map.Count;
-					dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
-				};
-				applier.SetEntryDate += (_, args) => {
-					++current;
-					dialog.ReportProgress(
-						(int)Math.Round((double)current / total),
-						$"进度：{current} / ${total}",
-						$"正在设置 {args.Path}"
-					);
-				};
-				dialog.DoWork += (_, _) => {
-					var task = applier.Apply();
-					task.Wait();
-				};
-				dialog.Show();
-			}
-			catch (Exception ex) {
-				MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
+			var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
+			var dialog = new ProgressDialog {
+				MinimizeBox = true,
+				ShowTimeRemaining = true,
+				UseCompactPathsForText = true,
+				UseCompactPathsForDescription = true,
+				WindowTitle = "设置文件日期",
+				ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
+			};
+			int total = 0, current = 0;
+			var source = new CancellationTokenSource();
+			applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", "");
+			applier.Ready += (_, args) => {
+				total = args.Map.Count;
+				dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
+			};
+			applier.SetEntryDate += (_, args) => {
+				++current;
+				dialog.ReportProgress(
+					(int)Math.Round((double)current / total),
+					$"进度：{current} / ${total}",
+					$"正在设置 {args.Path}"
+				);
+			};
+			dialog.DoWork += (_, args) => {
+				CreateCancellationTimer(args, source, dialog, 500).Start();
+				applier.Apply().Wait(source.Token);
+			};
+			dialog.Show(source.Token);
 		}
 	}
 
@@ -270,6 +269,7 @@ namespace EntryDateCopier {
 							ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 						};
 						int total = 0, current = 0;
+						var source = new CancellationTokenSource();
 						synchronizer.Start += (_, _) => dialog.ReportProgress(0, "正在收集文件日期数据...", "");
 						synchronizer.ApplicationStart += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", "");
 						synchronizer.ApplicationReady += (_, args) => {
@@ -284,15 +284,16 @@ namespace EntryDateCopier {
 								$"正在设置{args.Path}"
 							);
 						};
-						dialog.DoWork += (_, _) => {
-							var task = synchronizer.Synchronize(
-								includesChildren,
-								appliesToChildren,
-								(EntryDateFields)Settings.Default.SyncFields
-							);
-							task.Wait();
+						dialog.DoWork += (_, args) => {
+							CreateCancellationTimer(args, source, dialog, 500).Start();
+							synchronizer.Synchronize(
+									includesChildren,
+									appliesToChildren,
+									(EntryDateFields)Settings.Default.SyncFields
+								)
+								.Wait(source.Token);
 						};
-						dialog.Show();
+						dialog.Show(source.Token);
 					}
 				)
 			);
@@ -301,20 +302,26 @@ namespace EntryDateCopier {
 			var generator = new Generator(paths);
 			var dialog = new ProgressDialog {
 				MinimizeBox = true,
-				ShowCancelButton = false,
 				ShowTimeRemaining = false,
 				UseCompactPathsForText = true,
 				UseCompactPathsForDescription = true,
-				WindowTitle = "生成日期文件进度",
+				WindowTitle = "生成日期文件",
 				ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 			};
 			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", $"文件：{args.Path}");
 			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", $"保存到{saveFile}");
-			dialog.DoWork += (_, _) => {
-				generator.Generate(matchBasePath, includesChildren, (EntryDateFields)Settings.Default.GenerationFields);
-				generator.SaveToFile(saveFile);
+			var source = new CancellationTokenSource();
+			dialog.DoWork += (_, args) => {
+				Task.Run(
+					() => {
+						generator.Generate(matchBasePath, includesChildren, (EntryDateFields)Settings.Default.GenerationFields);
+						generator.SaveToFile(saveFile);
+					},
+					source.Token
+				);
+				CreateCancellationTimer(args, source, dialog, 500).Start();
 			};
-			dialog.Show();
+			dialog.Show(source.Token);
 		}
 	}
 }

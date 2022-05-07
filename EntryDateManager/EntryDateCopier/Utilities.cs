@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
+using Ookii.Dialogs.Wpf;
 using TrueMogician.Extensions.List;
+using Timer = System.Timers.Timer;
 
 #nullable enable
 namespace EntryDateCopier {
@@ -77,6 +81,17 @@ namespace EntryDateCopier {
 			catch (Exception ex) {
 				MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
+		}
+
+		internal static Timer CreateCancellationTimer(DoWorkEventArgs args, CancellationTokenSource source, ProgressDialog dialog, double interval) {
+			var timer = new Timer(interval) { AutoReset = true };
+			timer.Elapsed += (_, _) => {
+				if (args.Cancel) {
+					source.Cancel();
+					dialog.ReportProgress(0, "正在取消...", "");
+				}
+			};
+			return timer;
 		}
 
 		private static FileAttributes? UnlockFile(string path) {
