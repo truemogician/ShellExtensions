@@ -65,19 +65,9 @@ namespace EntryDateCopier {
 			encoding ??= Encoding.UTF8;
 			using var msi = new MemoryStream(bytes);
 			using var mso = new MemoryStream();
-			using (var gs = new GZipStream(msi, CompressionMode.Decompress))//gs.CopyTo(mso);
+			using (var gs = new GZipStream(msi, CompressionMode.Decompress))
 				CopyStream(gs, mso);
 			return encoding.GetString(mso.ToArray());
-		}
-
-		public static IEnumerable<string> EnumerateFileSystemEntriesRecursively(string path) {
-			foreach (string? entry in Directory.EnumerateFiles(path))
-				yield return entry;
-			foreach (string? entry in Directory.EnumerateDirectories(path)) {
-				yield return entry;
-				foreach (string? e in EnumerateFileSystemEntriesRecursively(entry))
-					yield return e;
-			}
 		}
 
 		public static void HandleException(Action action) {

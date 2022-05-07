@@ -44,17 +44,6 @@ namespace EntryDateCopier {
 
 		[JsonIgnore]
 		public IEnumerable<EntryDateInfo>? Directories => Entries?.Where(e => e.IsDirectory == true);
-
-		public bool Match(string path) {
-			if (!System.IO.Path.IsPathRooted(path))
-				throw new ArgumentException(@"Not an absolute path", nameof(path));
-			if (Path is null)
-				return true;
-			path = System.IO.Path.GetFullPath(path);
-			if (!path.EndsWith(Path))
-				return false;
-			return path.LastIndexOf(Path, StringComparison.Ordinal) is var idx && (idx == 0 || path[idx - 1] == System.IO.Path.DirectorySeparatorChar || path[idx - 1] == System.IO.Path.AltDirectorySeparatorChar);
-		}
 	}
 
 	public record EntryDate(DateTime? Creation = null, DateTime? Modification = null, DateTime? Access = null) {
