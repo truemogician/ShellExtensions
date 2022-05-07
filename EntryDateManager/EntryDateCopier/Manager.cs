@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TrueMogician.Exceptions;
 using TrueMogician.Extensions.Enumerable;
 using TrueMogician.Extensions.Enumerator;
 
@@ -56,20 +55,20 @@ namespace EntryDateCopier {
 			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
 				using var e = infos.GetEnumerator().ToExtended();
 				if (!e.MoveNext())
-					throw new EmptyCollectionException();
+					return;
 				var general = e.Current!.General ? e.GetAndMoveNext() : null;
 				if (e.Success && e.Current!.General)
 					throw new InvalidOperationException(@"More than one general EntryDateInfo found");
 				foreach (string path in paths) {
 					string? fileName = Path.GetFileName(path);
-					while (e.Success && string.CompareOrdinal(fileName, e.Current!.Path) < 0)
+					while (e.Success && string.Compare(fileName, e.Current!.Path) < 0)
 						e.MoveNext();
 					if (!e.Success && general is null)
 						break;
 					bool isDirectory = path.IsDirectory();
 					EntryDateInfo? srcInfo = null;
 					if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
-						srcInfo = e.Current;
+						srcInfo = e.GetAndMoveNext();
 					else if (general is not null)
 						if (general.IsDirectory is null || general.IsDirectory == isDirectory)
 							srcInfo = general;
@@ -77,8 +76,10 @@ namespace EntryDateCopier {
 						newDates[path] = srcInfo.Value;
 						if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
 							string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
-							Array.Sort(entries);
-							Search(entries, srcInfo.Entries!);
+							if (entries.Length > 0) {
+								Array.Sort(entries);
+								Search(entries, srcInfo.Entries!);
+							}
 						}
 					}
 				}
