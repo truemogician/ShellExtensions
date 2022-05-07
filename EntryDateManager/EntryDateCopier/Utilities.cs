@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using TrueMogician.Extensions.List;
 
 #nullable enable
@@ -52,15 +53,6 @@ namespace EntryDateCopier {
 			return true;
 		}
 
-		private static FileAttributes? UnlockFile(string path) {
-			var attr = File.GetAttributes(path);
-			if (attr.HasFlag(FileAttributes.ReadOnly)) {
-				File.SetAttributes(path, attr & ~FileAttributes.ReadOnly);
-				return attr;
-			}
-			return null;
-		}
-
 		public static byte[] Compress(string str, Encoding? encoding = null) {
 			encoding ??= Encoding.UTF8;
 			byte[] bytes = encoding.GetBytes(str);
@@ -80,13 +72,6 @@ namespace EntryDateCopier {
 			return encoding.GetString(mso.ToArray());
 		}
 
-		private static void CopyStream(Stream src, Stream dest) {
-			var bytes = new byte[4096];
-			int cnt;
-			while ((cnt = src.Read(bytes, 0, bytes.Length)) != 0)
-				dest.Write(bytes, 0, cnt);
-		}
-
 		public static IEnumerable<string> EnumerateFileSystemEntriesRecursively(string path) {
 			foreach (string? entry in Directory.EnumerateFiles(path))
 				yield return entry;
@@ -95,6 +80,31 @@ namespace EntryDateCopier {
 				foreach (string? e in EnumerateFileSystemEntriesRecursively(entry))
 					yield return e;
 			}
+		}
+
+		public static void HandleException(Action action) {
+			try {
+				action();
+			}
+			catch (Exception ex) {
+				MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
+
+		private static FileAttributes? UnlockFile(string path) {
+			var attr = File.GetAttributes(path);
+			if (attr.HasFlag(FileAttributes.ReadOnly)) {
+				File.SetAttributes(path, attr & ~FileAttributes.ReadOnly);
+				return attr;
+			}
+			return null;
+		}
+
+		private static void CopyStream(Stream src, Stream dest) {
+			var bytes = new byte[4096];
+			int cnt;
+			while ((cnt = src.Read(bytes, 0, bytes.Length)) != 0)
+				dest.Write(bytes, 0, cnt);
 		}
 	}
 
