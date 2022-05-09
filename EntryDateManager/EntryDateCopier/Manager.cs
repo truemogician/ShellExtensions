@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TrueMogician.Extensions.Enumerable;
 using TrueMogician.Extensions.Enumerator;
@@ -27,6 +28,19 @@ namespace EntryDateCopier {
 		public IReadOnlyDictionary<string, EntryDate> Map { get; }
 	}
 
+	public class CancelEventArgs : EventArgs {
+		public CancelEventArgs() { }
+
+		public CancelEventArgs(Task task, Exception? exception = null) {
+			Task = task;
+			Exception = exception;
+		}
+
+		public Task? Task { get; init; }
+
+		public Exception? Exception { get; init; }
+	}
+
 	public class Applier {
 		public Applier(string path, string ediPath) : this(new[] { path }, ediPath) { }
 
@@ -46,11 +60,14 @@ namespace EntryDateCopier {
 
 		public event EventHandler? Complete;
 
+		public event EventHandler<CancelEventArgs>? Cancel;
+
 		public string[] Paths { get; set; }
 
 		public EntryDateInfo[] EntryDates { get; set; }
 
-		public async Task Apply(bool appliesToChildren = true) {
+		public async Task Apply(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
+			cancellationToken ??= CancellationToken.None;
 			var newDates = new Dictionary<string, EntryDate>();
 			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
 				using var e = infos.GetEnumerator().ToExtended();
@@ -87,18 +104,27 @@ namespace EntryDateCopier {
 			OnStart();
 			Search(Paths, EntryDates);
 			OnReady(new ReadyEventArgs(newDates));
-			await Task.WhenAll(
-				newDates.Select(
-						pair => Task.Run(
-							() => {
-								pair.Value.ApplyToEntry(pair.Key);
-								OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
-							}
+			try {
+				await Task.WhenAll(
+					newDates.Select(
+							pair => Task.Run(
+								() => {
+									pair.Value.ApplyToEntry(pair.Key);
+									OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
+								},
+								cancellationToken.Value
+							)
 						)
-					)
-					.ToArray()
-			);
-			OnComplete();
+						.ToArray()
+				);
+				OnComplete();
+			}
+			catch (AggregateException ex) {
+				if (ex.InnerExceptions.Any(e => e is TaskCanceledException))
+					OnCancel(new CancelEventArgs { Exception = ex });
+				else
+					throw;
+			}
 		}
 
 		protected virtual void OnStart(EventArgs? e = null) => Start?.Invoke(this, e ?? EventArgs.Empty);
@@ -106,6 +132,8 @@ namespace EntryDateCopier {
 		protected virtual void OnReady(ReadyEventArgs e) => Ready?.Invoke(this, e);
 
 		protected virtual void OnSetEntryDate(EntryEventArgs e) => SetEntryDate?.Invoke(this, e);
+
+		protected virtual void OnCancel(CancelEventArgs e) => Cancel?.Invoke(this, e);
 
 		protected virtual void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
 
@@ -124,11 +152,13 @@ namespace EntryDateCopier {
 
 		public Generator(string path) : this(new[] { path }) { }
 
-		public event EventHandler? Complete;
+		public event EventHandler? Start;
 
 		public event EventHandler<EntryEventArgs>? ReadEntryDate;
 
-		public event EventHandler? Start;
+		public event EventHandler<CancelEventArgs>? Cancel;
+
+		public event EventHandler? Complete;
 
 		public string[] Paths { get; }
 
@@ -140,28 +170,48 @@ namespace EntryDateCopier {
 
 		public void SaveToFile(string path) => SaveToFile(path, EntryDates ?? throw new InvalidOperationException("Generator not started yet."));
 
-		public EntryDateInfo[] Generate(bool matchBasePath = true, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All) {
+		public async Task<EntryDateInfo[]?> Generate(bool matchBasePath = true, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All, CancellationToken? cancellationToken = null) {
+			cancellationToken ??= CancellationToken.None;
 			if (Paths.Length > 1)
 				matchBasePath = true;
 			OnStart();
-			EntryDates = Paths.Select(path => Generate(path, matchBasePath, includesChildren, fields)).ToArray();
-			OnComplete();
-			return EntryDates;
+			try {
+				EntryDates = await Task.WhenAll(
+					Paths.Select(path => Generate(path, matchBasePath, includesChildren, fields, cancellationToken.Value))
+				);
+				OnComplete();
+				return EntryDates;
+			}
+			catch (AggregateException ex) {
+				if (ex.InnerExceptions.Any(e => e is TaskCanceledException)) {
+					OnCancel(new CancelEventArgs { Exception = ex });
+					return null;
+				}
+				throw;
+			}
 		}
 
 		public void OnStart(EventArgs? e = null) => Start?.Invoke(this, e ?? EventArgs.Empty);
 
 		public void OnReadEntryDate(EntryEventArgs e) => ReadEntryDate?.Invoke(this, e);
 
+		public void OnCancel(CancelEventArgs e) => Cancel?.Invoke(this, e);
+
 		public void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
 
-		private EntryDateInfo Generate(string path, bool matchBasePath = false, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All) {
-			var dates = EntryDate.FromEntry(path, fields);
-			OnReadEntryDate(new EntryEventArgs(path, dates));
-			List<EntryDateInfo>? entries = null;
+		private async Task<EntryDateInfo> Generate(string path, bool matchBasePath, bool includesChildren, EntryDateFields fields, CancellationToken cancellationToken) {
+			var dates = await Task.Run(
+				() => {
+					var result = EntryDate.FromEntry(path, fields);
+					OnReadEntryDate(new EntryEventArgs(path, result));
+					return result;
+				},
+				cancellationToken
+			);
+			IList<EntryDateInfo>? entries = null;
 			if (includesChildren && path.IsDirectory()) {
 				var dirInfo = new DirectoryInfo(path);
-				entries = dirInfo.EnumerateFileSystemInfos().Select(info => Generate(info.FullName, true, true, fields)).ToList();
+				entries = await Task.WhenAll(dirInfo.EnumerateFileSystemInfos().Select(info => Generate(info.FullName, true, true, fields, cancellationToken)));
 				Sort(entries, true);
 			}
 			return new EntryDateInfo(dates, matchBasePath ? Path.GetFileName(path) : null, entries, matchBasePath ? path.IsDirectory() : null);
@@ -186,20 +236,26 @@ namespace EntryDateCopier {
 
 		public event EventHandler? Complete;
 
+		public event EventHandler<CancelEventArgs>? Cancel;
+
 		public string SourcePath { get; set; }
 
 		public string[] DestinationPaths { get; set; }
 
-		public async Task Synchronize(bool includesChildren = true, bool appliesToChildren = false, EntryDateFields fields = EntryDateFields.All) {
+		public async Task Synchronize(bool includesChildren = true, bool appliesToChildren = false, EntryDateFields fields = EntryDateFields.All, CancellationToken? cancellationToken = null) {
 			var generator = new Generator(SourcePath);
 			generator.Start += Start;
-			var infos = generator.Generate(false, includesChildren, fields);
+			generator.Cancel += Cancel;
+			var infos = await generator.Generate(false, includesChildren, fields, cancellationToken);
+			if (infos is null)
+				return;
 			var applier = new Applier(DestinationPaths, infos);
 			applier.Start += ApplicationStart;
 			applier.Ready += ApplicationReady;
 			applier.SetEntryDate += ApplicationSetEntryDate;
 			applier.Complete += Complete;
-			await applier.Apply(appliesToChildren);
+			applier.Cancel += Cancel;
+			await applier.Apply(appliesToChildren, cancellationToken);
 		}
 	}
 }

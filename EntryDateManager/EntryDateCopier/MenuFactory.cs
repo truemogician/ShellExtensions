@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using EntryDateCopier.Properties;
 using Ookii.Dialogs.Wpf;
@@ -14,7 +13,7 @@ namespace EntryDateCopier {
 	internal static class MenuFactory {
 		internal const int MAX_SYNC_FILES = 16;
 
-		private static ToolStripSeparator Separator { get; } = new();
+		private static ToolStripSeparator Separator => new();
 
 		private static ToolStripMenuItem GenerationFieldsConfigItem { get; } = CreateFieldsConfigMenuItem(
 			"设置生成的文件日期字段",
@@ -34,19 +33,10 @@ namespace EntryDateCopier {
 			}
 		);
 
-		private static string GetFileName(string path, bool general) {
-			var suffix = $"{(general ? ".general" : ".special")}.edi";
-			string dir = Path.GetDirectoryName(path)!;
-			string name = Path.GetFileNameWithoutExtension(path);
-			string fileName = name;
-			var index = 1;
-			while (File.Exists(Path.Combine(dir, fileName + suffix)))
-				fileName = name + $"({++index})";
-			return fileName + suffix;
-		}
+		private static string GetFileName(string path) => GetFileName(new[] { path });
 
 		private static string GetFileName(IReadOnlyList<string> paths) {
-			const string suffix = ".special.edi";
+			const string suffix = ".edi";
 			string dir = Path.GetDirectoryName(paths[0])!;
 			string name = Path.GetFileName(dir);
 			string fileName = name;
@@ -61,7 +51,7 @@ namespace EntryDateCopier {
 			void Generate(bool matchBasePath, bool includesChildren) => Utilities.HandleException(
 				() => RunGeneration(
 					new[] { path },
-					Path.Combine(dstDirectory, GetFileName(path, !matchBasePath)),
+					Path.Combine(dstDirectory, GetFileName(path)),
 					matchBasePath,
 					includesChildren
 				)
@@ -210,7 +200,8 @@ namespace EntryDateCopier {
 							synchronizer.Synchronize(
 									includesChildren,
 									appliesToChildren,
-									(EntryDateFields)Settings.Default.SyncFields
+									(EntryDateFields)Settings.Default.SyncFields,
+									source.Token
 								)
 								.Wait(source.Token);
 						};
@@ -233,14 +224,15 @@ namespace EntryDateCopier {
 			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", $"保存到{saveFile}");
 			var source = new CancellationTokenSource();
 			dialog.DoWork += (_, args) => {
-				Task.Run(
-					() => {
-						generator.Generate(matchBasePath, includesChildren, (EntryDateFields)Settings.Default.GenerationFields);
-						generator.SaveToFile(saveFile);
-					},
-					source.Token
-				);
 				Utilities.CreateCancellationTimer(args, source, dialog, 500).Start();
+				generator.Generate(
+						matchBasePath,
+						includesChildren,
+						(EntryDateFields)Settings.Default.GenerationFields,
+						source.Token
+					)
+					.ContinueWith(_ => generator.SaveToFile(saveFile), source.Token)
+					.Wait(source.Token);
 			};
 			dialog.Show(source.Token);
 		}

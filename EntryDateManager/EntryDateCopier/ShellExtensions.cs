@@ -75,7 +75,7 @@ namespace EntryDateCopier {
 			};
 			dialog.DoWork += (_, args) => {
 				CreateCancellationTimer(args, source, dialog, 500).Start();
-				applier.Apply().Wait(source.Token);
+				applier.Apply(cancellationToken: source.Token).Wait(source.Token);
 			};
 			dialog.Show(source.Token);
 		}
