@@ -26,7 +26,7 @@ namespace EntryDateCopier {
 			string[] selectedPaths = SelectedItemPaths.ToArray();
 			var menu = new ContextMenuStrip();
 			if (selectedPaths.Length == 1)
-				menu.Items.Add(MenuFactory.CreateSingleMenu(selectedPaths[0], false));
+				menu.Items.Add(MenuFactory.CreateSingleMenu(selectedPaths[0]));
 			else
 				menu.Items.AddRange(MenuFactory.CreateMultipleMenus(selectedPaths).OfType<ToolStripItem>().ToArray());
 			return menu;
@@ -39,7 +39,7 @@ namespace EntryDateCopier {
 		protected override bool CanShowMenu() => true;
 
 		protected override ContextMenuStrip CreateMenu() => new() {
-			Items = { MenuFactory.CreateSingleMenu(FolderPath, true) }
+			Items = { MenuFactory.CreateBackgroundMenu(FolderPath) }
 		};
 	}
 

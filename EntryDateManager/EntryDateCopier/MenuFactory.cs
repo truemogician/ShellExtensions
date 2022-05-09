@@ -53,8 +53,8 @@ namespace EntryDateCopier {
 			return fileName + suffix;
 		}
 
-		internal static ToolStripMenuItem CreateSingleMenu(string path, bool isBackground) {
-			string dstDirectory = isBackground ? path : Path.GetDirectoryName(path)!;
+		internal static ToolStripMenuItem CreateSingleMenu(string path) {
+			string dstDirectory = Path.GetDirectoryName(path)!;
 			void Generate(bool matchBasePath, bool includesChildren) => Utilities.HandleException(
 				() => RunGeneration(
 					new[] { path },
@@ -102,7 +102,13 @@ namespace EntryDateCopier {
 			return result;
 		}
 
-		internal static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(string[] paths) {
+		internal static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(string[] paths) =>
+			CreateMultipleMenus(paths, false);
+
+		internal static ToolStripMenuItem CreateBackgroundMenu(string directory) =>
+			CreateMultipleMenus(Directory.GetFileSystemEntries(directory), true).Single();
+
+		private static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(IReadOnlyList<string> paths, bool isBackground) {
 			string root = Path.GetDirectoryName(paths[0])!;
 			void Generate(bool includesChildren) => Utilities.HandleException(
 				() => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, includesChildren)
@@ -127,7 +133,7 @@ namespace EntryDateCopier {
 			menu.DropDownItems.Add(Separator);
 			menu.DropDownItems.Add(GenerationFieldsConfigItem);
 			yield return menu;
-			if (paths.Length > MAX_SYNC_FILES)
+			if (isBackground || paths.Count > MAX_SYNC_FILES)
 				yield break;
 			menu = new ToolStripMenuItem("同步文件日期", Resource.Sync);
 			var items = menu.DropDownItems;
