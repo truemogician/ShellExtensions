@@ -31,14 +31,14 @@ namespace EntryDateCopier {
 	public class CancelEventArgs : EventArgs {
 		public CancelEventArgs() { }
 
-		public CancelEventArgs(Task task, Exception? exception = null) {
+		public CancelEventArgs(Exception? exception = null, Task? task = null) {
 			Task = task;
 			Exception = exception;
 		}
 
-		public Task? Task { get; init; }
+		public Task? Task { get; }
 
-		public Exception? Exception { get; init; }
+		public Exception? Exception { get; }
 	}
 
 	public class Applier {
@@ -119,9 +119,12 @@ namespace EntryDateCopier {
 				);
 				OnComplete();
 			}
+			catch (TaskCanceledException ex) {
+				OnCancel(new CancelEventArgs(ex));
+			}
 			catch (AggregateException ex) {
 				if (ex.InnerExceptions.Any(e => e is TaskCanceledException))
-					OnCancel(new CancelEventArgs { Exception = ex });
+					OnCancel(new CancelEventArgs(ex));
 				else
 					throw;
 			}
@@ -170,7 +173,12 @@ namespace EntryDateCopier {
 
 		public void SaveToFile(string path) => SaveToFile(path, EntryDates ?? throw new InvalidOperationException("Generator not started yet."));
 
-		public async Task<EntryDateInfo[]?> Generate(bool matchBasePath = true, bool includesChildren = false, EntryDateFields fields = EntryDateFields.All, CancellationToken? cancellationToken = null) {
+		public async Task<EntryDateInfo[]?> Generate(
+			bool matchBasePath = true,
+			bool includesChildren = false,
+			EntryDateFields fields = EntryDateFields.All,
+			CancellationToken? cancellationToken = null
+		) {
 			cancellationToken ??= CancellationToken.None;
 			if (Paths.Length > 1)
 				matchBasePath = true;
@@ -182,9 +190,13 @@ namespace EntryDateCopier {
 				OnComplete();
 				return EntryDates;
 			}
+			catch (TaskCanceledException ex) {
+				OnCancel(new CancelEventArgs(ex));
+				return null;
+			}
 			catch (AggregateException ex) {
 				if (ex.InnerExceptions.Any(e => e is TaskCanceledException)) {
-					OnCancel(new CancelEventArgs { Exception = ex });
+					OnCancel(new CancelEventArgs(ex));
 					return null;
 				}
 				throw;
@@ -199,7 +211,13 @@ namespace EntryDateCopier {
 
 		public void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
 
-		private async Task<EntryDateInfo> Generate(string path, bool matchBasePath, bool includesChildren, EntryDateFields fields, CancellationToken cancellationToken) {
+		private async Task<EntryDateInfo> Generate(
+			string path,
+			bool matchBasePath,
+			bool includesChildren,
+			EntryDateFields fields,
+			CancellationToken cancellationToken
+		) {
 			var dates = await Task.Run(
 				() => {
 					var result = EntryDate.FromEntry(path, fields);
@@ -211,7 +229,10 @@ namespace EntryDateCopier {
 			IList<EntryDateInfo>? entries = null;
 			if (includesChildren && path.IsDirectory()) {
 				var dirInfo = new DirectoryInfo(path);
-				entries = await Task.WhenAll(dirInfo.EnumerateFileSystemInfos().Select(info => Generate(info.FullName, true, true, fields, cancellationToken)));
+				entries = await Task.WhenAll(
+					dirInfo.EnumerateFileSystemInfos()
+						.Select(info => Generate(info.FullName, true, true, fields, cancellationToken))
+				);
 				Sort(entries, true);
 			}
 			return new EntryDateInfo(dates, matchBasePath ? Path.GetFileName(path) : null, entries, matchBasePath ? path.IsDirectory() : null);
@@ -242,7 +263,12 @@ namespace EntryDateCopier {
 
 		public string[] DestinationPaths { get; set; }
 
-		public async Task Synchronize(bool includesChildren = true, bool appliesToChildren = false, EntryDateFields fields = EntryDateFields.All, CancellationToken? cancellationToken = null) {
+		public async Task Synchronize(
+			bool includesChildren = true,
+			bool appliesToChildren = false,
+			EntryDateFields fields = EntryDateFields.All,
+			CancellationToken? cancellationToken = null
+		) {
 			var generator = new Generator(SourcePath);
 			generator.Start += Start;
 			generator.Cancel += Cancel;
