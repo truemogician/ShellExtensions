@@ -35,17 +35,17 @@ namespace EntryDateCopier {
 			}
 		);
 
-		private static string GetFileName(IEnumerable<string> paths) => GetFileName(paths.First());
+		private static string GetFileName(IEnumerable<string> paths) => GetFileName(
+			paths.SameOrDefault(Path.GetDirectoryName) ??
+			throw new ArgumentException("Paths not in the same directory", nameof(paths))
+		);
 
 		private static string GetFileName(string path) {
 			const string suffix = ".edi";
-			string? dir = Path.GetDirectoryName(path);
-			if (dir is null) {
-				var drive = DriveInfo.GetDrives().First(d => d.Name == path) ??
-					throw new ArgumentException($"Possible relative path: {path}");
-				dir = drive.VolumeLabel;
-			}
-			string name = Path.GetFileName(dir);
+			string dir = Path.GetDirectoryName(path) ?? "";
+			string name = dir == ""
+				? DriveInfo.GetDrives().First(d => d.Name == path).VolumeLabel
+				: Path.GetFileName(path);
 			string fileName = name;
 			var index = 1;
 			while (File.Exists(Path.Combine(dir, fileName + suffix)))
@@ -188,8 +188,8 @@ namespace EntryDateCopier {
 						};
 						int total = 0, current = 0;
 						var source = new CancellationTokenSource();
-						synchronizer.Start += (_, _) => dialog.ReportProgress(0, "正在收集文件日期数据...", "");
-						synchronizer.ApplicationStart += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", "");
+						synchronizer.Start += (_, _) => dialog.ReportProgress(0, "正在收集文件日期数据...", null);
+						synchronizer.ApplicationStart += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
 						synchronizer.ApplicationReady += (_, args) => {
 							total = args.Map.Count;
 							dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
@@ -227,8 +227,8 @@ namespace EntryDateCopier {
 				WindowTitle = "生成日期文件",
 				ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 			};
-			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", $"文件：{args.Path}");
-			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", $"保存到{saveFile}");
+			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", args.Path);
+			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", saveFile);
 			var source = new CancellationTokenSource();
 			dialog.DoWork += (_, args) => {
 				Utilities.CreateCancellationTimer(args, source, dialog, 500).Start();
