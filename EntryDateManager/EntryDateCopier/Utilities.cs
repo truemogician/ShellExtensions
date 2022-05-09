@@ -88,7 +88,7 @@ namespace EntryDateCopier {
 			timer.Elapsed += (_, _) => {
 				if (args.Cancel) {
 					source.Cancel();
-					dialog.ReportProgress(0, "正在取消...", "");
+					dialog.ReportProgress(0, "正在取消...", null);
 				}
 			};
 			return timer;

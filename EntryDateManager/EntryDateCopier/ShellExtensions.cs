@@ -60,7 +60,7 @@ namespace EntryDateCopier {
 			};
 			int total = 0, current = 0;
 			var source = new CancellationTokenSource();
-			applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", "");
+			applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
 			applier.Ready += (_, args) => {
 				total = args.Map.Count;
 				dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
@@ -70,7 +70,7 @@ namespace EntryDateCopier {
 				dialog.ReportProgress(
 					(int)Math.Round((double)current / total),
 					$"进度：{current} / ${total}",
-					$"正在设置 {args.Path}"
+					args.Path
 				);
 			};
 			dialog.DoWork += (_, args) => {
