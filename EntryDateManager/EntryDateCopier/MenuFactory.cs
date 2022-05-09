@@ -199,7 +199,7 @@ namespace EntryDateCopier {
 							dialog.ReportProgress(
 								(int)Math.Round((double)current / total),
 								$"当前进度：{current} / ${total}",
-								$"正在设置{args.Path}"
+								args.Path
 							);
 						};
 						dialog.DoWork += (_, args) => {
