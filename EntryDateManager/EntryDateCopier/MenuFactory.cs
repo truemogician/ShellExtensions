@@ -8,6 +8,7 @@ using EntryDateCopier.Properties;
 using Ookii.Dialogs.Wpf;
 using TrueMogician.Extensions.Enumerable;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
+using static EntryDateCopier.Utilities;
 
 #nullable enable
 
@@ -55,7 +56,7 @@ namespace EntryDateCopier {
 
 		internal static ToolStripMenuItem CreateSingleMenu(string path) {
 			string dstDirectory = Path.GetDirectoryName(path)!;
-			void Generate(bool matchBasePath, bool includesChildren) => Utilities.HandleException(
+			void Generate(bool matchBasePath, bool includesChildren) => HandleException(
 				() => RunGeneration(
 					new[] { path },
 					Path.Combine(dstDirectory, GetFileName(path)),
@@ -63,7 +64,7 @@ namespace EntryDateCopier {
 					includesChildren
 				)
 			);
-			var pathType = Utilities.GetEntryType(path, true);
+			var pathType = GetEntryType(path, true);
 			var result = new ToolStripMenuItem {
 				Text = "生成日期文件",
 				Image = Resource.Generate,
@@ -110,7 +111,7 @@ namespace EntryDateCopier {
 
 		private static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(IReadOnlyList<string> paths, bool isBackground) {
 			string root = Path.GetDirectoryName(paths[0])!;
-			void Generate(bool includesChildren) => Utilities.HandleException(
+			void Generate(bool includesChildren) => HandleException(
 				() => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, includesChildren)
 			);
 			bool hasDirectory = paths.Any(Directory.Exists);
@@ -137,7 +138,7 @@ namespace EntryDateCopier {
 				yield break;
 			menu = new ToolStripMenuItem("同步文件日期", Resource.Sync);
 			var items = menu.DropDownItems;
-			var entryTypes = paths.ToDictionaryWith(p => Utilities.GetEntryType(p, true));
+			var entryTypes = paths.ToDictionaryWith(p => GetEntryType(p, true));
 			int folderCount = entryTypes.Values.Count(t => t == EntryType.Directory);
 			foreach (string path in paths) {
 				var dsts = paths.ToList();
@@ -180,7 +181,7 @@ namespace EntryDateCopier {
 			new(
 				text,
 				Resource.Sync,
-				(_, _) => Utilities.HandleException(
+				(_, _) => HandleException(
 					() => {
 						var synchronizer = new Synchronizer(dsts, src);
 						var dialog = new ProgressDialog {
@@ -208,16 +209,19 @@ namespace EntryDateCopier {
 								args.Path
 							);
 						};
-						dialog.DoWork += (_, args) => {
-							Utilities.CreateCancellationTimer(args, source, dialog, 500).Start();
-							synchronizer.Synchronize(
-									includesChildren,
-									appliesToChildren,
-									(EntryDateFields)Settings.Default.SyncFields,
-									source.Token
-								)
-								.Wait(source.Token);
-						};
+						dialog.DoWork += (_, args) => HandleException(
+							() => {
+								CreateCancellationTimer(args, source, dialog, 500).Start();
+								synchronizer.Synchronize(
+										includesChildren,
+										appliesToChildren,
+										(EntryDateFields)Settings.Default.SyncFields,
+										source.Token
+									)
+									.Wait(source.Token);
+							},
+							dialog
+						);
 						dialog.Show(source.Token);
 					}
 				)
@@ -236,17 +240,27 @@ namespace EntryDateCopier {
 			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", args.Path);
 			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", saveFile);
 			var source = new CancellationTokenSource();
-			dialog.DoWork += (_, args) => {
-				Utilities.CreateCancellationTimer(args, source, dialog, 500).Start();
-				generator.Generate(
-						matchBasePath,
-						includesChildren,
-						(EntryDateFields)Settings.Default.GenerationFields,
-						source.Token
-					)
-					.ContinueWith(_ => generator.SaveToFile(saveFile), source.Token)
-					.Wait(source.Token);
-			};
+			dialog.DoWork += (_, args) => HandleException(
+				() => {
+					CreateCancellationTimer(args, source, dialog, 500).Start();
+					generator.Generate(
+							matchBasePath,
+							includesChildren,
+							(EntryDateFields)Settings.Default.GenerationFields,
+							source.Token
+						)
+						.ContinueWith(
+							task => {
+								if (task.IsFaulted)
+									throw task.Exception!;
+								generator.SaveToFile(saveFile);
+							},
+							source.Token
+						)
+						.Wait(source.Token);
+				},
+				dialog
+			);
 			dialog.Show(source.Token);
 		}
 	}
