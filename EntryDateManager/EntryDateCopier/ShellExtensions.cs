@@ -48,37 +48,42 @@ namespace EntryDateCopier {
 	public class DropHandler : SharpDropHandler {
 		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
 
-		protected override void Drop(DragEventArgs dragEventArgs) {
-			var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
-			var dialog = new ProgressDialog {
-				MinimizeBox = true,
-				ShowTimeRemaining = true,
-				UseCompactPathsForText = true,
-				UseCompactPathsForDescription = true,
-				WindowTitle = "设置文件日期",
-				ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
-			};
-			int total = 0, current = 0;
-			var source = new CancellationTokenSource();
-			applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
-			applier.Ready += (_, args) => {
-				total = args.Map.Count;
-				dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
-			};
-			applier.SetEntryDate += (_, args) => {
-				++current;
-				dialog.ReportProgress(
-					(int)Math.Round((double)current / total),
-					$"进度：{current} / ${total}",
-					args.Path
+		protected override void Drop(DragEventArgs dragEventArgs) => HandleException(
+			() => {
+				var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
+				var dialog = new ProgressDialog {
+					MinimizeBox = true,
+					ShowTimeRemaining = true,
+					UseCompactPathsForText = true,
+					UseCompactPathsForDescription = true,
+					WindowTitle = "设置文件日期",
+					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
+				};
+				int total = 0, current = 0;
+				var source = new CancellationTokenSource();
+				applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
+				applier.Ready += (_, args) => {
+					total = args.Map.Count;
+					dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
+				};
+				applier.SetEntryDate += (_, args) => {
+					++current;
+					dialog.ReportProgress(
+						(int)Math.Round((double)current / total),
+						$"进度：{current} / ${total}",
+						args.Path
+					);
+				};
+				dialog.DoWork += (_, args) => HandleException(
+					() => {
+						CreateCancellationTimer(args, source, dialog, 500).Start();
+						applier.Apply(cancellationToken: source.Token).Wait(source.Token);
+					},
+					dialog
 				);
-			};
-			dialog.DoWork += (_, args) => {
-				CreateCancellationTimer(args, source, dialog, 500).Start();
-				applier.Apply(cancellationToken: source.Token).Wait(source.Token);
-			};
-			dialog.Show(source.Token);
-		}
+				dialog.Show(source.Token);
+			}
+		);
 	}
 
 	[ComVisible(true)]

@@ -74,12 +74,23 @@ namespace EntryDateCopier {
 			return encoding.GetString(mso.ToArray());
 		}
 
-		public static void HandleException(Action action) {
+		public static void HandleException(Action action, ProgressDialog? dialog = null) {
 			try {
 				action();
 			}
 			catch (Exception ex) {
-				MessageBox.Show(ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				dialog?.ReportProgress(100, "遇到异常，正在退出...", ex.Message);
+				while (ex is AggregateException agg && agg.InnerExceptions.Count == 1)
+					ex = agg.InnerExceptions[0];
+				if (ex is AggregateException ae)
+					MessageBox.Show(
+						string.Join(Environment.NewLine, ae.InnerExceptions.Select(e => e.StackTrace)),
+						$"{ex.GetType().Name}: {ex.Message}",
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Error
+					);
+				else
+					MessageBox.Show(ex.StackTrace, $"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
