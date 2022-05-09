@@ -9,6 +9,8 @@ using Ookii.Dialogs.Wpf;
 using TrueMogician.Extensions.Enumerable;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
 
+#nullable enable
+
 namespace EntryDateCopier {
 	internal static class MenuFactory {
 		internal const int MAX_SYNC_FILES = 16;
@@ -33,11 +35,16 @@ namespace EntryDateCopier {
 			}
 		);
 
-		private static string GetFileName(string path) => GetFileName(new[] { path });
+		private static string GetFileName(IEnumerable<string> paths) => GetFileName(paths.First());
 
-		private static string GetFileName(IReadOnlyList<string> paths) {
+		private static string GetFileName(string path) {
 			const string suffix = ".edi";
-			string dir = Path.GetDirectoryName(paths[0])!;
+			string? dir = Path.GetDirectoryName(path);
+			if (dir is null) {
+				var drive = DriveInfo.GetDrives().First(d => d.Name == path) ??
+					throw new ArgumentException($"Possible relative path: {path}");
+				dir = drive.VolumeLabel;
+			}
 			string name = Path.GetFileName(dir);
 			string fileName = name;
 			var index = 1;
