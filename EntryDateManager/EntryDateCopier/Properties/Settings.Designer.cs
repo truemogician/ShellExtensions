@@ -46,5 +46,17 @@ namespace EntryDateCopier.Properties {
                 this["SyncFields"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DirectoryOnly {
+            get {
+                return ((bool)(this["DirectoryOnly"]));
+            }
+            set {
+                this["DirectoryOnly"] = value;
+            }
+        }
     }
 }

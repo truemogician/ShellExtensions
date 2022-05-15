@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EntryDateCopier.Properties;
 using TrueMogician.Extensions.Enumerable;
 using TrueMogician.Extensions.Enumerator;
 
 #nullable enable
+
 namespace EntryDateCopier {
 	using static Utilities;
 
@@ -165,9 +167,9 @@ namespace EntryDateCopier {
 
 		public string[] Paths { get; }
 
-		public EntryDateInfo[]? EntryDates { get; private set; }
+        public EntryDateInfo[]? EntryDates { get; private set; }
 
-		public static void SaveToFile(string path, EntryDateInfo src) => SaveToFile(path, new[] { src });
+        public static void SaveToFile(string path, EntryDateInfo src) => SaveToFile(path, new[] { src });
 
 		public static void SaveToFile(string path, EntryDateInfo[] srcs) => new EdiFile(srcs).Save(path);
 
@@ -176,6 +178,7 @@ namespace EntryDateCopier {
 		public async Task<EntryDateInfo[]?> Generate(
 			bool matchBasePath = true,
 			bool includesChildren = false,
+			bool directoryOnly = false,
 			EntryDateFields fields = EntryDateFields.All,
 			CancellationToken? cancellationToken = null
 		) {
@@ -185,7 +188,7 @@ namespace EntryDateCopier {
 			OnStart();
 			try {
 				EntryDates = await Task.WhenAll(
-					Paths.Select(path => Generate(path, matchBasePath, includesChildren, fields, cancellationToken.Value))
+					Paths.Select(path => Generate(path, matchBasePath, directoryOnly, includesChildren, fields, cancellationToken.Value))
 				);
 				OnComplete();
 				return EntryDates;
@@ -215,6 +218,7 @@ namespace EntryDateCopier {
 			string path,
 			bool matchBasePath,
 			bool includesChildren,
+			bool directoryOnly,
 			EntryDateFields fields,
 			CancellationToken cancellationToken
 		) {
@@ -229,9 +233,9 @@ namespace EntryDateCopier {
 			IList<EntryDateInfo>? entries = null;
 			if (includesChildren && path.IsDirectory()) {
 				var dirInfo = new DirectoryInfo(path);
-				entries = await Task.WhenAll(
-					dirInfo.EnumerateFileSystemInfos()
-						.Select(info => Generate(info.FullName, true, true, fields, cancellationToken))
+                entries = await Task.WhenAll(
+                    (directoryOnly ? dirInfo.EnumerateDirectories() : dirInfo.EnumerateFileSystemInfos())
+						.Select(info => Generate(info.FullName, true, directoryOnly, true, fields, cancellationToken))
 				);
 				Sort(entries, true);
 			}
@@ -272,7 +276,13 @@ namespace EntryDateCopier {
 			var generator = new Generator(SourcePath);
 			generator.Start += Start;
 			generator.Cancel += Cancel;
-			var infos = await generator.Generate(false, includesChildren, fields, cancellationToken);
+			var infos = await generator.Generate(
+                false,
+                includesChildren,
+                Settings.Default.DirectoryOnly,
+                fields,
+                cancellationToken
+            );
 			if (infos is null)
 				return;
 			var applier = new Applier(DestinationPaths, infos);
