@@ -18,7 +18,7 @@ namespace EntryDateCopier {
 
 		private static ToolStripSeparator Separator => new();
 
-		private static ToolStripMenuItem GenerationFieldsConfigItem { get; } = CreateFieldsConfigMenuItem(
+		private static ToolStripMenuItem GenerationFieldsConfigItem { get; } = CreateConfigMenuItem(
 			"设置生成的文件日期字段",
 			() => (EntryDateFields)Settings.Default.GenerationFields,
 			fields => {
@@ -27,7 +27,7 @@ namespace EntryDateCopier {
 			}
 		);
 
-		private static ToolStripMenuItem SyncFieldsConfigItem { get; } = CreateFieldsConfigMenuItem(
+		private static ToolStripMenuItem SyncFieldsConfigItem { get; } = CreateConfigMenuItem(
 			"设置同步的文件日期字段",
 			() => (EntryDateFields)Settings.Default.SyncFields,
 			fields => {
@@ -159,8 +159,8 @@ namespace EntryDateCopier {
 			yield return menu;
 		}
 
-		private static ToolStripMenuItem CreateFieldsConfigMenuItem(string text, Func<EntryDateFields> getter, Action<EntryDateFields> setter) {
-			ToolStripMenuItem CreateItem(string itemText, EntryDateFields field) {
+		private static ToolStripMenuItem CreateConfigMenuItem(string text, Func<EntryDateFields> getter, Action<EntryDateFields> setter) {
+			ToolStripMenuItem CreateFieldItem(string itemText, EntryDateFields field) {
 				var item = new ToolStripMenuItem(itemText, null) {
 					CheckOnClick = true,
 					Checked = getter().HasFlag(field)
@@ -168,11 +168,19 @@ namespace EntryDateCopier {
 				item.CheckedChanged += (_, _) => setter(getter() & ~field);
 				return item;
 			}
+            var directoryOnlyItem = new ToolStripMenuItem("仅文件夹", null) {
+                CheckOnClick = true,
+                Checked = Settings.Default.DirectoryOnly
+            };
+            directoryOnlyItem.CheckedChanged +=
+                (_, _) => Settings.Default.DirectoryOnly = !Settings.Default.DirectoryOnly;
 			return new ToolStripMenuItem(text, Resource.Configuration) {
 				DropDownItems = {
-					CreateItem("创建日期", EntryDateFields.Creation),
-					CreateItem("修改日期", EntryDateFields.Modification),
-					CreateItem("访问日期", EntryDateFields.Access)
+					CreateFieldItem("创建日期", EntryDateFields.Creation),
+					CreateFieldItem("修改日期", EntryDateFields.Modification),
+					CreateFieldItem("访问日期", EntryDateFields.Access),
+					Separator,
+					directoryOnlyItem
 				}
 			};
 		}
@@ -246,6 +254,7 @@ namespace EntryDateCopier {
 					generator.Generate(
 							matchBasePath,
 							includesChildren,
+							Settings.Default.DirectoryOnly,
 							(EntryDateFields)Settings.Default.GenerationFields,
 							source.Token
 						)
