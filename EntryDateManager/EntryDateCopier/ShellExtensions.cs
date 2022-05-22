@@ -70,7 +70,7 @@ namespace EntryDateCopier {
 					++current;
 					dialog.ReportProgress(
 						(int)Math.Round((double)current / total),
-						$"进度：{current} / ${total}",
+						$"进度：{current}/{total}",
 						args.Path
 					);
 				};
