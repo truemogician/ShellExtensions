@@ -26,52 +26,51 @@ public class FileContextMenu : SharpContextMenu {
 
 	protected override ContextMenuStrip CreateMenu() {
 		var paths = SelectedItemPaths.ToList();
-		if (paths.Count > 1 || HardLink.GetFileLinkCount(paths[0]) == 1)
-			return new ContextMenuStrip {
-				Items = {
-					new ToolStripMenuItem(
-						"创建硬链接",
-						Resource.Icon,
-						(_, _) => Create(paths)
-					)
-				}
-			};
-		string path = paths[0];
-		string[] otherLinks = HardLink.GetFileSiblingHardLinks(path).Where(p => p != path).ToArray();
-		var jumpToItem = new ToolStripMenuItem("转到硬链接引用");
-		jumpToItem.DropDownItems.AddRange(
-			otherLinks.Select(
-					link => new ToolStripMenuItem(
-						link,
-						null,
-						(_, _) => ExplorerSelector.FileOrFolder(link)
-					) as ToolStripItem
-				)
-				.ToArray()
-		);
-		return new ContextMenuStrip {
+		var menu = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
-					$"硬链接（{otherLinks.Length}）",
+					"创建硬链接",
+					Resource.Icon,
+					(_, _) => Create(paths)
+				)
+			}
+		};
+		if (paths.Count == 1 && HardLink.GetFileLinkCount(paths[0]) > 1) {
+			string path = paths[0];
+			string[] otherLinks = HardLink.GetFileSiblingHardLinks(path).Where(p => p != path).ToArray();
+			var jumpToItem = new ToolStripMenuItem("打开引用所在位置");
+			jumpToItem.DropDownItems.AddRange(
+				otherLinks.Select(
+						link => new ToolStripMenuItem(
+							link,
+							null,
+							(_, _) => ExplorerSelector.FileOrFolder(link)
+						) as ToolStripItem
+					)
+					.ToArray()
+			);
+			menu.Items.Add(
+				new ToolStripMenuItem(
+					"管理硬链接引用",
 					Resource.Icon
 				) {
 					DropDownItems = {
-						new ToolStripMenuItem("创建", null, (_, _) => Create(paths)),
 						jumpToItem,
 						new ToolStripMenuItem(
-							"将所有硬链接引用移入回收站",
+							"全部移入回收站",
 							null,
 							(_, _) => Delete(otherLinks.Append(path), true)
 						),
 						new ToolStripMenuItem(
-							"删除所有硬链接引用",
+							"全部删除",
 							null,
 							(_, _) => Delete(otherLinks.Append(path), false)
 						)
 					}
 				}
-			}
-		};
+			);
+		}
+		return menu;
 	}
 
 	private static void Create(IReadOnlyList<string> paths) {
