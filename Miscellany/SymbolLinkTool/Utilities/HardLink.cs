@@ -51,13 +51,6 @@ namespace SymbolLinkTool.Utilities {
 		[DllImport("kernel32.dll", SetLastError = true)]
 		private static extern bool FindClose(IntPtr fFindHandle);
 
-		[DllImport("kernel32.dll")]
-		private static extern bool GetVolumePathName(
-			string lpszFileName,
-			[Out] StringBuilder lpszVolumePathName,
-			uint cchBufferLength
-		);
-
 		[DllImport(@"shlwapi.dll", CharSet = CharSet.Auto)]
 		private static extern bool PathAppend([In] [Out] StringBuilder pszPath, string pszMore);
 
@@ -75,27 +68,21 @@ namespace SymbolLinkTool.Utilities {
 			return result;
 		}
 
-		public static string[] GetFileSiblingHardLinks(string filePath) {
-			var result = new List<string>();
-			uint stringLength = 256;
+		public static IEnumerable<string> GetFileSiblingHardLinks(string filePath) {
+			string volume = Path.GetPathRoot(filePath);
 			var sb = new StringBuilder(256);
-			GetVolumePathName(filePath, sb, stringLength);
-			var volume = sb.ToString();
-			sb.Length = 0;
-			stringLength = 256;
+			var stringLength = 256u;
 			var findHandle = FindFirstFileNameW(filePath, 0, ref stringLength, sb);
-			if (findHandle.ToInt32() != -1) {
+			if (findHandle.ToInt64() != -1) {
 				do {
 					var pathSb = new StringBuilder(volume, 256);
 					PathAppend(pathSb, sb.ToString());
-					result.Add(pathSb.ToString());
+					yield return pathSb.ToString();
 					sb.Length = 0;
 					stringLength = 256;
 				} while (FindNextFileNameW(findHandle, ref stringLength, sb));
 				FindClose(findHandle);
-				return result.ToArray();
 			}
-			return null;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
