@@ -42,12 +42,13 @@
     <AssemblyOriginatorKeyFile>SymbolLinkTool.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Enumerable, Version=1.7.0.0, Culture=neutral, PublicKeyToken=27172bc36694b3b0, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\TrueMogician.Extensions.Enumerable.1.7.0\lib\netstandard2.0\Enumerable.dll</HintPath>
+    <Reference Include="Enumerable, Version=2.0.0.0, Culture=neutral, PublicKeyToken=27172bc36694b3b0, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\TrueMogician.Extensions.Enumerable.2.0.0\lib\netstandard2.0\Enumerable.dll</HintPath>
     </Reference>
-    <Reference Include="Exceptions, Version=1.1.1.0, Culture=neutral, PublicKeyToken=719b7518b4500859, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\TrueMogician.Exceptions.1.1.1\lib\netstandard2.0\Exceptions.dll</HintPath>
+    <Reference Include="Exceptions, Version=1.4.1.0, Culture=neutral, PublicKeyToken=719b7518b4500859, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\TrueMogician.Exceptions.1.4.1\lib\netstandard2.0\Exceptions.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.4.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft-WindowsAPICodePack-Core.1.1.4\lib\net462\Microsoft.WindowsAPICodePack.dll</HintPath>
     </Reference>
@@ -75,6 +76,7 @@
     <Compile Include="Utilities\JunctionPoint.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="SymbolLinkTool.snk" />
   </ItemGroup>
@@ -82,6 +84,12 @@
     <Content Include="Icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Utility\PathSelector\PathSelector.csproj">
+      <Project>{d2ba6da9-7edc-4beb-a9b6-17fe50e1bca6}</Project>
+      <Name>PathSelector</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
