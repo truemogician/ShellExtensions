@@ -9,7 +9,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DllRegistrator</RootNamespace>
     <AssemblyName>DllRegistrator</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -22,6 +23,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>preview</LangVersion>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <NoWarn>IDE0079</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -70,9 +73,16 @@
     <None Include="DllRegistrator.snk" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy /y "$(SolutionDir)\Registration\RegistrationHandler\bin\Release\RegistrationHandler.exe" "$(TargetDir)"
-copy /y "$(SolutionDir)\Registration\RegistrationHandler\bin\Release\CommandLine.dll" "$(TargetDir)"</PreBuildEvent>
+    <PreBuildEvent>
+			copy /y "$(SolutionDir)\Registration\RegistrationHandler\bin\Release\RegistrationHandler.exe" "$(TargetDir)"
+			copy /y "$(SolutionDir)\Registration\RegistrationHandler\bin\Release\CommandLine.dll" "$(TargetDir)"
+		</PreBuildEvent>
   </PropertyGroup>
 </Project>
