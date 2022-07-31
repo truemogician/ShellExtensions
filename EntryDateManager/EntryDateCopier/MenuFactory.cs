@@ -165,7 +165,7 @@ namespace EntryDateCopier {
 					CheckOnClick = true,
 					Checked = getter().HasFlag(field)
 				};
-				item.CheckedChanged += (_, _) => setter(getter() & ~field);
+				item.CheckedChanged += (_, _) => setter(getter() ^ field);
 				return item;
 			}
             var directoryOnlyItem = new ToolStripMenuItem("仅文件夹", null) {
