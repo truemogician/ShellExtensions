@@ -7,23 +7,22 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RestartExplorer {
-	static partial class Program {
+	public static partial class Explorer {
 		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool PostMessage(IntPtr hWnd, [MarshalAs(UnmanagedType.U4)] uint msg, IntPtr wParam, IntPtr lParam);
+		internal static extern bool PostMessage(IntPtr hWnd, [MarshalAs(UnmanagedType.U4)] uint msg, IntPtr wParam, IntPtr lParam);
 
-		const int WM_USER = 0x0400;
+		internal const int WM_USER = 0x0400;
 
-		static async Task Main() {
-			var explorerInfos = new List<ExplorerInfo>();
+		public static void Restart() {
+			var explorerInfos = new List<WindowInfo>();
 			var shells = new ShellWindows().Cast<InternetExplorer>().ToArray();
 			foreach (var ie in shells) {
 				if (Path.GetFileNameWithoutExtension(ie.FullName).ToLower() != "explorer")
 					continue;
 				var hWnd = new IntPtr(ie.HWND);
-				explorerInfos.Add(new ExplorerInfo(ie));
+				explorerInfos.Add(new WindowInfo(ie));
 				User32.SendMessage(hWnd, User32.WindowMessage.WM_CLOSE, (IntPtr)0, (IntPtr)0);
 			}
 			try {
@@ -33,11 +32,11 @@ namespace RestartExplorer {
 					ptr = User32.FindWindow("Shell_TrayWnd", null);
 					if (ptr.ToInt32() == 0)
 						break;
-					await Task.Delay(1000);
+					Thread.Sleep(1000);
 				}
 			}
-			catch (Exception ex) {
-				await Console.Error.WriteLineAsync($"{ex.Message} {ex.StackTrace}");
+			catch (Exception) {
+				//ignore
 			}
 			var explorerPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
 			Process.Start(

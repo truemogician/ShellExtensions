@@ -3,13 +3,13 @@ using PInvoke;
 using SHDocVw;
 
 namespace RestartExplorer {
-	static partial class Program {
-		private class ExplorerInfo {
+	static partial class Explorer {
+		internal class WindowInfo {
 			public string Location { get; }
 
 			public User32.WINDOWPLACEMENT Placement { get; set; }
 
-			public ExplorerInfo(InternetExplorer ie) {
+			public WindowInfo(InternetExplorer ie) {
 				var hWnd = new IntPtr(ie.HWND);
 				Location = ie.LocationURL;
 				Placement = User32.GetWindowPlacement(hWnd);
