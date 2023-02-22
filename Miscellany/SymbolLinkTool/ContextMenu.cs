@@ -153,25 +153,25 @@ public class FileContextMenu : SharpContextMenu {
 
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.Folder)]
+[COMServerAssociation(AssociationType.DirectoryBackground)]
 public class FolderContextMenu : SharpContextMenu {
 	protected override bool CanShowMenu() => !SelectedItemPaths.Skip(1).Any();
 
-	protected override ContextMenuStrip CreateMenu() =>
-		new() {
+	protected override ContextMenuStrip CreateMenu() {
+		string src = SelectedItemPaths.FirstOrDefault() ?? FolderPath;
+        var strip = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
-					"创建Junction Point",
-					null,
+					"创建文件夹节点",
+					Resource.Icon,
 					(_, _) => {
-						string src = SelectedItemPaths.First();
 						var dialog = new CommonOpenFileDialog {
 							IsFolderPicker = true,
 							Multiselect = false,
-							EnsureFileExists = false,
 							EnsurePathExists = false,
-							Title = "选择要创建的Junction Point的空文件夹",
-							DefaultFileName = Path.GetFileName(src),
-							AllowNonFileSystemItems = false
+							EnsureValidNames = true,
+							Title = "选择要创建的文件夹节点的空文件夹",
+							DefaultFileName = Path.GetFileName(src)
 						};
 						string dst;
 						while (true) {
@@ -194,7 +194,7 @@ public class FolderContextMenu : SharpContextMenu {
 							}
 							catch (IOException ex) {
 								string message = ex.InnerException?.Message ?? ex.Message;
-								if (MessageBox.Show(message, "Junction Point创建失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+								if (MessageBox.Show(message, "文件夹节点创建失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
 									continue;
 							}
 							break;
@@ -203,6 +203,16 @@ public class FolderContextMenu : SharpContextMenu {
 				)
 			}
 		};
+		if (JunctionPoint.GetTarget(src) is { } target)
+			strip.Items.Add(
+				new ToolStripMenuItem(
+					"打开文件夹节点目标",
+					Resource.Icon,
+					(_, _) => ExplorerSelector.FileOrFolder(target)
+                )
+			);
+		return strip;
+	}
 }
 
 internal static class Resource {
