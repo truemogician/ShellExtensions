@@ -14,9 +14,10 @@ using PathSelector;
 using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
 using SymbolLinkTool.Utilities;
+using SymbolLinkTool.Windows;
 using TrueMogician.Extensions.Enumerable;
 
-namespace SymbolLinkTool; 
+namespace SymbolLinkTool;
 
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.AllFiles)]
@@ -36,39 +37,50 @@ public class FileContextMenu : SharpContextMenu {
 			}
 		};
 		if (paths.Count == 1 && HardLink.GetFileLinkCount(paths[0]) > 1) {
+			var manageItem = new ToolStripMenuItem("管理硬链接引用", Resource.Icon);
 			string path = paths[0];
 			string[] otherLinks = HardLink.GetFileSiblingHardLinks(path).Where(p => p != path).ToArray();
-			var jumpToItem = new ToolStripMenuItem("打开引用所在位置");
-			jumpToItem.DropDownItems.AddRange(
-				otherLinks.Select(
-						link => new ToolStripMenuItem(
-							link,
-							null,
-							(_, _) => ExplorerSelector.FileOrFolder(link)
-						) as ToolStripItem
-					)
-					.ToArray()
-			);
-			menu.Items.Add(
-				new ToolStripMenuItem(
-					"管理硬链接引用",
-					Resource.Icon
-				) {
-					DropDownItems = {
-						jumpToItem,
-						new ToolStripMenuItem(
-							"全部移入回收站",
-							null,
-							(_, _) => Delete(otherLinks.Append(path), true)
-						),
-						new ToolStripMenuItem(
-							"全部删除",
-							null,
-							(_, _) => Delete(otherLinks.Append(path), false)
+			var jumpToItem = otherLinks.Length == 1
+				? new ToolStripMenuItem(
+					$"打开引用 {otherLinks[0]}",
+					null,
+					(_, _) => ExplorerSelector.FileOrFolder(otherLinks[0])
+				)
+				: new ToolStripMenuItem(
+					"打开引用所在位置",
+					null,
+					otherLinks.Select(
+							link => new ToolStripMenuItem(
+								link,
+								null,
+								(_, _) => ExplorerSelector.FileOrFolder(link)
+							) as ToolStripItem
 						)
+						.ToArray()
+				);
+			manageItem.DropDownItems.Add(jumpToItem);
+			var fileName = Path.GetFileName(path);
+			if (otherLinks.Select(Path.GetFileName).All(name => name == fileName))
+				manageItem.DropDownItems.Add(
+					"全部重命名",
+					null,
+					(_, _) => {
+						var files = new List<string>(otherLinks);
+						files.Insert(0, path);
+						RenameWindow.RenameHardLinks(files);
 					}
-				}
+				);
+			manageItem.DropDownItems.Add(
+				"全部移入回收站",
+				null,
+				(_, _) => Delete(otherLinks.Append(path), true)
 			);
+			manageItem.DropDownItems.Add(
+				"全部删除",
+				null,
+				(_, _) => Delete(otherLinks.Append(path), false)
+			);
+			menu.Items.Add(manageItem);
 		}
 		return menu;
 	}
