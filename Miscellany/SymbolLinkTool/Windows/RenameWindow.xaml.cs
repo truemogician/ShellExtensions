@@ -56,7 +56,7 @@ namespace SymbolLinkTool.Windows {
 
 			public event PropertyChangedEventHandler PropertyChanged;
 
-			protected void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+			protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
 				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
@@ -97,7 +97,8 @@ namespace SymbolLinkTool.Windows {
 
 		private void ApplyButtonClicked(object sender, RoutedEventArgs e) {
 			foreach (var f in FileStatusList)
-				File.Move(f.OriginalPath, f.FileName);
+				File.Move(f.OriginalPath, Path.Combine(f.DirectoryName, f.FileName));
+			Close();
 		}
 
 		private void FileNameTextBoxKeyDown(object sender, KeyEventArgs e) {
