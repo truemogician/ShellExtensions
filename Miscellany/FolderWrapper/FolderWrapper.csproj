@@ -1,74 +1,83 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{66B76E78-C5D4-42B5-8CB6-8D0C6915EB55}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FolderWrapper</RootNamespace>
-    <AssemblyName>FolderWrapper</AssemblyName>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>FolderWrapper.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Enumerable, Version=2.0.0.0, Culture=neutral, PublicKeyToken=27172bc36694b3b0, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\TrueMogician.Extensions.Enumerable.2.0.0\lib\netstandard2.0\Enumerable.dll</HintPath>
-    </Reference>
-    <Reference Include="Exceptions, Version=1.4.1.0, Culture=neutral, PublicKeyToken=719b7518b4500859, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\TrueMogician.Exceptions.1.4.1\lib\netstandard2.0\Exceptions.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SharpShell.2.7.2\lib\net40-client\SharpShell.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ContextMenu.cs" />
-    <Compile Include="FolderWrapper.cs" />
-    <Compile Include="FolderWrapperException.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="FolderWrapper.snk" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\*.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+	        Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{66B76E78-C5D4-42B5-8CB6-8D0C6915EB55}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>FolderWrapper</RootNamespace>
+		<AssemblyName>FolderWrapper</AssemblyName>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<OutputPath>bin\Release\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup>
+		<SignAssembly>true</SignAssembly>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AssemblyOriginatorKeyFile>FolderWrapper.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference
+			Include="Enumerable, Version=2.0.0.0, Culture=neutral, PublicKeyToken=27172bc36694b3b0, processorArchitecture=MSIL">
+			<HintPath>..\..\packages\TrueMogician.Extensions.Enumerable.2.0.0\lib\netstandard2.0\Enumerable.dll</HintPath>
+		</Reference>
+		<Reference
+			Include="Exceptions, Version=1.4.1.0, Culture=neutral, PublicKeyToken=719b7518b4500859, processorArchitecture=MSIL">
+			<HintPath>..\..\packages\TrueMogician.Exceptions.1.4.1\lib\netstandard2.0\Exceptions.dll</HintPath>
+		</Reference>
+		<Reference
+			Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
+			<HintPath>..\..\packages\SharpShell.2.7.2\lib\net40-client\SharpShell.dll</HintPath>
+		</Reference>
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Drawing" />
+		<Reference Include="System.Windows.Forms" />
+		<Reference Include="System.Xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="ContextMenu.cs" />
+		<Compile Include="FolderWrapper.cs" />
+		<Compile Include="FolderWrapperException.cs" />
+		<Compile Include="Locale.cs" />
+		<Compile Include="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="app.config" />
+		<None Include="FolderWrapper.snk" />
+		<None Include="packages.config" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="Assets\*.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Locales\*.resx" />
+	</ItemGroup>
+	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

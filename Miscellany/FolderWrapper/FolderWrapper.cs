@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using TrueMogician.Extensions.Enumerable;
 
-#nullable enable
 
 namespace FolderWrapper;
 
@@ -16,9 +15,9 @@ public static class FolderWrapper {
 			)
 		);
 		if (!wrapperFolders.Values.Unique())
-			throw new FolderWrapperException("所选文件存在相同的名称");
+			throw new FolderWrapperException(Locale.FolderWrapper.GetString("DupFileNameErr"));
 		if (wrapperFolders.Values.FirstOrDefault(Directory.Exists) is { } existing)
-			throw new FolderWrapperException($"文件夹{existing}已存在");
+			throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FolderExistErr")!, existing));
 		foreach (var pair in wrapperFolders) {
 			Directory.CreateDirectory(pair.Value);
 			Directory.Move(pair.Key, Path.Combine(pair.Value, Path.GetFileName(pair.Key)));
@@ -42,7 +41,7 @@ public static class FolderWrapper {
 				entries.AddRange(subs);
 			}
 			if (!entries.Select(Path.GetFileName).Unique())
-				throw new FolderWrapperException("所选文件夹的内容中包含同名文件");
+				throw new FolderWrapperException(Locale.FolderWrapper.GetString("SameNameFilesInFoldersErr"));
 			var selected = new HashSet<string>(group);
 			var sameNameEntries = group.ToDictionary(p => p, _ => null as string);
 			if (entries.FirstOrDefault(
@@ -55,7 +54,7 @@ public static class FolderWrapper {
 						return Exists(path, IsDirectory(p));
 					}
 				) is { } existing)
-				throw new FolderWrapperException($"文件{existing}已存在");
+				throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FileExistErr")!, existing));
 			sameNameEntries.Values.Where(p => p is not null).ForEach(p => entries.Remove(p!));
 			subEntries[group.Key] = (entries, sameNameEntries);
 		}
@@ -79,7 +78,7 @@ public static class FolderWrapper {
 				if (!enumerator.MoveNext() || deep && !enumerator.MoveNext())
 					Directory.Delete(folder, deep);
 				else
-					throw new FolderWrapperException("发生异常：解包装后的原文件夹内非空");
+					throw new FolderWrapperException(Locale.FolderWrapper.GetString("FolderNotEmptyAfterWrap"));
 			}
 			foreach (var mapping in sameNameMapping)
 				Directory.Move(Path.Combine(pair.Key, mapping.Key), Path.Combine(pair.Key, mapping.Value));
