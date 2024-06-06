@@ -106,5 +106,8 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Locales\*.resx" />
+	</ItemGroup>
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

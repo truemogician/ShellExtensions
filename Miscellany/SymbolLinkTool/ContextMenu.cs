@@ -6,7 +6,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -16,8 +18,16 @@ using SharpShell.SharpContextMenu;
 using SymbolLinkTool.Utilities;
 using SymbolLinkTool.Windows;
 using TrueMogician.Extensions.Enumerable;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace SymbolLinkTool;
+
+internal static class Locale {
+	private static readonly ResourceManager _localizer = new ResourceManager("SymbolLinkTool.Locales.ContextMenu", Assembly.GetExecutingAssembly());
+
+	internal static string Get(string key) =>
+		_localizer.GetString(key) ?? throw new ResourceReferenceKeyNotFoundException($"Resource key ${key} not found", key);
+}
 
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.AllFiles)]
@@ -30,24 +40,25 @@ public class FileContextMenu : SharpContextMenu {
 		var menu = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
-					"创建硬链接",
+					Locale.Get("CreateHardLink"),
 					Resource.Icon,
 					(_, _) => Create(paths)
 				)
 			}
 		};
 		if (paths.Count == 1 && HardLink.GetFileLinkCount(paths[0]) > 1) {
-			var manageItem = new ToolStripMenuItem("管理硬链接引用", Resource.Icon);
+			
+			var manageItem = new ToolStripMenuItem(Locale.Get("ManageRefs"), Resource.Icon);
 			string path = paths[0];
 			string[] otherLinks = HardLink.GetFileSiblingHardLinks(path).Where(p => p != path).ToArray();
 			var jumpToItem = otherLinks.Length == 1
 				? new ToolStripMenuItem(
-					$"打开引用 {otherLinks[0]}",
+					string.Format(Locale.Get("OpenRef"), otherLinks[0]),
 					null,
 					(_, _) => ExplorerSelector.FileOrFolder(otherLinks[0])
 				)
 				: new ToolStripMenuItem(
-					"打开引用所在位置",
+					Locale.Get("OpenRefLocation"),
 					null,
 					otherLinks.Select(
 							link => new ToolStripMenuItem(
@@ -62,7 +73,7 @@ public class FileContextMenu : SharpContextMenu {
 			var fileName = Path.GetFileName(path);
 			if (otherLinks.Select(Path.GetFileName).All(name => name == fileName))
 				manageItem.DropDownItems.Add(
-					"全部重命名",
+					Locale.Get("RenameAll"),
 					null,
 					(_, _) => {
 						var files = new List<string>(otherLinks);
@@ -71,12 +82,12 @@ public class FileContextMenu : SharpContextMenu {
 					}
 				);
 			manageItem.DropDownItems.Add(
-				"全部移入回收站",
+				Locale.Get("RemoveAll"),
 				null,
 				(_, _) => Delete(otherLinks.Append(path), true)
 			);
 			manageItem.DropDownItems.Add(
-				"全部删除",
+				Locale.Get("DeleteAll"),
 				null,
 				(_, _) => Delete(otherLinks.Append(path), false)
 			);
@@ -89,7 +100,7 @@ public class FileContextMenu : SharpContextMenu {
 		if (paths.Count == 1) {
 			string src = paths[0];
 			var dialog = new SaveFileDialog {
-				Title = "选择要创建的硬链接文件",
+				Title = Locale.Get("ChooseNewHardLinkFile"),
 				FileName = Path.GetFileName(src)
 			};
 			var result = dialog.ShowDialog();
@@ -100,7 +111,7 @@ public class FileContextMenu : SharpContextMenu {
 					HardLink.Create(dialog.FileName, src);
 				}
 				catch (Exception ex) {
-					if (MessageBox.Show(ex.Message, "硬链接创建失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+					if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
 						continue;
 				}
 				break;
@@ -108,7 +119,7 @@ public class FileContextMenu : SharpContextMenu {
 		}
 		else {
 			if (!paths.Unique(Path.GetFileName)) {
-				MessageBox.Show("所选文件中存在重名", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(Locale.Get("DupNameErrorMsg"), Locale.Get("MsgBoxErrorCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 			var dialog = new CommonOpenFileDialog {
@@ -116,7 +127,7 @@ public class FileContextMenu : SharpContextMenu {
 				Multiselect = false,
 				EnsurePathExists = true,
 				AllowNonFileSystemItems = false,
-				Title = "选择硬链接文件的保存目录",
+				Title = Locale.Get("ChooseSaveDirForHardLinks"),
 				InitialDirectory = Path.GetDirectoryName(paths[0])
 			};
 			if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
@@ -128,7 +139,7 @@ public class FileContextMenu : SharpContextMenu {
 						HardLink.Create(Path.Combine(root, Path.GetFileName(path)), path);
 				}
 				catch (Exception ex) {
-					if (MessageBox.Show(ex.Message, "硬链接创建失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+					if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
 						continue;
 				}
 				break;
@@ -162,7 +173,7 @@ public class FolderContextMenu : SharpContextMenu {
         var strip = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
-					"创建文件夹节点",
+					Locale.Get("CreateJunctionPoint"),
 					Resource.Icon,
 					(_, _) => {
 						var dialog = new CommonOpenFileDialog {
@@ -170,7 +181,7 @@ public class FolderContextMenu : SharpContextMenu {
 							Multiselect = false,
 							EnsurePathExists = false,
 							EnsureValidNames = true,
-							Title = "选择要创建的文件夹节点的空文件夹",
+							Title = Locale.Get("ChooseEmptyDir"),
 							DefaultFileName = Path.GetFileName(src)
 						};
 						string dst;
@@ -180,9 +191,9 @@ public class FolderContextMenu : SharpContextMenu {
 							dst = dialog.FileName;
 							DialogResult result;
 							if (dst == src)
-								result = MessageBox.Show("目标文件夹不可与源文件夹相同", "错误", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+								result = MessageBox.Show(Locale.Get("SameDirErrorMsg"), Locale.Get("MsgBoxErrorCaption"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
 							else if (Directory.EnumerateFileSystemEntries(dst).Any())
-								result = MessageBox.Show("目标文件夹非空", "错误", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+								result = MessageBox.Show(Locale.Get("NotEmptyDirErrorMsg"), Locale.Get("MsgBoxErrorCaption"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
 							else
 								break;
 							if (result != DialogResult.Retry)
@@ -194,7 +205,7 @@ public class FolderContextMenu : SharpContextMenu {
 							}
 							catch (IOException ex) {
 								string message = ex.InnerException?.Message ?? ex.Message;
-								if (MessageBox.Show(message, "文件夹节点创建失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+								if (MessageBox.Show(message, Locale.Get("JunctionPointCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
 									continue;
 							}
 							break;
@@ -206,7 +217,7 @@ public class FolderContextMenu : SharpContextMenu {
 		if (JunctionPoint.GetTarget(src) is { } target)
 			strip.Items.Add(
 				new ToolStripMenuItem(
-					"打开文件夹节点目标",
+					Locale.Get("OpenJunctionPointTarget"),
 					Resource.Icon,
 					(_, _) => ExplorerSelector.FileOrFolder(target)
                 )
