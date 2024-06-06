@@ -7,19 +7,21 @@ using System.Windows.Forms;
 using EntryDateCopier.Properties;
 using Ookii.Dialogs.Wpf;
 using TrueMogician.Extensions.Enumerable;
+using TrueMogician.Extensions.String;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
-using static EntryDateCopier.Utilities;
-
 
 
 namespace EntryDateCopier {
+	using static Locale;
+	using static Utilities;
+
 	internal static class MenuFactory {
 		internal const int MAX_SYNC_FILES = 16;
 
 		private static ToolStripSeparator Separator => new();
 
 		private static ToolStripMenuItem GenerationFieldsConfigItem { get; } = CreateConfigMenuItem(
-			"设置生成的文件日期字段",
+			Text.GetString("ConfigGenFields")!,
 			() => (EntryDateFields)Settings.Default.GenerationFields,
 			fields => {
 				Settings.Default.GenerationFields = (byte)fields;
@@ -28,7 +30,7 @@ namespace EntryDateCopier {
 		);
 
 		private static ToolStripMenuItem SyncFieldsConfigItem { get; } = CreateConfigMenuItem(
-			"设置同步的文件日期字段",
+			Text.GetString("ConfigSyncFields")!,
 			() => (EntryDateFields)Settings.Default.SyncFields,
 			fields => {
 				Settings.Default.SyncFields = (byte)fields;
@@ -38,7 +40,7 @@ namespace EntryDateCopier {
 
 		private static string GetFileName(IEnumerable<string> paths) => GetFileName(
 			paths.SameOrDefault(Path.GetDirectoryName) ??
-			throw new ArgumentException("Paths not in the same directory", nameof(paths))
+			throw new ArgumentException(Text.GetString("PathNotInSameDir"), nameof(paths))
 		);
 
 		private static string GetFileName(string path) {
@@ -64,13 +66,17 @@ namespace EntryDateCopier {
 					includesChildren
 				)
 			);
+			
 			var pathType = GetEntryType(path, true);
-			var result = new ToolStripMenuItem {
-				Text = "生成日期文件",
+			var format = Text.GetString("GenMenuFormat")!;
+            var result = new ToolStripMenuItem {
+				Text = Text.GetString("GenerateDateFile"),
 				Image = Resources.Image.Generate,
 				DropDownItems = {
 					new ToolStripMenuItem(
-						pathType == EntryType.Directory ? "匹配路径（仅文件夹）" : "匹配路径",
+						pathType == EntryType.Directory 
+							? string.Format(format, Text.GetString("MatchPath"), Text.GetString("DirOnly"))
+							: Text.GetString("MatchPath"),
 						Resources.Image.Aim,
 						(_, _) => Generate(true, false)
 					)
@@ -79,7 +85,7 @@ namespace EntryDateCopier {
 			if (pathType == EntryType.Directory)
 				result.DropDownItems.Add(
 					new ToolStripMenuItem(
-						"匹配路径（含子结构）",
+						string.Format(format, Text.GetString("MatchPath"), Text.GetString("IncludeSubStructure")),
 						Resources.Image.Aim,
 						(_, _) => Generate(true, true)
 					)
@@ -87,12 +93,12 @@ namespace EntryDateCopier {
 			result.DropDownItems.AddRange(
 				new ToolStripItem[] {
 					new ToolStripMenuItem(
-						"通用（仅拖放内容）",
+						string.Format(format, Text.GetString("Universal"), Text.GetString("DraggingContentOnly")),
 						Resources.Image.Globe,
 						(_, _) => Generate(false, false)
 					),
 					new ToolStripMenuItem(
-						"通用（含子结构）",
+						string.Format(format, Text.GetString("Universal"), Text.GetString("IncludeSubStructure")),
 						Resources.Image.Globe,
 						(_, _) => Generate(false, true)
 					),
@@ -111,47 +117,47 @@ namespace EntryDateCopier {
 
 		private static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(IReadOnlyList<string> paths, bool isBackground) {
 			string root = Path.GetDirectoryName(paths[0])!;
-			void Generate(bool includesChildren) => HandleException(
-				() => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, includesChildren)
-			);
 			bool hasDirectory = paths.Any(Directory.Exists);
-			var menu = new ToolStripMenuItem("生成日期文件", Resources.Image.Generate);
+			var format = Text.GetString("GenMenuFormat")!;
+            var menu = new ToolStripMenuItem(Text.GetString("GenerateDateFile"), Resources.Image.Generate);
 			menu.DropDownItems.Add(
 				new ToolStripMenuItem(
-					hasDirectory ? "匹配路径（仅文件夹）" : "匹配路径",
+					hasDirectory ? 
+						string.Format(format, Text.GetString("MatchPath"), Text.GetString("DirOnly"))
+						: Text.GetString("MatchPath"),
 					Resources.Image.Aim,
-					(_, _) => Generate(false)
-				)
+					(_, _) => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, false)
+                )
 			);
 			if (hasDirectory)
 				menu.DropDownItems.Add(
 					new ToolStripMenuItem(
-						"匹配路径（含子结构）",
+						string.Format(format, Text.GetString("MatchPath"), Text.GetString("IncludeSubStructure")),
 						Resources.Image.Aim,
-						(_, _) => Generate(true)
-					)
+						(_, _) => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, true)
+                    )
 				);
 			menu.DropDownItems.Add(Separator);
 			menu.DropDownItems.Add(GenerationFieldsConfigItem);
 			yield return menu;
 			if (isBackground || paths.Count > MAX_SYNC_FILES)
 				yield break;
-			menu = new ToolStripMenuItem("同步文件日期", Resources.Image.Sync);
+			menu = new ToolStripMenuItem(Text.GetString("SyncEntryDates"), Resources.Image.Sync);
 			var items = menu.DropDownItems;
 			var entryTypes = paths.ToDictionaryWith(p => GetEntryType(p, true));
 			int folderCount = entryTypes.Values.Count(t => t == EntryType.Directory);
 			foreach (string path in paths) {
 				var dsts = paths.ToList();
 				dsts.Remove(path);
-				items.Add(
-					entryTypes[path] == EntryType.File || folderCount <= 1
-						? CreateSyncMenuItem($"同步到{Path.GetFileName(path)}", dsts, path, false, false)
-						: new ToolStripMenuItem($"同步到{Path.GetFileName(path)}", Resources.Image.Sync) {
-							DropDownItems = {
-								CreateSyncMenuItem("仅所选内容", dsts, path, false, false),
-								CreateSyncMenuItem("包含子结构", dsts, path, true, true)
-							}
+				var text = string.Format(Text.GetString("SyncToFormat")!, Path.GetFileName(path));
+                items.Add(entryTypes[path] == EntryType.File || folderCount <= 1
+					? CreateSyncMenuItem(text, dsts, path, false, false)
+					: new ToolStripMenuItem(text, Resources.Image.Sync) {
+						DropDownItems = {
+							CreateSyncMenuItem(Text.GetString("SelectedOnly")!, dsts, path, false, false),
+							CreateSyncMenuItem(Text.GetString("IncludeSubStructure")!, dsts, path, true, true)
 						}
+					}
 				);
 			}
 			items.Add(Separator);
@@ -160,7 +166,7 @@ namespace EntryDateCopier {
 		}
 
 		private static ToolStripMenuItem CreateConfigMenuItem(string text, Func<EntryDateFields> getter, Action<EntryDateFields> setter) {
-			ToolStripMenuItem CreateFieldItem(string itemText, EntryDateFields field) {
+			ToolStripMenuItem CreateFieldItem(string? itemText, EntryDateFields field) {
 				var item = new ToolStripMenuItem(itemText, null) {
 					CheckOnClick = true,
 					Checked = getter().HasFlag(field)
@@ -168,7 +174,7 @@ namespace EntryDateCopier {
 				item.CheckedChanged += (_, _) => setter(getter() ^ field);
 				return item;
 			}
-            var directoryOnlyItem = new ToolStripMenuItem("仅文件夹", null) {
+            var directoryOnlyItem = new ToolStripMenuItem(Text.GetString("DirOnly").Capitalize(true), null) {
                 CheckOnClick = true,
                 Checked = Settings.Default.DirectoryOnly
             };
@@ -176,9 +182,9 @@ namespace EntryDateCopier {
                 (_, _) => Settings.Default.DirectoryOnly = !Settings.Default.DirectoryOnly;
 			return new ToolStripMenuItem(text, Resources.Image.Configuration) {
 				DropDownItems = {
-					CreateFieldItem("创建日期", EntryDateFields.Creation),
-					CreateFieldItem("修改日期", EntryDateFields.Modification),
-					CreateFieldItem("访问日期", EntryDateFields.Access),
+					CreateFieldItem(Text.GetString("CreationDate"), EntryDateFields.Creation),
+					CreateFieldItem(Text.GetString("ModificationDate"), EntryDateFields.Modification),
+					CreateFieldItem(Text.GetString("AccessDate"), EntryDateFields.Access),
 					Separator,
 					directoryOnlyItem
 				}
@@ -198,13 +204,13 @@ namespace EntryDateCopier {
 							ShowTimeRemaining = true,
 							UseCompactPathsForText = true,
 							UseCompactPathsForDescription = true,
-							WindowTitle = "文件日期同步进度",
+							WindowTitle =Text.GetString("SyncProgressTitle"),
 							ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 						};
 						int total = 0, current = 0;
 						var source = new CancellationTokenSource();
-						synchronizer.Start += (_, _) => dialog.ReportProgress(0, "正在收集文件日期数据...", null);
-						synchronizer.ApplicationStart += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
+						synchronizer.Start += (_, _) => dialog.ReportProgress(0, Text.GetString("CollectingEntryDateData"), null);
+						synchronizer.ApplicationStart += (_, _) => dialog.ReportProgress(0, Text.GetString("CountingEntries"), null);
 						synchronizer.ApplicationReady += (_, args) => {
 							total = args.Map.Count;
 							dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
@@ -213,8 +219,8 @@ namespace EntryDateCopier {
 							++current;
 							dialog.ReportProgress(
 								(int)Math.Round((double)current / total),
-								$"当前进度：{current} / ${total}",
-								args.Path
+								string.Format(Text.GetString("ProgressFormat")!, current, total),
+                                args.Path
 							);
 						};
 						dialog.DoWork += (_, args) => HandleException(
@@ -242,11 +248,11 @@ namespace EntryDateCopier {
 				ShowTimeRemaining = false,
 				UseCompactPathsForText = true,
 				UseCompactPathsForDescription = true,
-				WindowTitle = "生成日期文件",
+				WindowTitle = Text.GetString("GenerateDateFile"),
 				ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 			};
-			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, "正在读取文件日期...", args.Path);
-			generator.Complete += (_, _) => dialog.ReportProgress(100, "正在保存日期文件...", saveFile);
+			generator.ReadEntryDate += (_, args) => dialog.ReportProgress(0, Text.GetString("ReadingEntryDates"), args.Path);
+			generator.Complete += (_, _) => dialog.ReportProgress(100, Text.GetString("SavingDateFile"), saveFile);
 			var source = new CancellationTokenSource();
 			dialog.DoWork += (_, args) => HandleException(
 				() => {

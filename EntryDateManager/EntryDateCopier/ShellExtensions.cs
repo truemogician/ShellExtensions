@@ -11,12 +11,14 @@ using SharpShell.SharpContextMenu;
 using SharpShell.SharpDropHandler;
 using SharpShell.SharpIconHandler;
 using TrueMogician.Extensions.Enumerable;
+using Image = EntryDateCopier.Resources.Image;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
-using static EntryDateCopier.Utilities;
 
-// ReSharper disable LocalizableElement
 
 namespace EntryDateCopier {
+	using static Locale;
+	using static Utilities;
+
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.AllFilesAndFolders)]
 	public class FileFolderContextMenu : SharpContextMenu {
@@ -56,12 +58,12 @@ namespace EntryDateCopier {
 					ShowTimeRemaining = true,
 					UseCompactPathsForText = true,
 					UseCompactPathsForDescription = true,
-					WindowTitle = "设置文件日期",
+					WindowTitle = Text.GetString("DragDropProgressTitle"),
 					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 				};
 				int total = 0, current = 0;
 				var source = new CancellationTokenSource();
-				applier.Start += (_, _) => dialog.ReportProgress(0, "正在统计文件数量...", null);
+				applier.Start += (_, _) => dialog.ReportProgress(0, Text.GetString("CountingEntries"), null);
 				applier.Ready += (_, args) => {
 					total = args.Map.Count;
 					dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
@@ -70,7 +72,7 @@ namespace EntryDateCopier {
 					++current;
 					dialog.ReportProgress(
 						(int)Math.Round((double)current / total),
-						$"进度：{current}/{total}",
+						string.Format(Text.GetString("ProgressFormat")!, current, total),
 						args.Path
 					);
 				};
@@ -89,6 +91,6 @@ namespace EntryDateCopier {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.ClassOfExtension, ".edi")]
 	public class IconHandler : SharpIconHandler {
-		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Resources.Image.Main;
+		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Image.Main;
 	}
 }

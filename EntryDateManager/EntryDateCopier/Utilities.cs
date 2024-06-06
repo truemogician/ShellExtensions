@@ -12,6 +12,8 @@ using TrueMogician.Extensions.List;
 using Timer = System.Timers.Timer;
 
 namespace EntryDateCopier {
+	using static Locale;
+
 	public enum EntryType {
 		None,
 
@@ -78,7 +80,7 @@ namespace EntryDateCopier {
 				action();
 			}
 			catch (Exception ex) {
-				dialog?.ReportProgress(100, "遇到异常，正在退出...", ex.Message);
+				dialog?.ReportProgress(100, Text.GetString("ProgressErrExiting"), ex.Message);
 				while (ex is AggregateException { InnerExceptions: { Count: 1 } } agg)
 					ex = agg.InnerExceptions[0];
 				if (ex is AggregateException ae)
@@ -98,7 +100,7 @@ namespace EntryDateCopier {
 			timer.Elapsed += (_, _) => {
 				if (args.Cancel) {
 					source.Cancel();
-					dialog.ReportProgress(0, "正在取消...", null);
+					dialog.ReportProgress(0, Text.GetString("ProgressCancelling"), null);
 				}
 			};
 			return timer;

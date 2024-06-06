@@ -61,7 +61,7 @@
 		</Reference>
 		<Reference
 			Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-			<HintPath>..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+			<HintPath>..\..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
 		</Reference>
 		<Reference
 			Include="Ookii.Dialogs.Wpf, Version=5.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
@@ -72,6 +72,10 @@
 		<Reference
 			Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
 			<HintPath>..\..\packages\SharpShell.2.7.2\lib\net40-client\SharpShell.dll</HintPath>
+		</Reference>
+		<Reference
+			Include="String, Version=1.1.0.0, Culture=neutral, PublicKeyToken=70bea9bab5b14dde, processorArchitecture=MSIL">
+			<HintPath>..\..\packages\TrueMogician.Extensions.String.1.1.0\lib\netstandard2.0\String.dll</HintPath>
 		</Reference>
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
@@ -95,6 +99,7 @@
 		<Compile Include="LanguageFix.cs" />
 		<Compile Include="EdiConfiguration.cs" />
 		<Compile Include="EdiFile.cs" />
+		<Compile Include="Locale.cs" />
 		<Compile Include="Manager.cs" />
 		<Compile Include="EntryDateInfo.cs" />
 		<Compile Include="MenuFactory.cs" />
@@ -123,6 +128,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\Text.resx" />
+		<EmbeddedResource Include="Resources\Text.*.resx" />
 		<EmbeddedResource Include="Resources\Image.resx">
 			<Generator>ResXFileCodeGenerator</Generator>
 			<SubType>Designer</SubType>
