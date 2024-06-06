@@ -67,11 +67,11 @@ namespace EntryDateCopier {
 			var pathType = GetEntryType(path, true);
 			var result = new ToolStripMenuItem {
 				Text = "生成日期文件",
-				Image = Resource.Generate,
+				Image = Resources.Image.Generate,
 				DropDownItems = {
 					new ToolStripMenuItem(
 						pathType == EntryType.Directory ? "匹配路径（仅文件夹）" : "匹配路径",
-						Resource.Aim,
+						Resources.Image.Aim,
 						(_, _) => Generate(true, false)
 					)
 				}
@@ -80,7 +80,7 @@ namespace EntryDateCopier {
 				result.DropDownItems.Add(
 					new ToolStripMenuItem(
 						"匹配路径（含子结构）",
-						Resource.Aim,
+						Resources.Image.Aim,
 						(_, _) => Generate(true, true)
 					)
 				);
@@ -88,12 +88,12 @@ namespace EntryDateCopier {
 				new ToolStripItem[] {
 					new ToolStripMenuItem(
 						"通用（仅拖放内容）",
-						Resource.Globe,
+						Resources.Image.Globe,
 						(_, _) => Generate(false, false)
 					),
 					new ToolStripMenuItem(
 						"通用（含子结构）",
-						Resource.Globe,
+						Resources.Image.Globe,
 						(_, _) => Generate(false, true)
 					),
 					Separator,
@@ -115,11 +115,11 @@ namespace EntryDateCopier {
 				() => RunGeneration(paths, Path.Combine(root, GetFileName(paths)), true, includesChildren)
 			);
 			bool hasDirectory = paths.Any(Directory.Exists);
-			var menu = new ToolStripMenuItem("生成日期文件", Resource.Generate);
+			var menu = new ToolStripMenuItem("生成日期文件", Resources.Image.Generate);
 			menu.DropDownItems.Add(
 				new ToolStripMenuItem(
 					hasDirectory ? "匹配路径（仅文件夹）" : "匹配路径",
-					Resource.Aim,
+					Resources.Image.Aim,
 					(_, _) => Generate(false)
 				)
 			);
@@ -127,7 +127,7 @@ namespace EntryDateCopier {
 				menu.DropDownItems.Add(
 					new ToolStripMenuItem(
 						"匹配路径（含子结构）",
-						Resource.Aim,
+						Resources.Image.Aim,
 						(_, _) => Generate(true)
 					)
 				);
@@ -136,7 +136,7 @@ namespace EntryDateCopier {
 			yield return menu;
 			if (isBackground || paths.Count > MAX_SYNC_FILES)
 				yield break;
-			menu = new ToolStripMenuItem("同步文件日期", Resource.Sync);
+			menu = new ToolStripMenuItem("同步文件日期", Resources.Image.Sync);
 			var items = menu.DropDownItems;
 			var entryTypes = paths.ToDictionaryWith(p => GetEntryType(p, true));
 			int folderCount = entryTypes.Values.Count(t => t == EntryType.Directory);
@@ -146,7 +146,7 @@ namespace EntryDateCopier {
 				items.Add(
 					entryTypes[path] == EntryType.File || folderCount <= 1
 						? CreateSyncMenuItem($"同步到{Path.GetFileName(path)}", dsts, path, false, false)
-						: new ToolStripMenuItem($"同步到{Path.GetFileName(path)}", Resource.Sync) {
+						: new ToolStripMenuItem($"同步到{Path.GetFileName(path)}", Resources.Image.Sync) {
 							DropDownItems = {
 								CreateSyncMenuItem("仅所选内容", dsts, path, false, false),
 								CreateSyncMenuItem("包含子结构", dsts, path, true, true)
@@ -174,7 +174,7 @@ namespace EntryDateCopier {
             };
             directoryOnlyItem.CheckedChanged +=
                 (_, _) => Settings.Default.DirectoryOnly = !Settings.Default.DirectoryOnly;
-			return new ToolStripMenuItem(text, Resource.Configuration) {
+			return new ToolStripMenuItem(text, Resources.Image.Configuration) {
 				DropDownItems = {
 					CreateFieldItem("创建日期", EntryDateFields.Creation),
 					CreateFieldItem("修改日期", EntryDateFields.Modification),
@@ -188,7 +188,7 @@ namespace EntryDateCopier {
 		private static ToolStripMenuItem CreateSyncMenuItem(string text, IEnumerable<string> dsts, string src, bool includesChildren, bool appliesToChildren) =>
 			new(
 				text,
-				Resource.Sync,
+				Resources.Image.Sync,
 				(_, _) => HandleException(
 					() => {
 						var synchronizer = new Synchronizer(dsts, src);

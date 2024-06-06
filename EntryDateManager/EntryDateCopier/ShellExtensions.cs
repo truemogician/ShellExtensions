@@ -89,6 +89,6 @@ namespace EntryDateCopier {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.ClassOfExtension, ".edi")]
 	public class IconHandler : SharpIconHandler {
-		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Resource.Main;
+		protected override Icon GetIcon(bool smallIcon, uint iconSize) => Resources.Image.Main;
 	}
 }
