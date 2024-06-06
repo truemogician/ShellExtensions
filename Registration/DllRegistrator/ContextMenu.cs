@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using ServerManager;
@@ -34,7 +33,9 @@ internal enum RegistrationStatus {
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.ClassOfExtension, ".dll")]
 public class ContextMenu : SharpContextMenu {
-	private static Image Icon { get; } = new Bitmap(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "Icon.png"));
+	private static readonly ResourceManager _locale = new ResourceManager("DllRegistrator.Locales.ContextMenu", Assembly.GetExecutingAssembly());
+
+    private static Image Icon { get; } = new Bitmap(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "Icon.png"));
 
 	protected override bool CanShowMenu() => SelectedItemPaths.Count() == 1;
 
@@ -72,34 +73,42 @@ public class ContextMenu : SharpContextMenu {
 		if (status32 || status64) {
 			if (status32 && status64)
 				menu.Items.Add(
-					new ToolStripMenuItem("注册类库", Icon) {
+					new ToolStripMenuItem(_locale.GetString("RegisterDll"), Icon) {
 						DropDownItems = {
-							new ToolStripMenuItem("到当前系统", null, (_, _) => Register("x64")),
-							new ToolStripMenuItem("到32位子系统", null, (_, _) => Register("x86"))
+							new ToolStripMenuItem(_locale.GetString("ToCurrentSystem"), null, (_, _) => Register("x64")),
+							new ToolStripMenuItem(_locale.GetString("ToX86Subsystem"), null, (_, _) => Register("x86"))
 						}
 					}
 				);
 			else if (status64 || !Environment.Is64BitOperatingSystem)
-				menu.Items.Add(new ToolStripMenuItem("注册类库", Icon, (_, _) => Register()));
+				menu.Items.Add(new ToolStripMenuItem(_locale.GetString("RegisterDll"), Icon, (_, _) => Register()));
 			else
-				menu.Items.Add(new ToolStripMenuItem("注册类库（到32位子系统）", Icon, (_, _) => Register("x86")));
+				menu.Items.Add(new ToolStripMenuItem(
+					string.Format(_locale.GetString("AdditionalActionFormat")!, _locale.GetString("RegisterDll"), _locale.GetString("ToX86Subsystem")), 
+					Icon, 
+					(_, _) => Register("x86")
+				));
 		}
 		status32 = status.HasFlag(RegistrationStatus.RegisteredOnOS32Bit);
 		status64 = status.HasFlag(RegistrationStatus.RegisteredOnOS64Bit);
 		if (status32 || status64) {
 			if (status32 && status64)
 				menu.Items.Add(
-					new ToolStripMenuItem("注销类库", Icon) {
+					new ToolStripMenuItem(_locale.GetString("UnregisterDll"), Icon) {
 						DropDownItems = {
-							new ToolStripMenuItem("从当前系统", null, (_, _) => Unregister("x64")),
-							new ToolStripMenuItem("从32位子系统", null, (_, _) => Unregister("x86"))
+							new ToolStripMenuItem(_locale.GetString("FromCurrentSystem"), null, (_, _) => Unregister("x64")),
+							new ToolStripMenuItem(_locale.GetString("FromX86Subsystem"), null, (_, _) => Unregister("x86"))
 						}
 					}
 				);
 			else if (status64 || !Environment.Is64BitOperatingSystem)
-				menu.Items.Add(new ToolStripMenuItem("注销类库", Icon, (_, _) => Unregister()));
+				menu.Items.Add(new ToolStripMenuItem(_locale.GetString("UnregisterDll"), Icon, (_, _) => Unregister()));
 			else
-				menu.Items.Add(new ToolStripMenuItem("注销类库（从32位子系统）", Icon, (_, _) => Unregister("x86")));
+				menu.Items.Add(new ToolStripMenuItem(
+					string.Format(_locale.GetString("AdditionalActionFormat")!, _locale.GetString("UnregisterDll"), _locale.GetString("FromX86Subsystem")), 
+					Icon,
+					(_, _) => Unregister("x86")
+				));
 		}
 		return menu;
 	}
