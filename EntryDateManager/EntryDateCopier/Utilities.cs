@@ -11,7 +11,6 @@ using Ookii.Dialogs.Wpf;
 using TrueMogician.Extensions.List;
 using Timer = System.Timers.Timer;
 
-#nullable enable
 namespace EntryDateCopier {
 	public enum EntryType {
 		None,
@@ -80,17 +79,17 @@ namespace EntryDateCopier {
 			}
 			catch (Exception ex) {
 				dialog?.ReportProgress(100, "遇到异常，正在退出...", ex.Message);
-				while (ex is AggregateException agg && agg.InnerExceptions.Count == 1)
+				while (ex is AggregateException { InnerExceptions: { Count: 1 } } agg)
 					ex = agg.InnerExceptions[0];
 				if (ex is AggregateException ae)
 					MessageBox.Show(
 						string.Join(Environment.NewLine, ae.InnerExceptions.Select(e => e.StackTrace)),
-						$"{ex.GetType().Name}: {ex.Message}",
+						$@"{ex.GetType().Name}: {ex.Message}",
 						MessageBoxButtons.OK,
 						MessageBoxIcon.Error
 					);
 				else
-					MessageBox.Show(ex.StackTrace, $"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(ex.StackTrace, $@"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 

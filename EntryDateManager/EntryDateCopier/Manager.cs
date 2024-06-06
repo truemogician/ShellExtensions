@@ -8,7 +8,6 @@ using EntryDateCopier.Properties;
 using TrueMogician.Extensions.Enumerable;
 using TrueMogician.Extensions.Enumerator;
 
-#nullable enable
 
 namespace EntryDateCopier {
 	using static Utilities;
@@ -72,7 +71,8 @@ namespace EntryDateCopier {
 			cancellationToken ??= CancellationToken.None;
 			var newDates = new Dictionary<string, EntryDate>();
 			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
-				using var e = infos.GetEnumerator().ToExtended();
+				using var enumerator = infos.GetEnumerator();
+				using var e = enumerator.ToExtended();
 				if (!e.MoveNext())
 					return;
 				var general = e.Current!.General ? e.GetAndMoveNext() : null;

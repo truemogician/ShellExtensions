@@ -2,7 +2,7 @@
 using System.IO;
 using Newtonsoft.Json;
 
-#nullable enable
+
 namespace EntryDateCopier {
 	public class EdiFile {
 		private static readonly JsonSerializerSettings SerializerSettings = new() {

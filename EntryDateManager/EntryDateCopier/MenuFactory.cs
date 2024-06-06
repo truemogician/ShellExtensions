@@ -10,7 +10,7 @@ using TrueMogician.Extensions.Enumerable;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
 using static EntryDateCopier.Utilities;
 
-#nullable enable
+
 
 namespace EntryDateCopier {
 	internal static class MenuFactory {
