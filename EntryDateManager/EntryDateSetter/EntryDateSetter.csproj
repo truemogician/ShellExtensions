@@ -63,5 +63,8 @@
     <None Include="EntryDateSetter.snk" />
     <None Include="packages.config" />
   </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Locales\*.resx" />
+	</ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
