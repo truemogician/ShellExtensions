@@ -105,12 +105,6 @@
     <EmbeddedResource Include="Locales\ContextMenu.en.resx" />
     <EmbeddedResource Include="Locales\ContextMenu.resx" />
     <EmbeddedResource Include="Locales\ContextMenu.zh-CN.resx" />
-    <EmbeddedResource Include="Locales\Window.en.resx" />
-    <EmbeddedResource Include="Locales\Window.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Window.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Locales\Window.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

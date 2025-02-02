@@ -120,6 +120,9 @@
   <data name="AllFilesFilter" xml:space="preserve">
     <value>All files ({0})|{0}</value>
   </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
   <data name="ChooseEmptyDir" xml:space="preserve">
     <value>Choose an empty directory to create the junction point</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="RenameAll" xml:space="preserve">
     <value>Rename all</value>
+  </data>
+  <data name="RenameWindowTitle" xml:space="preserve">
+    <value>Rename Hard Links</value>
   </data>
   <data name="SameDirErrorMsg" xml:space="preserve">
     <value>Target directory cannot be the same as the source one</value>

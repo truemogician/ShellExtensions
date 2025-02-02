@@ -120,6 +120,9 @@
   <data name="AllFilesFilter" xml:space="preserve">
     <value>所有文件（{0}）</value>
   </data>
+  <data name="Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
   <data name="ChooseEmptyDir" xml:space="preserve">
     <value>选择要创建的文件夹节点的空文件夹</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="RenameAll" xml:space="preserve">
     <value>全部重命名</value>
+  </data>
+  <data name="RenameWindowTitle" xml:space="preserve">
+    <value>重命名硬链接</value>
   </data>
   <data name="SameDirErrorMsg" xml:space="preserve">
     <value>目标文件夹不可与源文件夹相同</value>

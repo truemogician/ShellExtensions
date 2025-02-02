@@ -6,7 +6,6 @@
         mc:Ignorable="d"
         d:DesignHeight="200" d:DesignWidth="300"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="重命名硬链接"
         SizeToContent="WidthAndHeight"
         MinWidth="300" WindowStartupLocation="CenterOwner"
         FontFamily="Fira Code" FontSize="15">
@@ -30,9 +29,7 @@
                     IsEnabled="False"
                     Margin="-1,0,0,0"
                     Padding="5"
-                    Click="ApplyButtonClicked">
-                应用
-            </Button>
+                    Click="ApplyButtonClicked" />
         </Grid>
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding FileStatusList}"
