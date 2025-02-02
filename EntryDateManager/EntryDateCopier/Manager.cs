@@ -70,6 +70,34 @@ namespace EntryDateCopier {
 		public async Task Apply(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
 			cancellationToken ??= CancellationToken.None;
 			var newDates = new Dictionary<string, EntryDate>();
+			OnStart();
+			Search(Paths, EntryDates);
+			OnReady(new ReadyEventArgs(newDates));
+			try {
+				await Task.WhenAll(
+					newDates.Select(
+							pair => Task.Run(
+								() => {
+									pair.Value.ApplyToEntry(pair.Key);
+									OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
+								},
+								cancellationToken.Value
+							)
+						)
+						.ToArray()
+				);
+				OnComplete();
+			}
+			catch (TaskCanceledException ex) {
+				OnCancel(new CancelEventArgs(ex));
+			}
+			catch (AggregateException ex) {
+				if (ex.InnerExceptions.Any(e => e is TaskCanceledException))
+					OnCancel(new CancelEventArgs(ex));
+				else
+					throw;
+			}
+			return;
 			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
 				using var enumerator = infos.GetEnumerator();
 				using var e = enumerator.ToExtended();
@@ -102,33 +130,6 @@ namespace EntryDateCopier {
 						}
 					}
 				}
-			}
-			OnStart();
-			Search(Paths, EntryDates);
-			OnReady(new ReadyEventArgs(newDates));
-			try {
-				await Task.WhenAll(
-					newDates.Select(
-							pair => Task.Run(
-								() => {
-									pair.Value.ApplyToEntry(pair.Key);
-									OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
-								},
-								cancellationToken.Value
-							)
-						)
-						.ToArray()
-				);
-				OnComplete();
-			}
-			catch (TaskCanceledException ex) {
-				OnCancel(new CancelEventArgs(ex));
-			}
-			catch (AggregateException ex) {
-				if (ex.InnerExceptions.Any(e => e is TaskCanceledException))
-					OnCancel(new CancelEventArgs(ex));
-				else
-					throw;
 			}
 		}
 
@@ -188,7 +189,7 @@ namespace EntryDateCopier {
 			OnStart();
 			try {
 				EntryDates = await Task.WhenAll(
-					Paths.Select(path => Generate(path, matchBasePath, directoryOnly, includesChildren, fields, cancellationToken.Value))
+					Paths.Select(path => Generate(path, matchBasePath, includesChildren, directoryOnly, fields, cancellationToken.Value))
 				);
 				OnComplete();
 				return EntryDates;
@@ -235,7 +236,7 @@ namespace EntryDateCopier {
 				var dirInfo = new DirectoryInfo(path);
 				entries = await Task.WhenAll(
 					(directoryOnly ? dirInfo.EnumerateDirectories() : dirInfo.EnumerateFileSystemInfos())
-					.Select(info => Generate(info.FullName, true, directoryOnly, true, fields, cancellationToken))
+					.Select(info => Generate(info.FullName, true, true, directoryOnly, fields, cancellationToken))
 				);
 				Sort(entries, true);
 			}
