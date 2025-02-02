@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllFilesFilter" xml:space="preserve">
+    <value>所有文件（{0}）</value>
+  </data>
   <data name="ChooseEmptyDir" xml:space="preserve">
     <value>选择要创建的文件夹节点的空文件夹</value>
   </data>
@@ -140,6 +143,9 @@
   </data>
   <data name="HardLinkCreationFailure" xml:space="preserve">
     <value>硬链接创建失败</value>
+  </data>
+  <data name="HardLinkSaveFilter" xml:space="preserve">
+    <value>与源文件相同（{0}）</value>
   </data>
   <data name="JunctionPointCreationFailure" xml:space="preserve">
     <value>文件夹节点创建失败</value>

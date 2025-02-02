@@ -23,7 +23,7 @@ using MessageBox = System.Windows.Forms.MessageBox;
 namespace SymbolLinkTool;
 
 internal static class Locale {
-	private static readonly ResourceManager _localizer = new ResourceManager("SymbolLinkTool.Locales.ContextMenu", Assembly.GetExecutingAssembly());
+	private static readonly ResourceManager _localizer = new("SymbolLinkTool.Locales.ContextMenu", Assembly.GetExecutingAssembly());
 
 	internal static string Get(string key) =>
 		_localizer.GetString(key) ?? throw new ResourceReferenceKeyNotFoundException($"Resource key ${key} not found", key);
@@ -47,7 +47,6 @@ public class FileContextMenu : SharpContextMenu {
 			}
 		};
 		if (paths.Count == 1 && HardLink.GetFileLinkCount(paths[0]) > 1) {
-			
 			var manageItem = new ToolStripMenuItem(Locale.Get("ManageRefs"), Resource.Icon);
 			string path = paths[0];
 			string[] otherLinks = HardLink.GetFileSiblingHardLinks(path).Where(p => p != path).ToArray();
@@ -61,16 +60,16 @@ public class FileContextMenu : SharpContextMenu {
 					Locale.Get("OpenRefLocation"),
 					null,
 					otherLinks.Select(
-							link => new ToolStripMenuItem(
+							ToolStripItem (link) => new ToolStripMenuItem(
 								link,
 								null,
 								(_, _) => ExplorerSelector.FileOrFolder(link)
-							) as ToolStripItem
+							)
 						)
 						.ToArray()
 				);
 			manageItem.DropDownItems.Add(jumpToItem);
-			var fileName = Path.GetFileName(path);
+			string? fileName = Path.GetFileName(path);
 			if (otherLinks.Select(Path.GetFileName).All(name => name == fileName))
 				manageItem.DropDownItems.Add(
 					Locale.Get("RenameAll"),
@@ -99,22 +98,26 @@ public class FileContextMenu : SharpContextMenu {
 	private static void Create(IReadOnlyList<string> paths) {
 		if (paths.Count == 1) {
 			string src = paths[0];
+			string? ext = Path.GetExtension(src);
 			var dialog = new SaveFileDialog {
 				Title = Locale.Get("ChooseNewHardLinkFile"),
-				FileName = Path.GetFileName(src)
+				FileName = Path.GetFileName(src),
+				RestoreDirectory = false,
+				InitialDirectory = Path.GetDirectoryName(src),
+				Filter = string.IsNullOrEmpty(ext)
+					? string.Format(Locale.Get("AllFilesFilter"), "*.*")
+					: string.Format($"{Locale.Get("HardLinkSaveFilter")}|${Locale.Get("AllFilesFilter")}", "*" + ext, "*.*")
 			};
 			var result = dialog.ShowDialog();
 			if (result != DialogResult.OK)
 				return;
-			while (true) {
-				try {
-					HardLink.Create(dialog.FileName, src);
-				}
-				catch (Exception ex) {
-					if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
-						continue;
-				}
-				break;
+		CreateHardLink:
+			try {
+				HardLink.Create(dialog.FileName, src);
+			}
+			catch (Exception ex) {
+				if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+					goto CreateHardLink;
 			}
 		}
 		else {
@@ -132,26 +135,21 @@ public class FileContextMenu : SharpContextMenu {
 			};
 			if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
 				return;
-			while (true) {
-				try {
-					string root = dialog.FileName;
-					foreach (string path in paths)
-						HardLink.Create(Path.Combine(root, Path.GetFileName(path)), path);
-				}
-				catch (Exception ex) {
-					if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
-						continue;
-				}
-				break;
+		CreateHardLinks:
+			try {
+				string root = dialog.FileName;
+				foreach (string path in paths)
+					HardLink.Create(Path.Combine(root, Path.GetFileName(path)), path);
+			}
+			catch (Exception ex) {
+				if (MessageBox.Show(ex.Message, Locale.Get("HardLinkCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+					goto CreateHardLinks;
 			}
 		}
 	}
 
-	private static void Delete(
-		IEnumerable<string> paths,
-		bool recycleBin
-	)
-		=> paths.ForEach(
+	private static void Delete(IEnumerable<string> paths, bool recycleBin) =>
+		paths.ForEach(
 			path => FileSystem.DeleteFile(
 				path,
 				UIOption.OnlyErrorDialogs,
@@ -170,7 +168,7 @@ public class FolderContextMenu : SharpContextMenu {
 
 	protected override ContextMenuStrip CreateMenu() {
 		string src = SelectedItemPaths.FirstOrDefault() ?? FolderPath;
-        var strip = new ContextMenuStrip {
+		var strip = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
 					Locale.Get("CreateJunctionPoint"),
@@ -180,6 +178,7 @@ public class FolderContextMenu : SharpContextMenu {
 							IsFolderPicker = true,
 							Multiselect = false,
 							EnsurePathExists = false,
+							EnsureFileExists = false,
 							EnsureValidNames = true,
 							Title = Locale.Get("ChooseEmptyDir"),
 							DefaultFileName = Path.GetFileName(src)
@@ -199,16 +198,14 @@ public class FolderContextMenu : SharpContextMenu {
 							if (result != DialogResult.Retry)
 								return;
 						}
-						while (true) {
-							try {
-								JunctionPoint.Create(src, dst, true);
-							}
-							catch (IOException ex) {
-								string message = ex.InnerException?.Message ?? ex.Message;
-								if (MessageBox.Show(message, Locale.Get("JunctionPointCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
-									continue;
-							}
-							break;
+					Create:
+						try {
+							JunctionPoint.Create(src, dst, true);
+						}
+						catch (IOException ex) {
+							string message = ex.InnerException?.Message ?? ex.Message;
+							if (MessageBox.Show(message, Locale.Get("JunctionPointCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+								goto Create;
 						}
 					}
 				)
@@ -220,7 +217,7 @@ public class FolderContextMenu : SharpContextMenu {
 					Locale.Get("OpenJunctionPointTarget"),
 					Resource.Icon,
 					(_, _) => ExplorerSelector.FileOrFolder(target)
-                )
+				)
 			);
 		return strip;
 	}
