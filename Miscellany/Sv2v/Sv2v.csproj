@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+	        Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,10 +11,12 @@
 		<AppDesignerFolder>Properties</AppDesignerFolder>
 		<RootNamespace>Sv2v</RootNamespace>
 		<AssemblyName>Sv2v</AssemblyName>
-		<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
 		<FileAlignment>512</FileAlignment>
 		<Deterministic>true</Deterministic>
-		<LangVersion>latest</LangVersion>
+		<TargetFrameworkProfile />
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<DebugSymbols>true</DebugSymbols>
@@ -23,6 +26,7 @@
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<ErrorReport>prompt</ErrorReport>
 		<WarningLevel>4</WarningLevel>
+		<Prefer32Bit>false</Prefer32Bit>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>pdbonly</DebugType>
@@ -31,6 +35,7 @@
 		<DefineConstants>TRACE</DefineConstants>
 		<ErrorReport>prompt</ErrorReport>
 		<WarningLevel>4</WarningLevel>
+		<Prefer32Bit>false</Prefer32Bit>
 	</PropertyGroup>
 	<PropertyGroup>
 		<SignAssembly>true</SignAssembly>
@@ -39,18 +44,14 @@
 		<AssemblyOriginatorKeyFile>Sv2v.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
+		<Reference
+			Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
 			<HintPath>..\..\packages\SharpShell.2.7.2\lib\net40-client\SharpShell.dll</HintPath>
 		</Reference>
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
 		<Reference Include="System.Drawing" />
 		<Reference Include="System.Windows.Forms" />
-		<Reference Include="System.Xml.Linq" />
-		<Reference Include="System.Data.DataSetExtensions" />
-		<Reference Include="Microsoft.CSharp" />
-		<Reference Include="System.Data" />
-		<Reference Include="System.Xml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="ContextMenu.cs" />
@@ -76,7 +77,9 @@
 	</ItemGroup>
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 	<PropertyGroup>
-		<PostBuildEvent>"D:\Code\Visual Studio\Solutions\Shell Extensions\Registrator\RegistrationHandler\bin\Debug\RegistrationHandler.exe" r Sv2v.dll
-"D:\Code\Visual Studio\Solutions\Shell Extensions\Utility\PathSelector\bin\Release\PathSelector.exe" Sv2v.dll</PostBuildEvent>
+		<PostBuildEvent>
+			"D:\Code\Visual Studio\Solutions\Shell Extensions\Registrator\RegistrationHandler\bin\Debug\RegistrationHandler.exe" r Sv2v.dll
+			"D:\Code\Visual Studio\Solutions\Shell Extensions\Utility\PathSelector\bin\Release\PathSelector.exe" Sv2v.dll
+		</PostBuildEvent>
 	</PropertyGroup>
 </Project>

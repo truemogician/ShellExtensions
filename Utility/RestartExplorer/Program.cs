@@ -1,5 +1,7 @@
-﻿namespace RestartExplorer {
+﻿using System.Threading.Tasks;
+
+namespace RestartExplorer {
 	public static class Program {
-		public static void Main() => Explorer.Restart();
+		public static Task Main() => Explorer.Restart();
 	}
 }

@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-#nullable enable
 namespace Sv2v {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.AllFiles)]

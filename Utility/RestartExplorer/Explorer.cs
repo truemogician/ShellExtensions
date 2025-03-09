@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace RestartExplorer {
 	public static partial class Explorer {
@@ -15,7 +16,7 @@ namespace RestartExplorer {
 
 		internal const int WM_USER = 0x0400;
 
-		public static void Restart() {
+		public static async Task Restart() {
 			var explorerInfos = new List<WindowInfo>();
 			var shells = new ShellWindows().Cast<InternetExplorer>().ToArray();
 			foreach (var ie in shells) {
@@ -32,7 +33,7 @@ namespace RestartExplorer {
 					ptr = User32.FindWindow("Shell_TrayWnd", null);
 					if (ptr.ToInt32() == 0)
 						break;
-					Thread.Sleep(1000);
+					await Task.Delay(TimeSpan.FromSeconds(1));
 				}
 			}
 			catch (Exception) {

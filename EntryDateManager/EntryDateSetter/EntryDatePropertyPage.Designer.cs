@@ -48,6 +48,8 @@ namespace EntryDateSetter {
             this.accessDateLabel.Name = "accessDateLabel";
             this.accessDateLabel.Size = new System.Drawing.Size(134, 31);
             this.accessDateLabel.TabIndex = 9;
+			this.accessDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+            this.accessDateLabel.Text = "访问日期：";
             // 
             // modificationDateLabel
             // 
@@ -57,6 +59,8 @@ namespace EntryDateSetter {
             this.modificationDateLabel.Name = "modificationDateLabel";
             this.modificationDateLabel.Size = new System.Drawing.Size(129, 31);
             this.modificationDateLabel.TabIndex = 10;
+			this.modificationDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+            this.modificationDateLabel.Text = "Modified: ";
             // 
             // creationDateLabel
             // 
@@ -66,6 +70,8 @@ namespace EntryDateSetter {
             this.creationDateLabel.Name = "creationDateLabel";
             this.creationDateLabel.Size = new System.Drawing.Size(117, 31);
             this.creationDateLabel.TabIndex = 11;
+			this.creationDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+            this.creationDateLabel.Text = "Created: ";
             // 
             // restoreDateButton
             // 
@@ -77,6 +83,8 @@ namespace EntryDateSetter {
             this.restoreDateButton.TabIndex = 8;
             this.restoreDateButton.UseVisualStyleBackColor = true;
             this.restoreDateButton.Click += new System.EventHandler(this.RecoverDateButtonOnClick);
+			this.restoreDateButton.Text = "Restore";
+			this.restoreDateButton.Font = new System.Drawing.Font("Microsoft YaHei", 11F);
             // 
             // exchangeDateButton
             // 
@@ -88,6 +96,8 @@ namespace EntryDateSetter {
             this.exchangeDateButton.TabIndex = 7;
             this.exchangeDateButton.UseVisualStyleBackColor = true;
             this.exchangeDateButton.Click += new System.EventHandler(this.ExchangeDateButtonOnClick);
+			this.exchangeDateButton.Font = new System.Drawing.Font("Microsoft YaHei", 11F);
+            this.exchangeDateButton.Text = "Exchange";
             // 
             // setToNowButton
             // 
@@ -98,6 +108,8 @@ namespace EntryDateSetter {
             this.setToNowButton.TabIndex = 6;
             this.setToNowButton.UseVisualStyleBackColor = true;
             this.setToNowButton.Click += new System.EventHandler(this.SetToNowButtonOnClick);
+			this.setToNowButton.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+			this.setToNowButton.Text = "设为现在";
             // 
             // accessDateCheckBox
             // 
@@ -109,6 +121,8 @@ namespace EntryDateSetter {
             this.accessDateCheckBox.TabIndex = 3;
             this.accessDateCheckBox.UseVisualStyleBackColor = true;
             this.accessDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
+			this.accessDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 11F);
+			this.accessDateCheckBox.Text = "访问日期";
             // 
             // modificationDateCheckBox
             // 
@@ -120,6 +134,8 @@ namespace EntryDateSetter {
             this.modificationDateCheckBox.TabIndex = 4;
             this.modificationDateCheckBox.UseVisualStyleBackColor = true;
             this.modificationDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
+			this.modificationDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
+			this.modificationDateCheckBox.Text = "Modified";
             // 
             // creationDateCheckBox
             // 
@@ -131,6 +147,8 @@ namespace EntryDateSetter {
             this.creationDateCheckBox.TabIndex = 5;
             this.creationDateCheckBox.UseVisualStyleBackColor = true;
             this.creationDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
+			this.creationDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
+			this.creationDateCheckBox.Text = "Created";
             // 
             // accessDatePicker
             // 
@@ -185,6 +203,7 @@ namespace EntryDateSetter {
             this.Controls.Add(this.modificationDateLabel);
             this.Controls.Add(this.accessDateLabel);
             this.Name = "EntryDateInformationPropertyPage";
+            this.PageTitle = "File Dates";
             this.Size = new System.Drawing.Size(511, 628);
             this.ResumeLayout(false);
             this.PerformLayout();
