@@ -120,16 +120,37 @@
   <data name="FolderOperations" xml:space="preserve">
     <value>Folder operations</value>
   </data>
-  <data name="MsgBoxErrCaption" xml:space="preserve">
+  <data name="ExpectedErrCaption" xml:space="preserve">
     <value>Error</value>
   </data>
   <data name="UnwrapFolder" xml:space="preserve">
-    <value>Unwrap folder</value>
+    <value>Unwrap folder(s)</value>
   </data>
   <data name="UnwrapFolderDeep" xml:space="preserve">
-    <value>Unwrap folder deeply</value>
+    <value>Unwrap nested folder(s)</value>
   </data>
   <data name="WrapWithSameNameFolder" xml:space="preserve">
     <value>Wrap each file with a same-name folder</value>
+  </data>
+  <data name="UnexpectedErrCaption" xml:space="preserve">
+    <value>Unexpected Error</value>
+  </data>
+  <data name="DeleteEmptyFolder" xml:space="preserve">
+    <value>Delete empty folder(s)</value>
+  </data>
+  <data name="DeleteEmptyFolderDeep" xml:space="preserve">
+    <value>Delete nested empty folder(s)</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolder" xml:space="preserve">
+    <value>Unwrap folder(s) and remove empty folder(s)</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolderDeep" xml:space="preserve">
+    <value>Unwrap nested folder(s) (and remove empty)</value>
+  </data>
+  <data name="UnwrapFolderDeepMultiple" xml:space="preserve">
+    <value>Unwrap and flat nested folder(s)</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolderDeepMultiple" xml:space="preserve">
+    <value>Unwrap and flat nested folder(s) (and remove empty)</value>
   </data>
 </root>

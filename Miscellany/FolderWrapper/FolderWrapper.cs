@@ -1,14 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TrueMogician.Extensions.Enumerable;
 
-
 namespace FolderWrapper;
 
-public static class FolderWrapper {
-	public static void Wrap(IEnumerable<string> paths) {
-		var wrapperFolders = paths.ToDictionaryWith(
+public class FolderOperation(IEnumerable<string> folders) {
+	public string[] Folders { get; } = folders.Select(Path.GetFullPath).ToArray();
+
+	internal Dictionary<string, FolderFlag> Flags { get; } = new();
+
+	internal static bool IsDirectory(string path) {
+		var info = new DirectoryInfo(path);
+		return info.Exists &&
+			info.Attributes.HasFlag(FileAttributes.Directory) &&
+			!string.Equals(info.FullName, info.Root.FullName, StringComparison.OrdinalIgnoreCase);
+	}
+
+	internal static bool IsParentDirectory(string path, string dir) {
+		if (path.Length <= dir.Length)
+			return false;
+		if (dir[^1] == Path.DirectorySeparatorChar || dir[^1] == Path.AltDirectorySeparatorChar)
+			dir = dir[..^1];
+		return path.StartsWith(dir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+	}
+
+	public void Wrap() {
+		var wrapperFolders = Folders.ToDictionaryWith(
 			p => Path.Combine(
 				Path.GetDirectoryName(p)!,
 				Path.GetFileNameWithoutExtension(p)
@@ -24,70 +43,155 @@ public static class FolderWrapper {
 		}
 	}
 
-	public static void Unwrap(IEnumerable<string> paths, bool deep) {
-		var subEntries = new Dictionary<string, (IList<string> Entries, Dictionary<string, string?> SameNameEntries)>();
-		foreach (var group in paths.GroupBy(Path.GetDirectoryName)) {
-			var entries = new List<string>();
-			foreach (string folder in group) {
-				string[] subs = Directory.GetFileSystemEntries(folder);
-				if (deep)
-					while (subs.Length == 1 && IsDirectory(subs[0])) {
-						string[] @new = Directory.GetFileSystemEntries(subs[0]);
-						if (@new.Length > 0)
-							subs = @new;
-						else
-							break;
+	public void Unwrap(UnwrapOption option = UnwrapOption.Unwrap) {
+		if (Flags.Count < Folders.Length)
+			Check();
+		var deletion = new HashSet<string>();
+		var rename = new Dictionary<string, string>();
+		var allFolders = Flags.Keys.ToArray();
+		Array.Sort(allFolders);
+		var deepOpt = option.HasFlag(UnwrapOption.Deep);
+		var unwrapOpt = option.HasFlag(UnwrapOption.Unwrap);
+
+		foreach (var folder in Folders) {
+			var flag = Flags[folder];
+			var dstFolder = Path.GetDirectoryName(folder)!;
+			switch (flag) {
+				case FolderFlag.Empty when option.HasFlag(UnwrapOption.DeleteEmpty):
+				case FolderFlag.Empty | FolderFlag.HasOneDirectory when option.HasFlag(UnwrapOption.DeleteEmpty | UnwrapOption.Deep): deletion.Add(folder); break;
+				case FolderFlag.HasOneFile when unwrapOpt:
+				case FolderFlag.HasMultipleEntries when unwrapOpt: {
+					foreach (var entry in Directory.EnumerateFileSystemEntries(folder)) {
+						var filename = Path.GetFileName(entry);
+						SetRename(entry, Path.Combine(dstFolder, filename));
 					}
-				entries.AddRange(subs);
-			}
-			if (!entries.Select(Path.GetFileName).Unique())
-				throw new FolderWrapperException(Locale.FolderWrapper.GetString("SameNameFilesInFoldersErr"));
-			var selected = new HashSet<string>(group);
-			var sameNameEntries = group.ToDictionary(p => p, _ => null as string);
-			if (entries.FirstOrDefault(
-					p => {
-						string path = Path.Combine(group.Key, Path.GetFileName(p));
-						if (selected.Contains(path) && IsDirectory(path)) {
-							sameNameEntries[path] = p;
-							return false;
+					deletion.Add(folder);// Delete the empty folder after moving files
+					break;
+				}
+				default: {
+					if (!unwrapOpt || !flag.HasFlag(FolderFlag.HasOneDirectory))
+						break;
+					string[]? targets = null;
+					if (!deepOpt)
+						targets = [Directory.EnumerateFileSystemEntries(folder).Single()];
+					else {
+						var idx = Array.BinarySearch(allFolders, folder) + 1;
+						while (idx < allFolders.Length && allFolders[idx].StartsWith(folder + Path.DirectorySeparatorChar))
+							++idx;
+						var targetFolder = allFolders[idx - 1];
+						if (flag.HasFlag(FolderFlag.HasOneFile))
+							targets = [Directory.EnumerateFileSystemEntries(targetFolder).Single()];
+						else if (flag.HasFlag(FolderFlag.HasMultipleEntries)) {
+							targets = option.HasFlag(UnwrapOption.UnwrapMultipleDeep)
+								? Directory.EnumerateFileSystemEntries(targetFolder).ToArray()
+								: [targetFolder];
 						}
-						return Exists(path, IsDirectory(p));
 					}
-				) is { } existing)
-				throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FileExistErr")!, existing));
-			sameNameEntries.Values.Where(p => p is not null).ForEach(p => entries.Remove(p!));
-			subEntries[group.Key] = (entries, sameNameEntries);
+					if (targets is not null) {
+						foreach (var target in targets)
+							SetRename(target, Path.Combine(dstFolder, Path.GetFileName(target)));
+						deletion.Add(folder);
+					}
+					break;
+				}
+			}
 		}
-		foreach (var pair in subEntries)
-			foreach (string src in pair.Value.Entries)
-				Directory.Move(src, Path.Combine(pair.Key, Path.GetFileName(src)));
-		foreach (var pair in subEntries) {
-			var sameNameEntries = pair.Value.SameNameEntries;
-			var sameNameMapping = new Dictionary<string, string>();
-			foreach (string? entry in sameNameEntries.Values) {
-				if (entry is null)
-					continue;
-				var fileName = $"_{Path.GetFileName(entry)}";
-				while (Path.Combine(pair.Key, fileName) is var @new && Exists(@new, IsDirectory(entry)))
-					fileName = "_" + fileName;
-				sameNameMapping[fileName] = Path.GetFileName(entry);
-				Directory.Move(entry, Path.Combine(pair.Key, fileName));
+		// Remove duplicate entries in deletion list
+		var deletionList = deletion.ToList();
+		deletionList.Sort();
+		for (var i = 1; i < deletionList.Count; ++i) {
+			var prev = deletionList[i - 1];
+			while (IsParentDirectory(deletionList[i], prev))
+				deletion.Remove(deletionList[i++]);
+		}
+		// Ensure no conflicts in rename list
+		var renameReverse = new Dictionary<string, string>();
+		foreach (var pair in rename) {
+			var dst = pair.Value;
+			if (renameReverse.TryGetValue(dst, out var existing)) {
+				var template = Locale.FolderWrapper.GetString("SameNameFilesInFoldersErr")!;
+				throw new FolderWrapperException(string.Format(template, existing, pair.Key));
 			}
-			foreach (string? folder in sameNameEntries.Keys) {
-				using var enumerator = Directory.EnumerateFileSystemEntries(folder).GetEnumerator();
-				if (!enumerator.MoveNext() || deep && !enumerator.MoveNext())
-					Directory.Delete(folder, deep);
-				else
-					throw new FolderWrapperException(Locale.FolderWrapper.GetString("FolderNotEmptyAfterWrap"));
+			var isDir = IsDirectory(dst);
+			if ((isDir && !deletion.Contains(dst) && Directory.Exists(dst)) || (!isDir && File.Exists(dst)))
+				throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FileExistErr")!, dst));
+			renameReverse[dst] = pair.Key;
+		}
+		// Execute deletion and rename
+		var tempRename = new Dictionary<string, string>();
+		foreach (var pair in rename) {
+			var dst = pair.Value;
+			if (deletion.Contains(dst)) {
+				var dir = Path.GetDirectoryName(dst)!;
+				var tempFilename = $"_{Path.GetFileName(dst)}";
+				while (Directory.Exists(Path.Combine(dir!, tempFilename)))
+					tempFilename = $"_{tempFilename}";
+				dst = Path.Combine(dir, tempFilename);
+				tempRename[pair.Value] = dst;
+            }
+			Directory.Move(pair.Key, dst);
+		}
+		foreach (var folder in deletion)
+			Directory.Delete(folder, deepOpt);
+		foreach (var pair in tempRename)
+			Directory.Move(pair.Value, pair.Key);
+
+		return;
+		void SetRename(string src, string dst) {
+			if (!rename.TryGetValue(src, out var existing))
+				rename[src] = dst;
+			else if (existing != dst) {
+				if (IsParentDirectory(existing, dst))
+					rename[src] = dst;
+				else if (!IsParentDirectory(dst, existing)) {
+					var template = Locale.FolderWrapper.GetString("ConflictingMoveDestinations")!;
+					throw new FolderWrapperException(string.Format(template, existing, dst));
+				}
 			}
-			foreach (var mapping in sameNameMapping)
-				Directory.Move(Path.Combine(pair.Key, mapping.Key), Path.Combine(pair.Key, mapping.Value));
 		}
 	}
 
-	internal static bool IsDirectory(string path) => File.GetAttributes(path).HasFlag(FileAttributes.Directory);
+	internal void Check() {
+		foreach (var folder in Folders)
+			SetFolderFlag(folder);
+	}
 
-	internal static bool Exists(string path, bool? isDirectory = null) => isDirectory is null
-		? File.Exists(path) || Directory.Exists(path)
-		: isDirectory.Value ? Directory.Exists(path) : File.Exists(path);
+	private FolderFlag SetFolderFlag(string path) {
+		if (Flags.TryGetValue(path, out var flag))
+			return flag;
+		using var e = Directory.EnumerateFileSystemEntries(path).GetEnumerator();
+
+		if (!e.MoveNext())
+			return Flags[path] = FolderFlag.Empty;
+		var cur = e.Current!;
+		if (e.MoveNext())
+			return Flags[path] = FolderFlag.HasMultipleEntries;
+		if (!IsDirectory(cur))
+			return Flags[path] = FolderFlag.HasOneFile;
+		return Flags[path] = FolderFlag.HasOneDirectory | SetFolderFlag(cur);
+	}
+}
+
+[Flags]
+public enum UnwrapOption : byte {
+	Unwrap = 1 << 0,
+
+	DeleteEmpty = 1 << 1,
+
+	Deep = 1 << 2,
+
+	UnwrapMultipleDeep = 1 << 3,
+
+	UnwrapAndDeleteEmpty = Unwrap | DeleteEmpty
+}
+
+[Flags]
+internal enum FolderFlag : byte {
+	Empty = 1 << 0,
+
+	HasOneFile = 1 << 1,
+
+	HasOneDirectory = 1 << 2,
+
+	HasMultipleEntries = 1 << 3
 }

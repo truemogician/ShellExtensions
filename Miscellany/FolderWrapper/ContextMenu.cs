@@ -1,4 +1,8 @@
-﻿using System.Drawing;
+﻿using System;
+using SharpShell.Attributes;
+using SharpShell.SharpContextMenu;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
@@ -6,10 +10,17 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SharpShell.Attributes;
-using SharpShell.SharpContextMenu;
 
 namespace FolderWrapper;
+
+internal static class ExceptionHandler {
+	internal static void Handle(Exception ex) {
+		var caption = ex is FolderWrapperException
+			? Locale.ContextMenu.GetString("ExpectedErrCaption")
+			: Locale.ContextMenu.GetString("UnexpectedErrCaption");
+		MessageBox.Show(ex.Message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
 
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.AllFiles)]
@@ -23,10 +34,10 @@ public class FilesContextMenu : SharpContextMenu {
 				Resource.Wrap,
 				(_, _) => {
 					try {
-						FolderWrapper.Wrap(SelectedItemPaths);
+						new FolderOperation(SelectedItemPaths).Wrap();
 					}
-					catch (FolderWrapperException ex) {
-						MessageBox.Show(ex.Message, Locale.ContextMenu.GetString("MsgBoxErrCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+					catch (Exception ex) {
+						ExceptionHandler.Handle(ex);
 					}
 				}
 			)
@@ -37,57 +48,93 @@ public class FilesContextMenu : SharpContextMenu {
 [ComVisible(true)]
 [COMServerAssociation(AssociationType.Folder)]
 public class FoldersContextMenu : SharpContextMenu {
-	protected override bool CanShowMenu() => SelectedItemPaths.All(
-		p => FolderWrapper.IsDirectory(p) && Directory.EnumerateFileSystemEntries(p).Any()
-	);
+	protected override bool CanShowMenu() => SelectedItemPaths.All(FolderOperation.IsDirectory);
 
 	protected override ContextMenuStrip CreateMenu() {
-		string[] paths = SelectedItemPaths.ToArray();
-		var unwrapMenuItem = new ToolStripMenuItem(
-			Locale.ContextMenu.GetString("UnwrapFolder"),
-			Resource.Unwrap,
-			(_, _) => {
+		var op = new FolderOperation(SelectedItemPaths);
+		op.Check();
+
+		var menus = new List<ToolStripItem>();
+
+		bool hasNonEmptyDir = op.Flags.Values.Any(f => f != FolderFlag.Empty);
+		bool hasEmptyDir = op.Flags.Values.Any(f => f == FolderFlag.Empty);
+        if (hasNonEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapFolder"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.Unwrap)
+			));
+		}
+		if (hasEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("DeleteEmptyFolder"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.DeleteEmpty)
+			));
+		}
+		if (hasNonEmptyDir && hasEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapAndDeleteEmptyFolder"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.UnwrapAndDeleteEmpty)
+			));
+        }
+
+		bool hasDeepNonEmptyDir = op.Folders.Any(f => op.Flags.TryGetValue(f, out var flag) && flag.HasFlag(FolderFlag.HasOneDirectory) && !flag.HasFlag(FolderFlag.Empty));
+		bool hasDeepEmptyDir = op.Folders.Any(f => op.Flags[f] == (FolderFlag.HasOneDirectory | FolderFlag.Empty));
+        if (hasDeepNonEmptyDir || hasDeepEmptyDir)
+			menus.Add(new ToolStripSeparator());
+		if (hasDeepNonEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapFolderDeep"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.Unwrap | UnwrapOption.Deep)
+			));
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapFolderDeepMultiple"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.Unwrap | UnwrapOption.Deep | UnwrapOption.UnwrapMultipleDeep)
+			));
+        }
+		if (hasDeepEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("DeleteEmptyFolderDeep"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.DeleteEmpty | UnwrapOption.Deep)
+			));
+        }
+		if (hasDeepNonEmptyDir && hasDeepEmptyDir) {
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapAndDeleteEmptyFolderDeep"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.UnwrapAndDeleteEmpty | UnwrapOption.Deep)
+			));
+			menus.Add(new ToolStripMenuItem(
+				Locale.ContextMenu.GetString("UnwrapAndDeleteEmptyFolderDeepMultiple"),
+				Resource.Unwrap,
+				CreateUnwrapHandler(UnwrapOption.UnwrapAndDeleteEmpty | UnwrapOption.Deep | UnwrapOption.UnwrapMultipleDeep)
+			));
+        }
+
+		var contextMenu = new ContextMenuStrip();
+		if (menus.Count == 1)
+			contextMenu.Items.Add(menus[0]);
+		else {
+			var item = new ToolStripMenuItem(Locale.ContextMenu.GetString("FolderOperations"), Resource.Folder);
+			item.DropDownItems.AddRange(menus.ToArray());
+		}
+		return contextMenu;
+
+		EventHandler CreateUnwrapHandler(UnwrapOption option) {
+			return (_, _) => {
 				try {
-					FolderWrapper.Unwrap(paths, false);
+					op.Unwrap(option);
 				}
-				catch (FolderWrapperException ex) {
-					MessageBox.Show(ex.Message, Locale.ContextMenu.GetString("MsgBoxErrCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+				catch (Exception ex) {
+					ExceptionHandler.Handle(ex);
 				}
-			}
-		);
-		return new ContextMenuStrip {
-			Items = {
-				paths.Any(
-					p => {
-						using var e = Directory.EnumerateFileSystemEntries(p).GetEnumerator();
-						if (!e.MoveNext())
-							return false;
-						string target = e.Current!;
-						if (e.MoveNext() || !FolderWrapper.IsDirectory(target))
-							return false;
-						return Directory.EnumerateFileSystemEntries(target).Any();
-					}
-				)
-					? new ToolStripMenuItem(Locale.ContextMenu.GetString("FolderOperations"), Resource.Folder) {
-						DropDownItems = {
-							unwrapMenuItem,
-							new ToolStripMenuItem(
-								Locale.ContextMenu.GetString("UnwrapFolderDeep"),
-								Resource.Unwrap,
-								(_, _) => {
-									try {
-										FolderWrapper.Unwrap(paths, true);
-									}
-									catch (FolderWrapperException ex) {
-										MessageBox.Show(ex.Message, Locale.ContextMenu.GetString("MsgBoxErrCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
-									}
-								}
-							)
-						}
-					}
-					: unwrapMenuItem
-			}
-		};
+			};
+		}
 	}
 }
 

@@ -120,7 +120,7 @@
   <data name="FolderOperations" xml:space="preserve">
     <value>文件夹操作</value>
   </data>
-  <data name="MsgBoxErrCaption" xml:space="preserve">
+  <data name="ExpectedErrCaption" xml:space="preserve">
     <value>错误</value>
   </data>
   <data name="UnwrapFolder" xml:space="preserve">
@@ -131,5 +131,26 @@
   </data>
   <data name="WrapWithSameNameFolder" xml:space="preserve">
     <value>用同名文件夹包装</value>
+  </data>
+  <data name="UnexpectedErrCaption" xml:space="preserve">
+    <value>意外错误</value>
+  </data>
+  <data name="DeleteEmptyFolder" xml:space="preserve">
+    <value>删除空文件夹</value>
+  </data>
+  <data name="DeleteEmptyFolderDeep" xml:space="preserve">
+    <value>删除空文件夹（多层）</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolder" xml:space="preserve">
+    <value>解包装文件夹（删除空文件夹）</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolderDeep" xml:space="preserve">
+    <value>深度解包装文件夹（删除空文件夹）</value>
+  </data>
+  <data name="UnwrapFolderDeepMultiple" xml:space="preserve">
+    <value>深度解包装并展平文件夹</value>
+  </data>
+  <data name="UnwrapAndDeleteEmptyFolderDeepMultiple" xml:space="preserve">
+    <value>深度解包装并展平文件夹（删除空文件夹）</value>
   </data>
 </root>
