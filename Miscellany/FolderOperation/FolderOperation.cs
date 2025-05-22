@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using TrueMogician.Extensions.Enumerable;
 
-namespace FolderWrapper;
+namespace FolderOperation;
 
 public class FolderOperation(IEnumerable<string> folders) {
 	public string[] Folders { get; } = folders.Select(Path.GetFullPath).ToArray();
@@ -34,9 +34,9 @@ public class FolderOperation(IEnumerable<string> folders) {
 			)
 		);
 		if (!wrapperFolders.Values.Unique())
-			throw new FolderWrapperException(Locale.FolderWrapper.GetString("DupFileNameErr"));
+			throw new FolderOperationException(Locale.FolderOperation.GetString("DupFileNameErr"));
 		if (wrapperFolders.Values.FirstOrDefault(Directory.Exists) is { } existing)
-			throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FolderExistErr")!, existing));
+			throw new FolderOperationException(string.Format(Locale.FolderOperation.GetString("FolderExistErr")!, existing));
 		foreach (var pair in wrapperFolders) {
 			Directory.CreateDirectory(pair.Value);
 			Directory.Move(pair.Key, Path.Combine(pair.Value, Path.GetFileName(pair.Key)));
@@ -109,12 +109,12 @@ public class FolderOperation(IEnumerable<string> folders) {
 		foreach (var pair in rename) {
 			var dst = pair.Value;
 			if (renameReverse.TryGetValue(dst, out var existing)) {
-				var template = Locale.FolderWrapper.GetString("SameNameFilesInFoldersErr")!;
-				throw new FolderWrapperException(string.Format(template, existing, pair.Key));
+				var template = Locale.FolderOperation.GetString("SameNameFilesInFoldersErr")!;
+				throw new FolderOperationException(string.Format(template, existing, pair.Key));
 			}
 			var isDir = IsDirectory(dst);
 			if ((isDir && !deletion.Contains(dst) && Directory.Exists(dst)) || (!isDir && File.Exists(dst)))
-				throw new FolderWrapperException(string.Format(Locale.FolderWrapper.GetString("FileExistErr")!, dst));
+				throw new FolderOperationException(string.Format(Locale.FolderOperation.GetString("FileExistErr")!, dst));
 			renameReverse[dst] = pair.Key;
 		}
 		// Execute deletion and rename
@@ -144,8 +144,8 @@ public class FolderOperation(IEnumerable<string> folders) {
 				if (IsParentDirectory(existing, dst))
 					rename[src] = dst;
 				else if (!IsParentDirectory(dst, existing)) {
-					var template = Locale.FolderWrapper.GetString("ConflictingMoveDestinations")!;
-					throw new FolderWrapperException(string.Format(template, existing, dst));
+					var template = Locale.FolderOperation.GetString("ConflictingMoveDestinations")!;
+					throw new FolderOperationException(string.Format(template, existing, dst));
 				}
 			}
 		}

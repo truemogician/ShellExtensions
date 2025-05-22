@@ -11,11 +11,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace FolderWrapper;
+namespace FolderOperation;
 
 internal static class ExceptionHandler {
 	internal static void Handle(Exception ex) {
-		var caption = ex is FolderWrapperException
+		var caption = ex is FolderOperationException
 			? Locale.ContextMenu.GetString("ExpectedErrCaption")
 			: Locale.ContextMenu.GetString("UnexpectedErrCaption");
 		MessageBox.Show(ex.Message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);

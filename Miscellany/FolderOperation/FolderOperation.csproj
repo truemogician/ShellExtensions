@@ -7,8 +7,8 @@
     <ProjectGuid>{66B76E78-C5D4-42B5-8CB6-8D0C6915EB55}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FolderWrapper</RootNamespace>
-    <AssemblyName>FolderWrapper</AssemblyName>
+    <RootNamespace>FolderOperation</RootNamespace>
+    <AssemblyName>FolderOperation</AssemblyName>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -37,7 +37,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>FolderWrapper.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>FolderOperation.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Enumerable, Version=2.0.0.0, Culture=neutral, PublicKeyToken=27172bc36694b3b0, processorArchitecture=MSIL">
@@ -59,14 +59,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContextMenu.cs" />
-    <Compile Include="FolderWrapper.cs" />
-    <Compile Include="FolderWrapperException.cs" />
+    <Compile Include="FolderOperation.cs" />
+    <Compile Include="FolderOperationException.cs" />
     <Compile Include="Locale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="FolderWrapper.snk" />
+    <None Include="FolderOperation.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
