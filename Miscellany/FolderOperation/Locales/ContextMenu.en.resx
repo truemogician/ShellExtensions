@@ -142,7 +142,7 @@
     <value>Delete nested empty folder(s)</value>
   </data>
   <data name="UnwrapAndDeleteEmptyFolder" xml:space="preserve">
-    <value>Unwrap folder(s) and remove empty folder(s)</value>
+    <value>Unwrap folder(s) (and remove empty)</value>
   </data>
   <data name="UnwrapAndDeleteEmptyFolderDeep" xml:space="preserve">
     <value>Unwrap nested folder(s) (and remove empty)</value>

@@ -122,7 +122,8 @@ public class FoldersContextMenu : SharpContextMenu {
 		else {
 			var item = new ToolStripMenuItem(Locale.ContextMenu.GetString("FolderOperations"), Resource.Folder);
 			item.DropDownItems.AddRange(menus.ToArray());
-		}
+			contextMenu.Items.Add(item);
+        }
 		return contextMenu;
 
 		EventHandler CreateUnwrapHandler(UnwrapOption option) {
