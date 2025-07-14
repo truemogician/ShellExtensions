@@ -8,7 +8,6 @@ using EntryDateCopier.Properties;
 using TrueMogician.Extensions.Enumerable;
 using TrueMogician.Extensions.Enumerator;
 
-
 namespace EntryDateCopier {
 	using static Utilities;
 
@@ -76,9 +75,9 @@ namespace EntryDateCopier {
 				OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
 			}
 			OnComplete();
-        }
+		}
 
-        public async Task ApplyAsync(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
+		public async Task ApplyAsync(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
 			cancellationToken ??= CancellationToken.None;
 			OnStart();
 			var newDates = Search(Paths, EntryDates, appliesToChildren).ToDictionary(p => p.Path, p => p.NewDate);
@@ -129,43 +128,52 @@ namespace EntryDateCopier {
 		}
 
 		private IEnumerable<(string Path, EntryDate NewDate)> Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, bool appliesToChildren) {
-				using var enumerator = infos.GetEnumerator();
-				using var e = enumerator.ToExtended();
-				if (!e.MoveNext())
+			using var enumerator = infos.GetEnumerator();
+			using var e = enumerator.ToExtended();
+			if (!e.MoveNext())
 				yield break;
-				var general = e.Current!.General ? e.GetAndMoveNext() : null;
-				if (e.Success && e.Current!.General)
-					throw new InvalidOperationException(@"More than one general EntryDateInfo found");
-				foreach (string path in paths) {
-					string? fileName = Path.GetFileName(path);
-					while (e.Success && string.Compare(fileName, e.Current!.Path) > 0)
-						e.MoveNext();
-					if (!e.Success && general is null)
-						break;
-					bool isDirectory = path.IsDirectory();
-					EntryDateInfo? srcInfo = null;
-					if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
-						srcInfo = e.GetAndMoveNext();
+			var general = e.Current!.General ? e.GetAndMoveNext() : null;
+			if (e.Success && e.Current!.General)
+				throw new InvalidOperationException(@"More than one general EntryDateInfo found");
+			foreach (var path in paths) {
+				var fileName = Path.GetFileName(path);
+				while (e.Success && string.Compare(fileName, e.Current!.Path) > 0)
+					e.MoveNext();
+				if (!e.Success && general is null)
+					break;
+				var isDirectory = path.IsDirectory();
+				EntryDateInfo? srcInfo = null;
+				if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
+					srcInfo = e.GetAndMoveNext();
 				else if (general is not null) {
-						if (general.IsDirectory is null || general.IsDirectory == isDirectory)
-							srcInfo = general;
+					if (general.IsDirectory is null || general.IsDirectory == isDirectory)
+						srcInfo = general;
 				}
-					if (srcInfo is not null) {
+				if (srcInfo is not null) {
 					yield return (path, srcInfo.Value);
-						if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
-							string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
-							if (entries.Length > 0) {
-								Array.Sort(entries);
+					if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
+						string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
+						if (entries.Length > 0) {
+							Array.Sort(entries);
 							foreach (var entry in Search(entries, srcInfo.Entries!, appliesToChildren))
 								yield return entry;
-			}
-		}
-			}
+						}
+					}
+				}
 			}
 		}
 	}
 
 	public class Generator {
+		[Flags]
+		public enum Flag : byte {
+			None = 0,
+
+			MatchBasePath = 1 << 0,
+
+			DirectoryOnly = 1 << 1
+		}
+
 		public Generator(IEnumerable<string> paths) => Paths = paths.AsArray();
 
 		public Generator(string path) : this(new[] { path }) { }
@@ -182,26 +190,23 @@ namespace EntryDateCopier {
 
 		public EntryDateInfo[]? EntryDates { get; private set; }
 
+		public EntryDateFields Fields { get; set; } = EntryDateFields.All;
+
+		public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+
 		public static void SaveToFile(string path, EntryDateInfo src) => SaveToFile(path, new[] { src });
 
 		public static void SaveToFile(string path, EntryDateInfo[] srcs) => new EdiFile(srcs).Save(path);
 
 		public void SaveToFile(string path) => SaveToFile(path, EntryDates ?? throw new InvalidOperationException("Generator not started yet."));
 
-		public async Task<EntryDateInfo[]?> Generate(
-			bool matchBasePath = true,
-			bool includesChildren = false,
-			bool directoryOnly = false,
-			EntryDateFields fields = EntryDateFields.All,
-			CancellationToken? cancellationToken = null
-		) {
-			cancellationToken ??= CancellationToken.None;
+		public async Task<EntryDateInfo[]?> Generate(int maxDepth, Flag flag = Flag.MatchBasePath) {
 			if (Paths.Length > 1)
-				matchBasePath = true;
+				flag |= Flag.MatchBasePath;
 			OnStart();
 			try {
 				EntryDates = await Task.WhenAll(
-					Paths.Select(path => Generate(path, matchBasePath, includesChildren, directoryOnly, fields, cancellationToken.Value))
+					Paths.Select(path => Generate(path, maxDepth, flag))
 				);
 				OnComplete();
 				return EntryDates;
@@ -227,32 +232,29 @@ namespace EntryDateCopier {
 
 		public void OnComplete(EventArgs? e = null) => Complete?.Invoke(this, e ?? EventArgs.Empty);
 
-		private async Task<EntryDateInfo> Generate(
-			string path,
-			bool matchBasePath,
-			bool includesChildren,
-			bool directoryOnly,
-			EntryDateFields fields,
-			CancellationToken cancellationToken
-		) {
+		private async Task<EntryDateInfo> Generate(string path, int maxDepth, Flag flag, uint depth = 0u) {
 			var dates = await Task.Run(
 				() => {
-					var result = EntryDate.FromEntry(path, fields);
+					var result = EntryDate.FromEntry(path, Fields);
 					OnReadEntryDate(new EntryEventArgs(path, result));
 					return result;
 				},
-				cancellationToken
+				CancellationToken
 			);
 			IList<EntryDateInfo>? entries = null;
-			if (includesChildren && path.IsDirectory()) {
-				var dirInfo = new DirectoryInfo(path);
+			if ((maxDepth < 0 || depth < maxDepth) && path.IsDirectory()) {
 				entries = await Task.WhenAll(
-					(directoryOnly ? dirInfo.EnumerateDirectories() : dirInfo.EnumerateFileSystemInfos())
-					.Select(info => Generate(info.FullName, true, true, directoryOnly, fields, cancellationToken))
+					(flag.HasFlag(Flag.DirectoryOnly) ? Directory.EnumerateDirectories(path) : Directory.EnumerateFileSystemEntries(path))
+					.Select(p => Generate(p, maxDepth, flag, depth + 1u))
 				);
 				Sort(entries, true);
 			}
-			return new EntryDateInfo(dates, matchBasePath ? Path.GetFileName(path) : null, entries, matchBasePath ? path.IsDirectory() : null);
+			return new EntryDateInfo(
+				dates,
+				flag.HasFlag(Flag.MatchBasePath) ? Path.GetFileName(path) : null,
+				entries,
+				flag.HasFlag(Flag.MatchBasePath) ? path.IsDirectory() : null
+			);
 		}
 	}
 
@@ -280,21 +282,20 @@ namespace EntryDateCopier {
 
 		public string[] DestinationPaths { get; set; }
 
-		public async Task Synchronize(
-			bool includesChildren = true,
-			bool appliesToChildren = false,
-			EntryDateFields fields = EntryDateFields.All,
-			CancellationToken? cancellationToken = null
-		) {
-			var generator = new Generator(SourcePath);
+		public EntryDateFields Fields { get; set; } = EntryDateFields.All;
+
+		public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+
+		public async Task Synchronize(bool includesChildren = true, bool appliesToChildren = false) {
+			var generator = new Generator(SourcePath) {
+				Fields = Fields,
+				CancellationToken = CancellationToken
+			};
 			generator.Start += Start;
 			generator.Cancel += Cancel;
 			var infos = await generator.Generate(
-				false,
-				includesChildren,
-				Settings.Default.DirectoryOnly,
-				fields,
-				cancellationToken
+				includesChildren ? -1 : 0,
+				Settings.Default.DirectoryOnly ? Generator.Flag.DirectoryOnly : Generator.Flag.None
 			);
 			if (infos is null)
 				return;
@@ -304,7 +305,7 @@ namespace EntryDateCopier {
 			applier.SetEntryDate += ApplicationSetEntryDate;
 			applier.Complete += Complete;
 			applier.Cancel += Cancel;
-			await applier.ApplyAsync(appliesToChildren, cancellationToken);
+			await applier.ApplyAsync(appliesToChildren, CancellationToken);
 		}
 	}
 }
