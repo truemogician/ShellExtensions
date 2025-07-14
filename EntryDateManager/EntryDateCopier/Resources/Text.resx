@@ -192,4 +192,10 @@
   <data name="SyncToFormat" xml:space="preserve">
     <value>Sync to {0}</value>
   </data>
+  <data name="EdiApplied" xml:space="preserve">
+    <value>File and folder dates applied</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
 </root>

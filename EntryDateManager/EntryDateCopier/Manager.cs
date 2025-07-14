@@ -67,11 +67,21 @@ namespace EntryDateCopier {
 
 		public EntryDateInfo[] EntryDates { get; set; }
 
-		public async Task Apply(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
-			cancellationToken ??= CancellationToken.None;
-			var newDates = new Dictionary<string, EntryDate>();
+		public void Apply(bool appliesToChildren = true) {
 			OnStart();
-			Search(Paths, EntryDates);
+			var newDates = Search(Paths, EntryDates, appliesToChildren).ToDictionary(p => p.Path, p => p.NewDate);
+			OnReady(new ReadyEventArgs(newDates));
+			foreach (var pair in newDates) {
+				pair.Value.ApplyToEntry(pair.Key);
+				OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
+			}
+			OnComplete();
+        }
+
+        public async Task ApplyAsync(bool appliesToChildren = true, CancellationToken? cancellationToken = null) {
+			cancellationToken ??= CancellationToken.None;
+			OnStart();
+			var newDates = Search(Paths, EntryDates, appliesToChildren).ToDictionary(p => p.Path, p => p.NewDate);
 			OnReady(new ReadyEventArgs(newDates));
 			try {
 				await Task.WhenAll(
@@ -97,40 +107,6 @@ namespace EntryDateCopier {
 				else
 					throw;
 			}
-			return;
-			void Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos) {
-				using var enumerator = infos.GetEnumerator();
-				using var e = enumerator.ToExtended();
-				if (!e.MoveNext())
-					return;
-				var general = e.Current!.General ? e.GetAndMoveNext() : null;
-				if (e.Success && e.Current!.General)
-					throw new InvalidOperationException(@"More than one general EntryDateInfo found");
-				foreach (string path in paths) {
-					string? fileName = Path.GetFileName(path);
-					while (e.Success && string.Compare(fileName, e.Current!.Path) > 0)
-						e.MoveNext();
-					if (!e.Success && general is null)
-						break;
-					bool isDirectory = path.IsDirectory();
-					EntryDateInfo? srcInfo = null;
-					if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
-						srcInfo = e.GetAndMoveNext();
-					else if (general is not null)
-						if (general.IsDirectory is null || general.IsDirectory == isDirectory)
-							srcInfo = general;
-					if (srcInfo is not null) {
-						newDates[path] = srcInfo.Value;
-						if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
-							string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
-							if (entries.Length > 0) {
-								Array.Sort(entries);
-								Search(entries, srcInfo.Entries!);
-							}
-						}
-					}
-				}
-			}
 		}
 
 		protected virtual void OnStart(EventArgs? e = null) => Start?.Invoke(this, e ?? EventArgs.Empty);
@@ -149,6 +125,42 @@ namespace EntryDateCopier {
 			}
 			catch (Exception ex) {
 				throw new InvalidDataException("Corrupted edi file", ex);
+			}
+		}
+
+		private IEnumerable<(string Path, EntryDate NewDate)> Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, bool appliesToChildren) {
+				using var enumerator = infos.GetEnumerator();
+				using var e = enumerator.ToExtended();
+				if (!e.MoveNext())
+				yield break;
+				var general = e.Current!.General ? e.GetAndMoveNext() : null;
+				if (e.Success && e.Current!.General)
+					throw new InvalidOperationException(@"More than one general EntryDateInfo found");
+				foreach (string path in paths) {
+					string? fileName = Path.GetFileName(path);
+					while (e.Success && string.Compare(fileName, e.Current!.Path) > 0)
+						e.MoveNext();
+					if (!e.Success && general is null)
+						break;
+					bool isDirectory = path.IsDirectory();
+					EntryDateInfo? srcInfo = null;
+					if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
+						srcInfo = e.GetAndMoveNext();
+				else if (general is not null) {
+						if (general.IsDirectory is null || general.IsDirectory == isDirectory)
+							srcInfo = general;
+				}
+					if (srcInfo is not null) {
+					yield return (path, srcInfo.Value);
+						if (appliesToChildren && isDirectory && srcInfo.IncludesChildren) {
+							string[] entries = Directory.EnumerateFileSystemEntries(path).ToArray();
+							if (entries.Length > 0) {
+								Array.Sort(entries);
+							foreach (var entry in Search(entries, srcInfo.Entries!, appliesToChildren))
+								yield return entry;
+			}
+		}
+			}
 			}
 		}
 	}
@@ -292,7 +304,7 @@ namespace EntryDateCopier {
 			applier.SetEntryDate += ApplicationSetEntryDate;
 			applier.Complete += Complete;
 			applier.Cancel += Cancel;
-			await applier.Apply(appliesToChildren, cancellationToken);
+			await applier.ApplyAsync(appliesToChildren, cancellationToken);
 		}
 	}
 }

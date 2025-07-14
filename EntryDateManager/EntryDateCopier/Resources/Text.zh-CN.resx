@@ -174,6 +174,12 @@
   <data name="ModificationDate" xml:space="preserve">
     <value>修改日期</value>
   </data>
+  <data name="ReadingEntryDates" xml:space="preserve">
+    <value>正在读取文件日期……</value>
+  </data>
+  <data name="SavingDateFile" xml:space="preserve">
+    <value>正在保存日期文件……</value>
+  </data>
   <data name="SelectedOnly" xml:space="preserve">
     <value>仅所选内容</value>
   </data>
@@ -186,10 +192,10 @@
   <data name="SyncToFormat" xml:space="preserve">
     <value>同步到 {0}</value>
   </data>
-  <data name="ReadingEntryDates" xml:space="preserve">
-    <value>正在读取文件日期……</value>
+  <data name="EdiApplied" xml:space="preserve">
+    <value>文件日期已应用</value>
   </data>
-  <data name="SavingDateFile" xml:space="preserve">
-    <value>正在保存日期文件……</value>
+  <data name="Success" xml:space="preserve">
+    <value>成功</value>
   </data>
 </root>

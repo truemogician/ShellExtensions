@@ -75,23 +75,22 @@ namespace EntryDateCopier {
 			return encoding.GetString(mso.ToArray());
 		}
 
-		public static void HandleException(Action action, ProgressDialog? dialog = null) {
+		public static void HandleException(Exception ex) {
+			while (ex is AggregateException { InnerExceptions: { Count: 1 } } agg)
+				ex = agg.InnerExceptions[0];
+			var message = ex is AggregateException ae
+				? string.Join(Environment.NewLine, ae.InnerExceptions.Select(e => e.StackTrace))
+				: ex.StackTrace;
+            MessageBox.Show(message, $@"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public static void HandleException(Action action, ProgressDialog? dialog = null) {
 			try {
 				action();
 			}
 			catch (Exception ex) {
 				dialog?.ReportProgress(100, Text.GetString("ProgressErrExiting"), ex.Message);
-				while (ex is AggregateException { InnerExceptions: { Count: 1 } } agg)
-					ex = agg.InnerExceptions[0];
-				if (ex is AggregateException ae)
-					MessageBox.Show(
-						string.Join(Environment.NewLine, ae.InnerExceptions.Select(e => e.StackTrace)),
-						$@"{ex.GetType().Name}: {ex.Message}",
-						MessageBoxButtons.OK,
-						MessageBoxIcon.Error
-					);
-				else
-					MessageBox.Show(ex.StackTrace, $@"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				HandleException(ex);
 			}
 		}
 
@@ -104,15 +103,6 @@ namespace EntryDateCopier {
 				}
 			};
 			return timer;
-		}
-
-		private static FileAttributes? UnlockFile(string path) {
-			var attr = File.GetAttributes(path);
-			if (attr.HasFlag(FileAttributes.ReadOnly)) {
-				File.SetAttributes(path, attr & ~FileAttributes.ReadOnly);
-				return attr;
-			}
-			return null;
 		}
 
 		private static void CopyStream(Stream src, Stream dest) {
