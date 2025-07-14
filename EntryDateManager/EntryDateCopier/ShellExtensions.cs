@@ -3,7 +3,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 using Ookii.Dialogs.Wpf;
 using SharpShell.Attributes;
@@ -62,7 +61,6 @@ namespace EntryDateCopier {
 					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
 				};
 				int total = 0, current = 0;
-				var source = new CancellationTokenSource();
 				applier.Start += (_, _) => dialog.ReportProgress(0, Text.GetString("CountingEntries"), null);
 				applier.Ready += (_, args) => {
 					total = args.Map.Count;
@@ -76,14 +74,8 @@ namespace EntryDateCopier {
 						args.Path
 					);
 				};
-				dialog.DoWork += (_, args) => HandleException(
-					() => {
-						CreateCancellationTimer(args, source, dialog, 500).Start();
-						applier.Apply(cancellationToken: source.Token).Wait(source.Token);
-					},
-					dialog
-				);
-				dialog.Show(source.Token);
+				dialog.DoWork += (_, _) => HandleException(() => applier.Apply(), dialog);
+				dialog.Show();
 			}
 		);
 	}

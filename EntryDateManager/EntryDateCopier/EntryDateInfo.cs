@@ -66,21 +66,21 @@ namespace EntryDateCopier {
 		}
 
 		public void ApplyToEntry(string path) {
-			if (path.IsFile()) {
+			var attr = File.GetAttributes(path);
+            FileSystemInfo info = attr.HasFlag(FileAttributes.Directory) ? new DirectoryInfo(path) : new FileInfo(path);
+            if (attr.HasFlag(FileAttributes.ReadOnly))
+				info.Attributes = attr & ~FileAttributes.ReadOnly;
+			try {
 				if (Creation is not null)
-					File.SetCreationTime(path, Creation.Value);
+					info.CreationTime = Creation.Value;
 				if (Modification is not null)
-					File.SetLastWriteTime(path, Modification.Value);
+					info.LastWriteTime = Modification.Value;
 				if (Access is not null)
-					File.SetLastAccessTime(path, Access.Value);
+					info.LastAccessTime = Access.Value;
 			}
-			else {
-				if (Creation is not null)
-					Directory.SetCreationTime(path, Creation.Value);
-				if (Modification is not null)
-					Directory.SetLastWriteTime(path, Modification.Value);
-				if (Access is not null)
-					Directory.SetLastAccessTime(path, Access.Value);
+			finally {
+				if (attr.HasFlag(FileAttributes.ReadOnly))
+					info.Attributes = attr;
 			}
 		}
 	}
