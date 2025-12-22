@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EntryDateUtility;
 using Newtonsoft.Json;
-
 
 namespace EntryDateCopier {
 	public class EntryDateInfo {
@@ -54,33 +54,26 @@ namespace EntryDateCopier {
 		public DateTime? Access { get; set; } = Access;
 
 		public static EntryDate FromEntry(string path, EntryDateFields fields = EntryDateFields.All) {
-			var info = new FileInfo(path);
-			DateTime? creation = null, modification = null, access = null;
-			if (fields.HasFlag(EntryDateFields.Creation))
-				creation = info.CreationTime;
-			if (fields.HasFlag(EntryDateFields.Modification))
-				modification = info.LastWriteTime;
-			if (fields.HasFlag(EntryDateFields.Access))
-				access = info.LastAccessTime;
-			return new EntryDate(creation, modification, access);
+			var metadata = new EntryMetadata(path);
+			metadata.GetTimes(out var creation, out var access, out var modification);
+			return new EntryDate(
+				fields.HasFlag(EntryDateFields.Creation) ? creation : null,
+				fields.HasFlag(EntryDateFields.Modification) ? modification : null,
+				fields.HasFlag(EntryDateFields.Access) ? access : null
+			);
 		}
 
 		public void ApplyToEntry(string path) {
-			var attr = File.GetAttributes(path);
-            FileSystemInfo info = attr.HasFlag(FileAttributes.Directory) ? new DirectoryInfo(path) : new FileInfo(path);
-            if (attr.HasFlag(FileAttributes.ReadOnly))
-				info.Attributes = attr & ~FileAttributes.ReadOnly;
+			var metadata = new EntryMetadata(path);
+			var attr = metadata.Attributes;
+			if (attr.HasFlag(FileAttributes.ReadOnly))
+				metadata.Attributes = attr & ~FileAttributes.ReadOnly;
 			try {
-				if (Creation is not null)
-					info.CreationTime = Creation.Value;
-				if (Modification is not null)
-					info.LastWriteTime = Modification.Value;
-				if (Access is not null)
-					info.LastAccessTime = Access.Value;
+				metadata.SetTimes(Creation, Access, Modification);
 			}
 			finally {
 				if (attr.HasFlag(FileAttributes.ReadOnly))
-					info.Attributes = attr;
+					metadata.Attributes = attr;
 			}
 		}
 	}

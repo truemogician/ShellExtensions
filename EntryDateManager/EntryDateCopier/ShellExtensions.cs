@@ -13,7 +13,6 @@ using TrueMogician.Extensions.Enumerable;
 using Image = EntryDateCopier.Resources.Image;
 using ProgressBarStyle = Ookii.Dialogs.Wpf.ProgressBarStyle;
 
-
 namespace EntryDateCopier {
 	using static Locale;
 	using static Utilities;
@@ -49,17 +48,16 @@ namespace EntryDateCopier {
 	public class DropHandler : SharpDropHandler {
 		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
 
-		protected override void Drop(DragEventArgs dragEventArgs) => HandleException(
-			() => {
+		protected override void Drop(DragEventArgs dragEventArgs) => HandleException(() => {
 				var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
-                /*var dialog = new ProgressDialog {
+				var dialog = new ProgressDialog {
 					MinimizeBox = true,
 					ShowTimeRemaining = false,
 					UseCompactPathsForText = true,
 					UseCompactPathsForDescription = true,
 					WindowTitle = Text.GetString("DragDropProgressTitle"),
 					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
-				}; 
+				};
 				int total = 0, current = 0;
 				applier.Start += (_, _) => dialog.ReportProgress(0, Text.GetString("CountingEntries"), null);
 				applier.Ready += (_, args) => {
@@ -75,14 +73,14 @@ namespace EntryDateCopier {
 					);
 				};
 				dialog.DoWork += (_, _) => HandleException(() => applier.Apply(), dialog);
-				dialog.Show();*/
-				try {
+				dialog.Show();
+				/*try {
 					applier.Apply();
 					MessageBox.Show(Text.GetString("EdiApplied"), Text.GetString("Success"), MessageBoxButtons.OK);
 				}
 				catch (Exception ex) {
 					HandleException(ex);
-                }
+				}*/
 			}
 		);
 	}

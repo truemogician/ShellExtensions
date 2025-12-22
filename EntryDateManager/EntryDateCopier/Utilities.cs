@@ -14,7 +14,7 @@ using Timer = System.Timers.Timer;
 namespace EntryDateCopier {
 	using static Locale;
 
-	public enum EntryType {
+	public enum EntryType : byte {
 		None,
 
 		File,
@@ -28,9 +28,7 @@ namespace EntryDateCopier {
 			try {
 				attributes = File.GetAttributes(path);
 			}
-			catch (FileNotFoundException) {
-				if (ensureExistence)
-					throw;
+			catch (Exception ex) when (!ensureExistence && ex is FileNotFoundException or DirectoryNotFoundException) {
 				return EntryType.None;
 			}
 			return attributes.HasFlag(FileAttributes.Directory) ? EntryType.Directory : EntryType.File;
@@ -44,15 +42,17 @@ namespace EntryDateCopier {
 			if (entryDates is null || entryDates.Count == 0 || checkOrder && IsSorted(entryDates))
 				return;
 			entryDates.Sort(EntryDateInfoComparer.Default);
-			if (recursive)
+			if (recursive) {
 				foreach (var entryDate in entryDates.Where(info => info.IncludesChildren))
 					Sort(entryDate.Entries, true, checkOrder);
+			}
 		}
 
 		public static bool IsSorted(IList<EntryDateInfo> entryDates) {
-			for (var i = 0; i < entryDates.Count - 1; ++i)
+			for (var i = 0; i < entryDates.Count - 1; ++i) {
 				if (EntryDateInfoComparer.Default.Compare(entryDates[i], entryDates[i + 1]) > 0)
 					return false;
+			}
 			return true;
 		}
 
@@ -81,10 +81,10 @@ namespace EntryDateCopier {
 			var message = ex is AggregateException ae
 				? string.Join(Environment.NewLine, ae.InnerExceptions.Select(e => e.StackTrace))
 				: ex.StackTrace;
-            MessageBox.Show(message, $@"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
+			MessageBox.Show(message, $@"{ex.GetType().Name}: {ex.Message}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
 
-        public static void HandleException(Action action, ProgressDialog? dialog = null) {
+		public static void HandleException(Action action, ProgressDialog? dialog = null) {
 			try {
 				action();
 			}
@@ -114,8 +114,6 @@ namespace EntryDateCopier {
 	}
 
 	public class EntryDateInfoComparer : IComparer<EntryDateInfo> {
-		public static EntryDateInfoComparer Default { get; } = new();
-
 		public int Compare(EntryDateInfo x, EntryDateInfo y) {
 			if (x is null || y is null)
 				throw new ArgumentNullException();
@@ -123,5 +121,7 @@ namespace EntryDateCopier {
 				return string.Compare(x.Path, y.Path);
 			return x.General ? -1 : 1;
 		}
+
+		public static EntryDateInfoComparer Default { get; } = new();
 	}
 }

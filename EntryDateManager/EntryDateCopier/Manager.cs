@@ -127,7 +127,7 @@ namespace EntryDateCopier {
 			}
 		}
 
-		private IEnumerable<(string Path, EntryDate NewDate)> Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, bool appliesToChildren) {
+		private static IEnumerable<(string Path, EntryDate NewDate)> Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, bool appliesToChildren) {
 			using var enumerator = infos.GetEnumerator();
 			using var e = enumerator.ToExtended();
 			if (!e.MoveNext())
