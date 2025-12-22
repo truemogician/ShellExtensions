@@ -107,7 +107,7 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	}
 
 	protected static DateTime[] GetDateTimes(string path) {
-		var info = new EntryDateInfo(path);
+		var info = new EntryMetadata(path);
 		info.GetTimes(out var c, out var a, out var w);
 		return [a, w, c];
 	}
@@ -115,7 +115,7 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	protected static void SetDateTimes(string path, DateTime?[] times) {
 		if (times.Length != 3)
 			throw new ArgumentException();
-		var info = new EntryDateInfo(path);
+		var info = new EntryMetadata(path);
 		info.SetTimes(times[2], times[0], times[1]);
 	}
 
