@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>EntryDateUtility.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+</Project>
