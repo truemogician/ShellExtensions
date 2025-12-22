@@ -1,8 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-	        Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -47,8 +46,7 @@
 		<Reference Include="DateTimePickerExtended">
 			<HintPath>..\..\..\UserControlLibrary\DateTimePickerExtended\bin\Debug\DateTimePickerExtended.dll</HintPath>
 		</Reference>
-		<Reference
-			Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
+		<Reference Include="SharpShell, Version=2.7.2.0, Culture=neutral, PublicKeyToken=f14dc899472fe6fb, processorArchitecture=MSIL">
 			<HintPath>..\..\packages\SharpShell.2.7.2\lib\net40-client\SharpShell.dll</HintPath>
 		</Reference>
 		<Reference Include="System" />
@@ -73,6 +71,12 @@
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Locales\*.resx" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\EntryDateUtility\EntryDateUtility.csproj">
+			<Project>{c5b91a2c-7229-46d2-b723-c778c0a0def8}</Project>
+			<Name>EntryDateUtility</Name>
+		</ProjectReference>
 	</ItemGroup>
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

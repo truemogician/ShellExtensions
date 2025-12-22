@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccessDate" xml:space="preserve">
+  <data name="LastAccessDate" xml:space="preserve">
     <value>访问日期</value>
   </data>
   <data name="Colon" xml:space="preserve">
@@ -132,7 +132,7 @@
   <data name="ExchangeDate" xml:space="preserve">
     <value>交换日期</value>
   </data>
-  <data name="ModificationDate" xml:space="preserve">
+  <data name="LastWriteDate" xml:space="preserve">
     <value>修改日期</value>
   </data>
   <data name="PathNotFoundErr" xml:space="preserve">

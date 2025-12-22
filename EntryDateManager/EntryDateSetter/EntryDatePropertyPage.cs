@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Windows.Forms;
+using EntryDateUtility;
 using Extension.Forms;
 using SharpShell.SharpPropertySheet;
 
@@ -14,18 +15,6 @@ namespace EntryDateSetter;
 
 public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	#region Constant Fields
-	protected static readonly Func<string, bool, DateTime>[] GetDateTime = [
-		(path, isFile) => isFile ? File.GetLastAccessTime(path) : Directory.GetLastAccessTime(path),
-		(path, isFile) => isFile ? File.GetLastWriteTime(path) : Directory.GetLastWriteTime(path),
-		(path, isFile) => isFile ? File.GetCreationTime(path) : Directory.GetCreationTime(path)
-	];
-
-	protected static readonly Action<string, bool, DateTime>[] SetDateTime = [
-		(path, isFile, value) => (isFile ? (Action<string, DateTime>)File.SetLastAccessTime : Directory.SetLastAccessTime)(path, value),
-		(path, isFile, value) => (isFile ? (Action<string, DateTime>)File.SetLastWriteTime : Directory.SetLastWriteTime)(path, value),
-		(path, isFile, value) => (isFile ? (Action<string, DateTime>)File.SetCreationTime : Directory.SetCreationTime)(path, value)
-	];
-
 	protected static readonly Dictionary<DateTimeComponent, Func<DateTime, int>> GetDateTimeComponent = new() {
 		{ DateTimeComponent.Year, datetime => datetime.Year },
 		{ DateTimeComponent.Month, datetime => datetime.Month },
@@ -73,9 +62,9 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 		Paths = paths.ToArray();
 		if (Paths.Length == 0)
 			throw new ArgumentNullException(nameof(paths), Locale.GetString("EmptyPathErr"));
-		Labels = [accessDateLabel, modificationDateLabel, creationDateLabel];
-		Pickers = [accessDatePicker, modificationDatePicker, creationDatePicker];
-		CheckBoxes = [accessDateCheckBox, modificationDateCheckBox, creationDateCheckBox];
+		Labels = [lastAccessDateLabel, lastWriteDateLabel, creationDateLabel];
+		Pickers = [lastAccessDatePicker, lastWriteDatePicker, creationDatePicker];
+		CheckBoxes = [lastAccessDateCheckBox, lastWriteDateCheckBox, creationDateCheckBox];
 		Buttons = [setToNowButton, exchangeDateButton, restoreDateButton];
 		ApplyLocale();
 	}
@@ -89,12 +78,12 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	private void ApplyLocale() {
 		PageTitle = Locale.GetString("Title");
 		string? colon = Locale.GetString("Colon");
+		lastAccessDateLabel.Text = Locale.GetString("LastAccessDate") + colon;
+		lastWriteDateLabel.Text = Locale.GetString("LastWriteDate") + colon;
 		creationDateLabel.Text = Locale.GetString("CreationDate") + colon;
-		modificationDateLabel.Text = Locale.GetString("ModificationDate") + colon;
-		accessDateLabel.Text = Locale.GetString("AccessDate") + colon;
+		lastAccessDateCheckBox.Text = Locale.GetString("LastAccessDate");
+		lastWriteDateCheckBox.Text = Locale.GetString("LastWriteDate");
 		creationDateCheckBox.Text = Locale.GetString("CreationDate");
-		modificationDateCheckBox.Text = Locale.GetString("ModificationDate");
-		accessDateCheckBox.Text = Locale.GetString("AccessDate");
 		setToNowButton.Text = Locale.GetString("SetToNow");
 		exchangeDateButton.Text = Locale.GetString("ExchangeDate");
 		restoreDateButton.Text = Locale.GetString("RestoreDate");
@@ -117,6 +106,19 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 		} while (comp <= DateTimeComponent.Second);
 	}
 
+	protected static DateTime[] GetDateTimes(string path) {
+		var info = new EntryDateInfo(path);
+		info.GetTimes(out var c, out var a, out var w);
+		return [a, w, c];
+	}
+
+	protected static void SetDateTimes(string path, DateTime?[] times) {
+		if (times.Length != 3)
+			throw new ArgumentException();
+		var info = new EntryDateInfo(path);
+		info.SetTimes(times[2], times[0], times[1]);
+	}
+
 	protected void OnPick(DateTimePickedEventArgs e) {
 		int i = e.PickerIndex;
 		bool different = Pickers[i].Value != Current?[i].Value || Pickers[i].UnknownComponent != Current[i].Unknown;
@@ -128,18 +130,17 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	protected override void OnPropertyPageInitialised(SharpPropertySheet parent) {
 		DateTimeComponent[] unknowns = [0, 0, 0];
 		string path = Paths[0];
-		bool isFile = File.Exists(path);
-		if (!isFile && !Directory.Exists(path))
+		if (!File.Exists(path) && !Directory.Exists(path))
 			throw new FileNotFoundException(Locale.GetString("PathNotFoundErr"), path);
-		for (var i = 0; i < 3; ++i)
-			Pickers[i].Value = GetDateTime[i](path, isFile);
+		var times = GetDateTimes(path);
+		for (int i = 0; i < 3; ++i)
+			Pickers[i].Value = times[i];
 		for (var i = 1; i < Paths.Length; ++i) {
-			path = Paths[i];
-			isFile = File.Exists(path);
-			if (!isFile && !Directory.Exists(path))
+			if (!File.Exists(path) && !Directory.Exists(path))
 				throw new FileNotFoundException(Locale.GetString("PathNotFoundErr"), path);
+			times = GetDateTimes(path);
 			for (var j = 0; j < 3; ++j)
-				UpdateUnknownComponent(Pickers[j].Value, GetDateTime[j](path, isFile), ref unknowns[j]);
+				UpdateUnknownComponent(Pickers[j].Value, times[i], ref unknowns[j]);
 		}
 		Current = new DateTimeExtended[3];
 		for (var i = 0; i < 3; ++i) {
@@ -151,16 +152,18 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	protected override void OnPropertySheetApply() {
 		try {
 			var originals = new DateTime[3];
-			var isFile = new bool[3];
 			foreach (string path in Paths) {
+				var times = GetDateTimes(path);
 				for (var i = 0; i < 3; ++i) {
-					isFile[i] = File.Exists(path);
-					if (!isFile[i] && !Directory.Exists(path))
+					if (!File.Exists(path) && !Directory.Exists(path))
 						throw new FileNotFoundException(Locale.GetString("PathNotFoundErr"), path);
-					originals[i] = GetDateTime[MappedIndex[i]](path, isFile[i]);
+					originals[i] = times[MappedIndex[i]];
 				}
-				for (var i = 0; i < 3; ++i)
-					if (Pickers[i].HasUnknown) {
+				var newTimes = new DateTime?[3];
+				for (var i = 0; i < 3; ++i) {
+					if (!Pickers[i].HasUnknown)
+						newTimes[i] = Pickers[i].Value;
+					else {
 						var @new = Pickers[i].Value;
 						var comp = DateTimeComponent.Year;
 						do {
@@ -168,10 +171,10 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 								@new = SetDateTimeComponent[comp](@new, GetDateTimeComponent[comp](originals[i]));
 							comp = (DateTimeComponent)((int)comp << 1);
 						} while (comp <= DateTimeComponent.Second);
-						SetDateTime[i](path, isFile[i], @new);
+						newTimes[i] = @new;
 					}
-					else
-						SetDateTime[i](path, isFile[i], Pickers[i].Value);
+				}
+				SetDateTimes(path, newTimes);
 			}
 			for (var i = 0; i < 3; ++i) {
 				Current![i] = new DateTimeExtended(Pickers[i].Value, Pickers[i].UnknownComponent);
@@ -192,9 +195,10 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	private void DateTimePickerOnValueChanged(object sender, EventArgs e) {
 		if (Current is null)
 			return;
-		for (var i = 0; i < 3; ++i)
+		for (var i = 0; i < 3; ++i) {
 			if (sender as DateTimePickerExtended == Pickers[i])
 				OnPick(new DateTimePickedEventArgs(i));
+		}
 	}
 
 	private void CheckBoxOnCheckedChanged(object sender, EventArgs e) {
@@ -202,22 +206,24 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	}
 
 	private void SetToNowButtonOnClick(object sender, EventArgs e) {
-		for (var i = 0; i < 3; ++i)
+		for (var i = 0; i < 3; ++i) {
 			if (CheckBoxes[i].Checked) {
 				Pickers[i].Value = DateTime.Now;
 				Pickers[i].UnknownComponent = DateTimeComponent.None;
 			}
+		}
 	}
 
 	private void ExchangeDateButtonOnClick(object sender, EventArgs e) {
 		int i, j;
-		for (i = -1, j = 0; j < 3; ++j)
+		for (i = -1, j = 0; j < 3; ++j) {
 			if (CheckBoxes[j].Checked) {
 				if (i == -1)
 					i = j;
 				else
 					break;
 			}
+		}
 		var temp = new DateTimeExtended(Pickers[i].Value, Pickers[i].UnknownComponent);
 		Pickers[i].Value = Pickers[j].Value;
 		Pickers[i].UnknownComponent = Pickers[j].UnknownComponent;
@@ -229,11 +235,12 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	}
 
 	private void RecoverDateButtonOnClick(object sender, EventArgs e) {
-		for (var i = 0; i < 3; ++i)
+		for (var i = 0; i < 3; ++i) {
 			if (CheckBoxes[i].Checked) {
 				Pickers[i].Value = Current![i].Value;
 				Pickers[i].UnknownComponent = Current[i].Unknown;
 			}
+		}
 	}
 	#endregion
 }

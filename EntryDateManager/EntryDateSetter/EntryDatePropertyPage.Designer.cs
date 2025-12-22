@@ -26,41 +26,41 @@ namespace EntryDateSetter {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.accessDateLabel = new System.Windows.Forms.Label();
-            this.modificationDateLabel = new System.Windows.Forms.Label();
+            this.lastAccessDateLabel = new System.Windows.Forms.Label();
+            this.lastWriteDateLabel = new System.Windows.Forms.Label();
             this.creationDateLabel = new System.Windows.Forms.Label();
             this.restoreDateButton = new System.Windows.Forms.Button();
             this.exchangeDateButton = new System.Windows.Forms.Button();
             this.setToNowButton = new System.Windows.Forms.Button();
-            this.accessDateCheckBox = new System.Windows.Forms.CheckBox();
-            this.modificationDateCheckBox = new System.Windows.Forms.CheckBox();
+            this.lastAccessDateCheckBox = new System.Windows.Forms.CheckBox();
+            this.lastWriteDateCheckBox = new System.Windows.Forms.CheckBox();
             this.creationDateCheckBox = new System.Windows.Forms.CheckBox();
-            this.accessDatePicker = new Extension.Forms.DateTimePickerExtended();
-            this.modificationDatePicker = new Extension.Forms.DateTimePickerExtended();
+            this.lastAccessDatePicker = new Extension.Forms.DateTimePickerExtended();
+            this.lastWriteDatePicker = new Extension.Forms.DateTimePickerExtended();
             this.creationDatePicker = new Extension.Forms.DateTimePickerExtended();
             this.SuspendLayout();
             // 
             // accessDateLabel
             // 
-            this.accessDateLabel.AutoSize = true;
-            this.accessDateLabel.Location = new System.Drawing.Point(35, 35);
-            this.accessDateLabel.Margin = new System.Windows.Forms.Padding(50, 50, 15, 15);
-            this.accessDateLabel.Name = "accessDateLabel";
-            this.accessDateLabel.Size = new System.Drawing.Size(134, 31);
-            this.accessDateLabel.TabIndex = 9;
-			this.accessDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
-            this.accessDateLabel.Text = "访问日期：";
+            this.lastAccessDateLabel.AutoSize = true;
+            this.lastAccessDateLabel.Location = new System.Drawing.Point(35, 35);
+            this.lastAccessDateLabel.Margin = new System.Windows.Forms.Padding(50, 50, 15, 15);
+            this.lastAccessDateLabel.Name = "accessDateLabel";
+            this.lastAccessDateLabel.Size = new System.Drawing.Size(134, 31);
+            this.lastAccessDateLabel.TabIndex = 9;
+			this.lastAccessDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+            this.lastAccessDateLabel.Text = "访问日期：";
             // 
             // modificationDateLabel
             // 
-            this.modificationDateLabel.AutoSize = true;
-            this.modificationDateLabel.Location = new System.Drawing.Point(35, 90);
-            this.modificationDateLabel.Margin = new System.Windows.Forms.Padding(50, 15, 15, 15);
-            this.modificationDateLabel.Name = "modificationDateLabel";
-            this.modificationDateLabel.Size = new System.Drawing.Size(129, 31);
-            this.modificationDateLabel.TabIndex = 10;
-			this.modificationDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
-            this.modificationDateLabel.Text = "Modified: ";
+            this.lastWriteDateLabel.AutoSize = true;
+            this.lastWriteDateLabel.Location = new System.Drawing.Point(35, 90);
+            this.lastWriteDateLabel.Margin = new System.Windows.Forms.Padding(50, 15, 15, 15);
+            this.lastWriteDateLabel.Name = "modificationDateLabel";
+            this.lastWriteDateLabel.Size = new System.Drawing.Size(129, 31);
+            this.lastWriteDateLabel.TabIndex = 10;
+			this.lastWriteDateLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F);
+            this.lastWriteDateLabel.Text = "Modified: ";
             // 
             // creationDateLabel
             // 
@@ -113,29 +113,29 @@ namespace EntryDateSetter {
             // 
             // accessDateCheckBox
             // 
-            this.accessDateCheckBox.AutoSize = true;
-            this.accessDateCheckBox.Location = new System.Drawing.Point(40, 200);
-            this.accessDateCheckBox.Margin = new System.Windows.Forms.Padding(0, 15, 0, 15);
-            this.accessDateCheckBox.Name = "accessDateCheckBox";
-            this.accessDateCheckBox.Size = new System.Drawing.Size(127, 34);
-            this.accessDateCheckBox.TabIndex = 3;
-            this.accessDateCheckBox.UseVisualStyleBackColor = true;
-            this.accessDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
-			this.accessDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 11F);
-			this.accessDateCheckBox.Text = "访问日期";
+            this.lastAccessDateCheckBox.AutoSize = true;
+            this.lastAccessDateCheckBox.Location = new System.Drawing.Point(40, 200);
+            this.lastAccessDateCheckBox.Margin = new System.Windows.Forms.Padding(0, 15, 0, 15);
+            this.lastAccessDateCheckBox.Name = "accessDateCheckBox";
+            this.lastAccessDateCheckBox.Size = new System.Drawing.Size(127, 34);
+            this.lastAccessDateCheckBox.TabIndex = 3;
+            this.lastAccessDateCheckBox.UseVisualStyleBackColor = true;
+            this.lastAccessDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
+			this.lastAccessDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 11F);
+			this.lastAccessDateCheckBox.Text = "访问日期";
             // 
             // modificationDateCheckBox
             // 
-            this.modificationDateCheckBox.AutoSize = true;
-            this.modificationDateCheckBox.Location = new System.Drawing.Point(195, 200);
-            this.modificationDateCheckBox.Margin = new System.Windows.Forms.Padding(0, 15, 0, 15);
-            this.modificationDateCheckBox.Name = "modificationDateCheckBox";
-            this.modificationDateCheckBox.Size = new System.Drawing.Size(125, 31);
-            this.modificationDateCheckBox.TabIndex = 4;
-            this.modificationDateCheckBox.UseVisualStyleBackColor = true;
-            this.modificationDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
-			this.modificationDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
-			this.modificationDateCheckBox.Text = "Modified";
+            this.lastWriteDateCheckBox.AutoSize = true;
+            this.lastWriteDateCheckBox.Location = new System.Drawing.Point(195, 200);
+            this.lastWriteDateCheckBox.Margin = new System.Windows.Forms.Padding(0, 15, 0, 15);
+            this.lastWriteDateCheckBox.Name = "modificationDateCheckBox";
+            this.lastWriteDateCheckBox.Size = new System.Drawing.Size(125, 31);
+            this.lastWriteDateCheckBox.TabIndex = 4;
+            this.lastWriteDateCheckBox.UseVisualStyleBackColor = true;
+            this.lastWriteDateCheckBox.CheckedChanged += new System.EventHandler(this.CheckBoxOnCheckedChanged);
+			this.lastWriteDateCheckBox.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
+			this.lastWriteDateCheckBox.Text = "Modified";
             // 
             // creationDateCheckBox
             // 
@@ -152,28 +152,28 @@ namespace EntryDateSetter {
             // 
             // accessDatePicker
             // 
-            this.accessDatePicker.CalendarFont = new System.Drawing.Font("Microsoft YaHei", 10F);
-            this.accessDatePicker.CustomFormat = " yyyy/M/d   H:mm:ss";
-            this.accessDatePicker.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
-            this.accessDatePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.accessDatePicker.Location = new System.Drawing.Point(180, 35);
-            this.accessDatePicker.Margin = new System.Windows.Forms.Padding(15, 50, 50, 15);
-            this.accessDatePicker.Name = "accessDatePicker";
-            this.accessDatePicker.Size = new System.Drawing.Size(295, 34);
-            this.accessDatePicker.TabIndex = 0;
-            this.accessDatePicker.ValueChanged += new System.EventHandler(this.DateTimePickerOnValueChanged);
+            this.lastAccessDatePicker.CalendarFont = new System.Drawing.Font("Microsoft YaHei", 10F);
+            this.lastAccessDatePicker.CustomFormat = " yyyy/M/d   H:mm:ss";
+            this.lastAccessDatePicker.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
+            this.lastAccessDatePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.lastAccessDatePicker.Location = new System.Drawing.Point(180, 35);
+            this.lastAccessDatePicker.Margin = new System.Windows.Forms.Padding(15, 50, 50, 15);
+            this.lastAccessDatePicker.Name = "accessDatePicker";
+            this.lastAccessDatePicker.Size = new System.Drawing.Size(295, 34);
+            this.lastAccessDatePicker.TabIndex = 0;
+            this.lastAccessDatePicker.ValueChanged += new System.EventHandler(this.DateTimePickerOnValueChanged);
             // 
             // modificationDatePicker
             // 
-            this.modificationDatePicker.CustomFormat = " yyyy/M/d   H:mm:ss";
-            this.modificationDatePicker.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
-            this.modificationDatePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.modificationDatePicker.Location = new System.Drawing.Point(180, 90);
-            this.modificationDatePicker.Margin = new System.Windows.Forms.Padding(15, 15, 50, 15);
-            this.modificationDatePicker.Name = "modificationDatePicker";
-            this.modificationDatePicker.Size = new System.Drawing.Size(295, 34);
-            this.modificationDatePicker.TabIndex = 1;
-            this.modificationDatePicker.ValueChanged += new System.EventHandler(this.DateTimePickerOnValueChanged);
+            this.lastWriteDatePicker.CustomFormat = " yyyy/M/d   H:mm:ss";
+            this.lastWriteDatePicker.Font = new System.Drawing.Font("Microsoft YaHei", 10F);
+            this.lastWriteDatePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.lastWriteDatePicker.Location = new System.Drawing.Point(180, 90);
+            this.lastWriteDatePicker.Margin = new System.Windows.Forms.Padding(15, 15, 50, 15);
+            this.lastWriteDatePicker.Name = "modificationDatePicker";
+            this.lastWriteDatePicker.Size = new System.Drawing.Size(295, 34);
+            this.lastWriteDatePicker.TabIndex = 1;
+            this.lastWriteDatePicker.ValueChanged += new System.EventHandler(this.DateTimePickerOnValueChanged);
             // 
             // creationDatePicker
             // 
@@ -192,16 +192,16 @@ namespace EntryDateSetter {
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.restoreDateButton);
             this.Controls.Add(this.exchangeDateButton);
-            this.Controls.Add(this.accessDateCheckBox);
+            this.Controls.Add(this.lastAccessDateCheckBox);
             this.Controls.Add(this.creationDatePicker);
             this.Controls.Add(this.setToNowButton);
-            this.Controls.Add(this.modificationDatePicker);
-            this.Controls.Add(this.modificationDateCheckBox);
-            this.Controls.Add(this.accessDatePicker);
+            this.Controls.Add(this.lastWriteDatePicker);
+            this.Controls.Add(this.lastWriteDateCheckBox);
+            this.Controls.Add(this.lastAccessDatePicker);
             this.Controls.Add(this.creationDateCheckBox);
             this.Controls.Add(this.creationDateLabel);
-            this.Controls.Add(this.modificationDateLabel);
-            this.Controls.Add(this.accessDateLabel);
+            this.Controls.Add(this.lastWriteDateLabel);
+            this.Controls.Add(this.lastAccessDateLabel);
             this.Name = "EntryDateInformationPropertyPage";
             this.PageTitle = "File Dates";
             this.Size = new System.Drawing.Size(511, 628);
@@ -211,17 +211,17 @@ namespace EntryDateSetter {
 
         #endregion
 
-        private Label accessDateLabel;
-        private Label modificationDateLabel;
+        private Label lastAccessDateLabel;
+        private Label lastWriteDateLabel;
         private Label creationDateLabel;
         protected Button restoreDateButton;
         protected Button exchangeDateButton;
         protected Button setToNowButton;
-        protected CheckBox accessDateCheckBox;
-        protected CheckBox modificationDateCheckBox;
+        protected CheckBox lastAccessDateCheckBox;
+        protected CheckBox lastWriteDateCheckBox;
         protected CheckBox creationDateCheckBox;
-        protected DateTimePickerExtended accessDatePicker;
-        protected DateTimePickerExtended modificationDatePicker;
+        protected DateTimePickerExtended lastAccessDatePicker;
+        protected DateTimePickerExtended lastWriteDatePicker;
         protected DateTimePickerExtended creationDatePicker;
     }
 }
