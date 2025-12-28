@@ -23,7 +23,7 @@ using MessageBox = System.Windows.Forms.MessageBox;
 namespace SymbolLinkTool;
 
 internal static class Locale {
-	private static readonly ResourceManager _localizer = new("SymbolLinkTool.Locales.ContextMenu", Assembly.GetExecutingAssembly());
+	private static readonly ResourceManager _localizer = new($"{nameof(SymbolLinkTool)}.Locales.ContextMenu", Assembly.GetExecutingAssembly());
 
 	internal static string Get(string key) =>
 		_localizer.GetString(key) ?? throw new ResourceReferenceKeyNotFoundException($"Resource key ${key} not found", key);
@@ -59,8 +59,7 @@ public class FileContextMenu : SharpContextMenu {
 				: new ToolStripMenuItem(
 					Locale.Get("OpenRefLocation"),
 					null,
-					otherLinks.Select(
-							ToolStripItem (link) => new ToolStripMenuItem(
+					otherLinks.Select(ToolStripItem (link) => new ToolStripMenuItem(
 								link,
 								null,
 								(_, _) => ExplorerSelector.FileOrFolder(link)
@@ -70,7 +69,7 @@ public class FileContextMenu : SharpContextMenu {
 				);
 			manageItem.DropDownItems.Add(jumpToItem);
 			string? fileName = Path.GetFileName(path);
-			if (otherLinks.Select(Path.GetFileName).All(name => name == fileName))
+			if (otherLinks.Select(Path.GetFileName).All(name => name == fileName)) {
 				manageItem.DropDownItems.Add(
 					Locale.Get("RenameAll"),
 					null,
@@ -80,6 +79,7 @@ public class FileContextMenu : SharpContextMenu {
 						RenameWindow.RenameHardLinks(files);
 					}
 				);
+			}
 			manageItem.DropDownItems.Add(
 				Locale.Get("RemoveAll"),
 				null,
@@ -149,8 +149,7 @@ public class FileContextMenu : SharpContextMenu {
 	}
 
 	private static void Delete(IEnumerable<string> paths, bool recycleBin) =>
-		paths.ForEach(
-			path => FileSystem.DeleteFile(
+		paths.ForEach(path => FileSystem.DeleteFile(
 				path,
 				UIOption.OnlyErrorDialogs,
 				recycleBin
@@ -164,21 +163,69 @@ public class FileContextMenu : SharpContextMenu {
 [COMServerAssociation(AssociationType.Folder)]
 [COMServerAssociation(AssociationType.DirectoryBackground)]
 public class FolderContextMenu : SharpContextMenu {
-	protected override bool CanShowMenu() => !SelectedItemPaths.Skip(1).Any();
+	protected override bool CanShowMenu() =>
+		SelectedItemPaths.All(p => File.GetAttributes(p).HasFlag(FileAttributes.Directory));
 
 	protected override ContextMenuStrip CreateMenu() {
-		string src = SelectedItemPaths.FirstOrDefault() ?? FolderPath;
+		var srcs = SelectedItemPaths.AsArray() is { Length: > 0 } arr ? arr : [FolderPath];
+		var names = srcs.Select(Path.GetFileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
 		var strip = new ContextMenuStrip {
 			Items = {
 				new ToolStripMenuItem(
-					Locale.Get("CreateJunctionPoint"),
+					Locale.Get("CreateJunctionPoints"),
+					Resource.Icon,
+					(_, _) => {
+						if (names.Count < srcs.Length) {
+							MessageBox.Show(Locale.Get("DupNameErrorMsg"), Locale.Get("MsgBoxErrorCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+							return;
+						}
+						var dialog = new CommonOpenFileDialog {
+							IsFolderPicker = true,
+							Multiselect = false,
+							EnsurePathExists = true,
+							EnsureFileExists = true,
+							EnsureValidNames = true,
+							Title = Locale.Get("ChooseSaveDirForJunctionPoints")
+						};
+						DirectoryInfo saveDir;
+						while (true) {
+							if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
+								return;
+							saveDir = new DirectoryInfo(dialog.FileName);
+							if (saveDir.EnumerateFileSystemInfos().All(i => !names.Contains(i.Name)))
+								break;
+							var result = MessageBox.Show(Locale.Get("NameConflictErrorMsg"), Locale.Get("MsgBoxErrorCaption"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+							if (result != DialogResult.Retry)
+								return;
+						}
+					Create:
+						foreach (var src in srcs) {
+							var target = Path.Combine(saveDir.FullName, Path.GetFileName(src));
+							try {
+								JunctionPoint.Create(src, target, false);
+							}
+							catch (IOException ex) {
+								string message = ex.InnerException?.Message ?? ex.Message;
+								if (MessageBox.Show(message, Locale.Get("JunctionPointCreationFailure"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+									goto Create;
+							}
+						}
+					}
+				)
+			}
+		};
+		if (srcs.Length == 1) {
+			var src = srcs[0];
+			strip.Items.Add(
+				new ToolStripMenuItem(
+					Locale.Get("CreateJunctionPointOverwrite"),
 					Resource.Icon,
 					(_, _) => {
 						var dialog = new CommonOpenFileDialog {
 							IsFolderPicker = true,
 							Multiselect = false,
-							EnsurePathExists = false,
-							EnsureFileExists = false,
+							EnsurePathExists = true,
+							EnsureFileExists = true,
 							EnsureValidNames = true,
 							Title = Locale.Get("ChooseEmptyDir"),
 							DefaultFileName = Path.GetFileName(src)
@@ -209,16 +256,17 @@ public class FolderContextMenu : SharpContextMenu {
 						}
 					}
 				)
-			}
-		};
-		if (JunctionPoint.GetTarget(src) is { } target)
-			strip.Items.Add(
-				new ToolStripMenuItem(
-					Locale.Get("OpenJunctionPointTarget"),
-					Resource.Icon,
-					(_, _) => ExplorerSelector.FileOrFolder(target)
-				)
 			);
+			if (JunctionPoint.GetTarget(src) is { } target) {
+				strip.Items.Add(
+					new ToolStripMenuItem(
+						Locale.Get("OpenJunctionPointTarget"),
+						Resource.Icon,
+						(_, _) => ExplorerSelector.FileOrFolder(target)
+					)
+				);
+			}
+		}
 		return strip;
 	}
 }

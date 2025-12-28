@@ -132,11 +132,17 @@
   <data name="ChooseSaveDirForHardLinks" xml:space="preserve">
     <value>Choose a directory to save the hard links</value>
   </data>
+  <data name="ChooseSaveDirForJunctionPoints" xml:space="preserve">
+    <value>Choose a directory to save the junction points</value>
+  </data>
   <data name="CreateHardLink" xml:space="preserve">
     <value>Create hard link</value>
   </data>
-  <data name="CreateJunctionPoint" xml:space="preserve">
-    <value>Create junction point</value>
+  <data name="CreateJunctionPointOverwrite" xml:space="preserve">
+    <value>Select empty directory as junction point</value>
+  </data>
+  <data name="CreateJunctionPoints" xml:space="preserve">
+    <value>Create junction point(s)</value>
   </data>
   <data name="DeleteAll" xml:space="preserve">
     <value>Delete all</value>
@@ -158,6 +164,9 @@
   </data>
   <data name="MsgBoxErrorCaption" xml:space="preserve">
     <value>Error</value>
+  </data>
+  <data name="NameConflictErrorMsg" xml:space="preserve">
+    <value>Target directory contains entries that conflict with the names of the selected</value>
   </data>
   <data name="NotEmptyDirErrorMsg" xml:space="preserve">
     <value>Target directory is not empty</value>

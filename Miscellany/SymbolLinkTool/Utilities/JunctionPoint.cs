@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
-#pragma warning disable IDE0051// Remove unused private members
+#pragma warning disable IDE0051 // Remove unused private members
 
 using System;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
-namespace SymbolLinkTool.Utilities; 
+namespace SymbolLinkTool.Utilities;
 
 /// <summary>
 ///     Provides access to NTFS junction points in .Net.
@@ -152,29 +152,6 @@ public static class JunctionPoint {
 		Delete = 0x00000004
 	}
 
-	[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-	private static extern bool DeviceIoControl(
-		IntPtr hDevice,
-		uint dwIoControlCode,
-		IntPtr inBuffer,
-		int nInBufferSize,
-		IntPtr outBuffer,
-		int nOutBufferSize,
-		out int pBytesReturned,
-		IntPtr lpOverlapped
-	);
-
-	[DllImport("kernel32.dll", SetLastError = true)]
-	private static extern IntPtr CreateFile(
-		string lpFileName,
-		FileAccess dwDesiredAccess,
-		FileShare dwShareMode,
-		IntPtr lpSecurityAttributes,
-		CreationDisposition dwCreationDisposition,
-		FileAttributes dwFlagsAndAttributes,
-		IntPtr hTemplateFile
-	);
-
 	/// <summary>
 	///     Creates a junction point from <paramref name="srcDir" /> to <paramref name="dstDir" />.
 	/// </summary>
@@ -183,23 +160,21 @@ public static class JunctionPoint {
 	/// </remarks>
 	/// <param name="srcDir">The source directory path</param>
 	/// <param name="dstDir">The path of the junction point to be created</param>
-	/// <param name="overwrite">If true overwrites an existing reparse point or empty directory</param>
+	/// <param name="overwrite">If <see langword="true" /> overwrites an existing reparse point or empty directory</param>
 	/// <exception cref="IOException">
-	///     Thrown when the junction point could not be created or when
-	///     an existing directory was found and <paramref name="overwrite" /> if false
+	///     Thrown when the junction point could not be created or when an existing directory was found and
+	///     <paramref name="overwrite" /> if <see langword="false" />
 	/// </exception>
 	public static void Create(string srcDir, string dstDir, bool overwrite = false) {
-		dstDir = Path.GetFullPath(dstDir);
-
 		if (!Directory.Exists(srcDir))
 			throw new IOException("Target path does not exist or is not a directory.");
-
-		if (!Directory.Exists(dstDir))
-			Directory.CreateDirectory(dstDir);
+		var dst = new DirectoryInfo(dstDir);
+		if (!dst.Exists)
+			dst.Create();
 		else if (!overwrite)
 			throw new IOException("Directory already exists.");
 
-		using var handle = OpenReparsePoint(dstDir, FileAccess.GenericWrite);
+		using var handle = OpenReparsePoint(dst.FullName, FileAccess.GenericWrite);
 		byte[] targetDirBytes = Encoding.Unicode.GetBytes(NonInterpretedPathPrefix + Path.GetFullPath(srcDir));
 
 		var reparseDataBuffer = new ReparseDataBuffer {
@@ -298,8 +273,7 @@ public static class JunctionPoint {
 	/// <param name="junctionPoint">The junction point path</param>
 	/// <returns>True if the specified path represents a junction point</returns>
 	/// <exception cref="IOException">
-	///     Thrown if the specified path is invalid
-	///     or some other error occurs
+	///     Thrown if the specified path is invalid or some other error occurs
 	/// </exception>
 	public static bool Exists(string junctionPoint) => GetTarget(junctionPoint) != null;
 
@@ -357,6 +331,29 @@ public static class JunctionPoint {
 			Marshal.FreeHGlobal(outBuffer);
 		}
 	}
+
+	[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+	private static extern bool DeviceIoControl(
+		IntPtr hDevice,
+		uint dwIoControlCode,
+		IntPtr inBuffer,
+		int nInBufferSize,
+		IntPtr outBuffer,
+		int nOutBufferSize,
+		out int pBytesReturned,
+		IntPtr lpOverlapped
+	);
+
+	[DllImport("kernel32.dll", SetLastError = true)]
+	private static extern IntPtr CreateFile(
+		string lpFileName,
+		FileAccess dwDesiredAccess,
+		FileShare dwShareMode,
+		IntPtr lpSecurityAttributes,
+		CreationDisposition dwCreationDisposition,
+		FileAttributes dwFlagsAndAttributes,
+		IntPtr hTemplateFile
+	);
 
 	private static SafeFileHandle OpenReparsePoint(string reparsePoint, FileAccess accessMode) {
 		var reparsePointHandle = new SafeFileHandle(

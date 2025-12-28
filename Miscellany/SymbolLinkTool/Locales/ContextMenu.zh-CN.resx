@@ -132,10 +132,16 @@
   <data name="ChooseSaveDirForHardLinks" xml:space="preserve">
     <value>选择硬链接文件的保存目录</value>
   </data>
+  <data name="ChooseSaveDirForJunctionPoints" xml:space="preserve">
+    <value>选择文件夹节点的保存目录</value>
+  </data>
   <data name="CreateHardLink" xml:space="preserve">
     <value>创建硬链接</value>
   </data>
-  <data name="CreateJunctionPoint" xml:space="preserve">
+  <data name="CreateJunctionPointOverwrite" xml:space="preserve">
+    <value>选择空文件夹为节点</value>
+  </data>
+  <data name="CreateJunctionPoints" xml:space="preserve">
     <value>创建文件夹节点</value>
   </data>
   <data name="DeleteAll" xml:space="preserve">
@@ -158,6 +164,9 @@
   </data>
   <data name="MsgBoxErrorCaption" xml:space="preserve">
     <value>错误</value>
+  </data>
+  <data name="NameConflictErrorMsg" xml:space="preserve">
+    <value>目标文件夹中存在和所选路径冲突的文件或文件夹</value>
   </data>
   <data name="NotEmptyDirErrorMsg" xml:space="preserve">
     <value>目标文件夹非空</value>
