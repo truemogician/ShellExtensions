@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Windows.Forms;
-using EntryDateUtility;
 using Extension.Forms;
 using SharpShell.SharpPropertySheet;
+using TrueMogician.Extensions.IO;
 
 namespace EntryDateSetter;
 
@@ -107,9 +107,8 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 	}
 
 	protected static DateTime[] GetDateTimes(string path) {
-		var info = new EntryMetadata(path);
-		info.GetTimes(out var c, out var a, out var w);
-		return [a, w, c];
+		var info = new EntryMetadata(path).BasicInfo;
+		return [info.LastAccessTime, info.LastWriteTime, info.CreationTime];
 	}
 
 	protected static void SetDateTimes(string path, DateTime?[] times) {
@@ -229,9 +228,7 @@ public partial class EntryDateInformationPropertyPage : SharpPropertyPage {
 		Pickers[i].UnknownComponent = Pickers[j].UnknownComponent;
 		Pickers[j].Value = temp.Value;
 		Pickers[j].UnknownComponent = temp.Unknown;
-		int tmp = MappedIndex[i];
-		MappedIndex[i] = MappedIndex[j];
-		MappedIndex[j] = tmp;
+		(MappedIndex[i], MappedIndex[j]) = (MappedIndex[j], MappedIndex[i]);
 	}
 
 	private void RecoverDateButtonOnClick(object sender, EventArgs e) {
