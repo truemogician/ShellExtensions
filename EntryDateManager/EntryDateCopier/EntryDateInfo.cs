@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EntryDateUtility;
 using Newtonsoft.Json;
+using TrueMogician.Extensions.IO;
 
 namespace EntryDateCopier {
 	public class EntryDateInfo {
@@ -31,13 +31,13 @@ namespace EntryDateCopier {
 		public bool IncludesChildren => Entries is not null;
 
 		[JsonIgnore]
-		public DateTime? CreationDate => Value.Creation;
+		public DateTime? CreationTime => Value.Creation;
 
 		[JsonIgnore]
-		public DateTime? ModificationDate => Value.Modification;
+		public DateTime? LastWriteTime => Value.LastWrite;
 
 		[JsonIgnore]
-		public DateTime? AccessDate => Value.Access;
+		public DateTime? LastAccessTime => Value.LastAccess;
 
 		[JsonIgnore]
 		public IEnumerable<EntryDateInfo>? Files => Entries?.Where(e => e.IsDirectory != true);
@@ -46,20 +46,21 @@ namespace EntryDateCopier {
 		public IEnumerable<EntryDateInfo>? Directories => Entries?.Where(e => e.IsDirectory == true);
 	}
 
-	public record EntryDate(DateTime? Creation = null, DateTime? Modification = null, DateTime? Access = null) {
+	public record EntryDate(DateTime? Creation = null, DateTime? LastWrite = null, DateTime? LastAccess = null) {
 		public DateTime? Creation { get; set; } = Creation;
 
-		public DateTime? Modification { get; set; } = Modification;
+		[JsonProperty("Modification")]
+		public DateTime? LastWrite { get; set; } = LastWrite;
 
-		public DateTime? Access { get; set; } = Access;
+		[JsonProperty("Access")]
+        public DateTime? LastAccess { get; set; } = LastAccess;
 
 		public static EntryDate FromEntry(string path, EntryDateFields fields = EntryDateFields.All) {
-			var metadata = new EntryMetadata(path);
-			metadata.GetTimes(out var creation, out var access, out var modification);
+			var metadata = new EntryMetadata(path).BasicInfo;
 			return new EntryDate(
-				fields.HasFlag(EntryDateFields.Creation) ? creation : null,
-				fields.HasFlag(EntryDateFields.Modification) ? modification : null,
-				fields.HasFlag(EntryDateFields.Access) ? access : null
+				fields.HasFlag(EntryDateFields.Creation) ? metadata.CreationTime : null,
+				fields.HasFlag(EntryDateFields.LastWrite) ? metadata.LastWriteTime : null,
+				fields.HasFlag(EntryDateFields.LastAccess) ? metadata.LastAccessTime : null
 			);
 		}
 
@@ -69,7 +70,7 @@ namespace EntryDateCopier {
 			if (attr.HasFlag(FileAttributes.ReadOnly))
 				metadata.Attributes = attr & ~FileAttributes.ReadOnly;
 			try {
-				metadata.SetTimes(Creation, Access, Modification);
+				metadata.SetTimes(Creation, LastAccess, LastWrite);
 			}
 			finally {
 				if (attr.HasFlag(FileAttributes.ReadOnly))
@@ -82,10 +83,10 @@ namespace EntryDateCopier {
 	public enum EntryDateFields : byte {
 		Creation = 1 << 0,
 
-		Modification = 1 << 1,
+		LastWrite = 1 << 1,
 
-		Access = 1 << 2,
+		LastAccess = 1 << 2,
 
-		All = Creation | Modification | Access
+		All = Creation | LastWrite | LastAccess
 	}
 }

@@ -185,8 +185,8 @@ namespace EntryDateCopier {
 			return new ToolStripMenuItem(text, Resources.Image.Configuration) {
 				DropDownItems = {
 					CreateFieldItem(Text.GetString("CreationDate"), EntryDateFields.Creation),
-					CreateFieldItem(Text.GetString("ModificationDate"), EntryDateFields.Modification),
-					CreateFieldItem(Text.GetString("AccessDate"), EntryDateFields.Access),
+					CreateFieldItem(Text.GetString("ModificationDate"), EntryDateFields.LastWrite),
+					CreateFieldItem(Text.GetString("AccessDate"), EntryDateFields.LastAccess),
 					Separator,
 					directoryOnlyItem
 				}
