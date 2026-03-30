@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using Newtonsoft.Json;
 
 
 namespace EntryDateCopier {
 	public class EdiFile {
+		public const string EXT = ".edi";
+
 		private static readonly JsonSerializerSettings SerializerSettings = new() {
 			NullValueHandling = NullValueHandling.Ignore
 		};

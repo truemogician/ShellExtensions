@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +16,8 @@ namespace EntryDateCopier {
 
 	internal static class MenuFactory {
 		internal const int MAX_SYNC_FILES = 16;
+
+		internal const int APPLY_DIALOG_MIN_ENTRY = 100;
 
 		private static ToolStripSeparator Separator => new();
 
@@ -38,27 +40,24 @@ namespace EntryDateCopier {
 		);
 
 		private static string GetFileName(IEnumerable<string> paths) => GetFileName(
-			paths.SameOrDefault(Path.GetDirectoryName) ??
-			throw new ArgumentException(Text.GetString("PathNotInSameDir"), nameof(paths))
+			paths.SameOrDefault(Path.GetDirectoryName) ?? throw new ArgumentException(Text.GetString("PathNotInSameDir"), nameof(paths))
 		);
 
 		private static string GetFileName(string path) {
-			const string suffix = ".edi";
 			var dir = Path.GetDirectoryName(path) ?? "";
 			var name = dir == ""
 				? DriveInfo.GetDrives().First(d => d.Name == path).VolumeLabel
 				: Path.GetFileName(path);
 			var fileName = name;
 			var index = 1;
-			while (File.Exists(Path.Combine(dir, fileName + suffix)))
+			while (File.Exists(Path.Combine(dir, fileName + EdiFile.EXT)))
 				fileName = name + $"({++index})";
-			return fileName + suffix;
+			return fileName + EdiFile.EXT;
 		}
 
-		internal static ToolStripMenuItem CreateSingleMenu(string path) {
+		internal static ToolStripMenuItem CreateGenerationSingleMenu(string path) {
 			var dstDirectory = Path.GetDirectoryName(path)!;
-			void Generate(bool matchBasePath, bool includesChildren) => HandleException(
-				() => RunGeneration(
+			void Generate(bool matchBasePath, bool includesChildren) => HandleException(() => RunGeneration(
 					new[] { path },
 					Path.Combine(dstDirectory, GetFileName(path)),
 					matchBasePath,
@@ -109,13 +108,7 @@ namespace EntryDateCopier {
 			return result;
 		}
 
-		internal static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(string[] paths) =>
-			CreateMultipleMenus(paths, false);
-
-		internal static ToolStripMenuItem CreateBackgroundMenu(string directory) =>
-			CreateMultipleMenus(Directory.GetFileSystemEntries(directory), true).Single();
-
-		private static IEnumerable<ToolStripMenuItem> CreateMultipleMenus(IReadOnlyList<string> paths, bool isBackground) {
+		internal static IEnumerable<ToolStripMenuItem> CreateGenerationMultipleMenus(IReadOnlyList<string> paths, bool isBackground) {
 			var root = Path.GetDirectoryName(paths[0])!;
 			var hasDirectory = paths.Any(Directory.Exists);
 			var format = Text.GetString("GenMenuFormat")!;
@@ -167,6 +160,23 @@ namespace EntryDateCopier {
 			yield return menu;
 		}
 
+		internal static ToolStripMenuItem CreateApplicationMenu(IReadOnlyList<string> paths) => new ToolStripMenuItem(
+			Text.GetString("ApplyDateFile"),
+			Resources.Image.Restore,
+			(_, _) => {
+				var dialog = new OpenFileDialog {
+					Title = Text.GetString("SelectDateFile"),
+					Filter = $"*{EdiFile.EXT}|*{EdiFile.EXT}",
+					DefaultExt = EdiFile.EXT,
+					InitialDirectory = Path.GetDirectoryName(paths[0]),
+					CheckFileExists = true,
+					AddExtension = true
+				};
+				if (dialog.ShowDialog() == DialogResult.OK)
+					RunApplication(paths, dialog.FileName);
+			}
+		);
+
 		private static ToolStripMenuItem CreateConfigMenuItem(string text, Func<EntryDateFields> getter, Action<EntryDateFields> setter) {
 			ToolStripMenuItem CreateFieldItem(string? itemText, EntryDateFields field) {
 				var item = new ToolStripMenuItem(itemText, null) {
@@ -176,7 +186,7 @@ namespace EntryDateCopier {
 				item.CheckedChanged += (_, _) => setter(getter() ^ field);
 				return item;
 			}
-			var directoryOnlyItem = new ToolStripMenuItem(Text.GetString("DirOnly").Capitalize(true), null) {
+			var directoryOnlyItem = new ToolStripMenuItem(Text.GetString("DirOnly")!.Capitalize(true), null) {
 				CheckOnClick = true,
 				Checked = Settings.Default.DirectoryOnly
 			};
@@ -197,13 +207,12 @@ namespace EntryDateCopier {
 			new(
 				text,
 				Resources.Image.Sync,
-				(_, _) => HandleException(
-					() => {
+				(_, _) => HandleException(() => {
 						var source = new CancellationTokenSource();
 						var synchronizer = new Synchronizer(dsts, src) {
 							Fields = (EntryDateFields)Settings.Default.SyncFields,
 							CancellationToken = source.Token
-                        };
+						};
 						var dialog = new ProgressDialog {
 							MinimizeBox = true,
 							ShowCancelButton = false,
@@ -240,7 +249,7 @@ namespace EntryDateCopier {
 				)
 			);
 
-		private static void RunGeneration(IEnumerable<string> paths, string saveFile, bool matchBasePath, bool includesChildren) {
+		internal static void RunGeneration(IEnumerable<string> paths, string saveFile, bool matchBasePath, bool includesChildren) {
 			var source = new CancellationTokenSource();
 			var generator = new Generator(paths) {
 				Fields = (EntryDateFields)Settings.Default.GenerationFields,
@@ -278,6 +287,39 @@ namespace EntryDateCopier {
 				dialog
 			);
 			dialog.Show(source.Token);
+		}
+
+		internal static void RunApplication(IEnumerable<string> paths, string ediFile, bool appliesToChildren = true) {
+			var applier = new Applier(paths, ediFile);
+			applier.Ready += (_, e) => {
+				int total = e.Map.Count;
+				if (total < APPLY_DIALOG_MIN_ENTRY)
+					return;
+				var dialog = new ProgressDialog {
+					MinimizeBox = true,
+					ShowTimeRemaining = false,
+					UseCompactPathsForText = true,
+					UseCompactPathsForDescription = true,
+					WindowTitle = Text.GetString("DragDropProgressTitle"),
+					ProgressBarStyle = ProgressBarStyle.ProgressBar
+				};
+				int current = 0;
+				applier.SetEntryDate += (_, args) => {
+					Interlocked.Increment(ref current);
+					dialog.ReportProgress(
+						(int)Math.Round((double)current / total),
+						string.Format(Text.GetString("ProgressFormat")!, current, total),
+						args.Path
+					);
+				};
+				dialog.Show();
+			};
+			_ = applier.ApplyAsync(appliesToChildren)
+				.ContinueWith(task => {
+						if (task.IsFaulted)
+							HandleException(task.Exception!.InnerException!);
+					}
+				);
 		}
 	}
 }

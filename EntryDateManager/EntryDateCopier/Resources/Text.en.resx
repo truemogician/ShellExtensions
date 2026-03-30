@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -197,5 +197,11 @@
   </data>
   <data name="Success" xml:space="preserve">
     <value>Success</value>
+  </data>
+  <data name="ApplyDateFile" xml:space="preserve">
+    <value>Apply date file</value>
+  </data>
+  <data name="SelectDateFile" xml:space="preserve">
+    <value>Select date file</value>
   </data>
 </root>

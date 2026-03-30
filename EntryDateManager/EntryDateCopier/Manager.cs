@@ -117,7 +117,7 @@ namespace EntryDateCopier {
 				return EdiFile.Load(ediPath).Data;
 			}
 			catch (Exception ex) {
-				throw new InvalidDataException("Corrupted edi file", ex);
+				throw new InvalidDataException("Corrupted date file", ex);
 			}
 		}
 
