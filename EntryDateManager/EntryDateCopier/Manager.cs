@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -84,16 +84,10 @@ namespace EntryDateCopier {
 			OnReady(new ReadyEventArgs(newDates));
 			try {
 				await Task.WhenAll(
-					newDates.Select(
-							pair => Task.Run(
-								() => {
-									pair.Value.ApplyToEntry(pair.Key);
-									OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
-								},
-								cancellationToken.Value
-							)
-						)
-						.ToArray()
+					newDates.Select(pair => Task.Run(() => {
+						pair.Value.ApplyToEntry(pair.Key);
+						OnSetEntryDate(new EntryEventArgs(pair.Key, pair.Value));
+					}, cancellationToken.Value))
 				);
 				OnComplete();
 			}

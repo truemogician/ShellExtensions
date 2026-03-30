@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using Ookii.Dialogs.Wpf;
 using SharpShell.Attributes;
@@ -46,43 +47,46 @@ namespace EntryDateCopier {
 	[ComVisible(true)]
 	[COMServerAssociation(AssociationType.ClassOfExtension, ".edi")]
 	public class DropHandler : SharpDropHandler {
+		public const int SHOW_DIALOG_COUNT = 100;
+
 		protected override void DragEnter(DragEventArgs dragEventArgs) => dragEventArgs.Effect = DragDropEffects.Link;
 
 		protected override void Drop(DragEventArgs dragEventArgs) => HandleException(() => {
-				var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
+			var applier = new Applier(DragItems.ToArray(), SelectedItemPath);
+			applier.Ready += (_, e) => {
+				int total = e.Map.Count;
+				if (total < SHOW_DIALOG_COUNT)
+					return;
 				var dialog = new ProgressDialog {
 					MinimizeBox = true,
 					ShowTimeRemaining = false,
 					UseCompactPathsForText = true,
 					UseCompactPathsForDescription = true,
 					WindowTitle = Text.GetString("DragDropProgressTitle"),
-					ProgressBarStyle = ProgressBarStyle.MarqueeProgressBar
+					ProgressBarStyle = ProgressBarStyle.ProgressBar
 				};
-				int total = 0, current = 0;
-				applier.Start += (_, _) => dialog.ReportProgress(0, Text.GetString("CountingEntries"), null);
-				applier.Ready += (_, args) => {
-					total = args.Map.Count;
-					dialog.ProgressBarStyle = ProgressBarStyle.ProgressBar;
-				};
+				int current = 0;
 				applier.SetEntryDate += (_, args) => {
-					++current;
+					Interlocked.Increment(ref current);
 					dialog.ReportProgress(
 						(int)Math.Round((double)current / total),
 						string.Format(Text.GetString("ProgressFormat")!, current, total),
 						args.Path
 					);
 				};
-				dialog.DoWork += (_, _) => HandleException(() => applier.Apply(), dialog);
-				dialog.Show();
-				/*try {
-					applier.Apply();
-					MessageBox.Show(Text.GetString("EdiApplied"), Text.GetString("Success"), MessageBoxButtons.OK);
-				}
-				catch (Exception ex) {
-					HandleException(ex);
-				}*/
+			};
+			_ = applier.ApplyAsync().ContinueWith(task => {
+				if (task.IsFaulted)
+					HandleException(task.Exception!.InnerException!);
+			});
+			/*try {
+				applier.Apply();
+				MessageBox.Show(Text.GetString("EdiApplied"), Text.GetString("Success"), MessageBoxButtons.OK);
 			}
-		);
+			catch (Exception ex) {
+				HandleException(ex);
+			}*/
+		});
 	}
 
 	[ComVisible(true)]
