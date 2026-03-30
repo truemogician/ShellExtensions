@@ -22,7 +22,11 @@ public class ContextMenu : SharpContextMenu {
 				Resource.Restart,
 				(_, _) => {
 					try {
-						Explorer.Restart();
+						var exe = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "RestartExplorer.exe");
+						Process.Start(new ProcessStartInfo {
+							FileName = exe,
+							Verb = "runas"
+						});
 					}
 					catch (Exception ex) {
 						MessageBox.Show(ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);

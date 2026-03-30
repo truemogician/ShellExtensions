@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="NUnit" Version="4.3.2" />
+		<PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit" Version="4.3.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\EntryDateCopier\EntryDateCopier.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\EntryDateCopier\EntryDateCopier.csproj" />
+	</ItemGroup>
 
 </Project>

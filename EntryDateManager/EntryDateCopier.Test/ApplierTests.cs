@@ -2,22 +2,30 @@ using System.IO;
 using NUnit.Framework;
 
 namespace EntryDateCopier.Test {
-    public class ApplierTests {
-        [SetUp]
-        public void Setup() {
-        }
+	public class ApplierTests {
+		[SetUp]
+		public void Setup() { }
 
 		[Test]
-        public void ApplySingleTest(string source, string ediFile, bool applyToChildren) {
+		[TestCase(@"R:\Models\Clarice\[HegreArt]Session In Bed-20170319", @"R:\Models\Clarice\Clarice.edi", true)]
+		public void ApplySingleTest(string source, string ediFile, bool applyToChildren) {
 			var applier = new Applier(source, ediFile);
 			applier.Apply(applyToChildren);
 		}
 
-        [Test]
-        public void ApplyMultipleTest(string root, string output, bool applyToChildren) {
-			var folders = Directory.GetDirectories(root);
-			var applier = new Applier(folders, output);
+		[Test]
+		[TestCase(new[] { @"R:\Models\Clarice\[HegreArt]Session In Bed-20170319" }, @"R:\Models\Clarice\Clarice.edi", false)]
+		public void ApplyMultipleTest(string[] sources, string ediFile, bool applyToChildren) {
+			var applier = new Applier(sources, ediFile);
 			applier.Apply(applyToChildren);
 		}
-    }
+
+		[Test]
+		[TestCase(@"R:\Models", @"R:\Models\Models.edi", true)]
+		public void ApplyMultipleTest(string root, string ediFile, bool applyToChildren) {
+			var folders = Directory.GetDirectories(root);
+			var applier = new Applier(folders, ediFile);
+			applier.Apply(applyToChildren);
+		}
+	}
 }

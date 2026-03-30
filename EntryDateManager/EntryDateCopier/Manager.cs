@@ -121,7 +121,12 @@ namespace EntryDateCopier {
 			}
 		}
 
-		private static IEnumerable<(string Path, EntryDate NewDate)> Search(IEnumerable<string> paths, IEnumerable<EntryDateInfo> infos, bool appliesToChildren) {
+		private static IEnumerable<(string Path, EntryDate NewDate)> Search(
+			IEnumerable<string> paths, 
+			IEnumerable<EntryDateInfo> infos, 
+			bool appliesToChildren,
+			StringComparison stringComparison = StringComparison.OrdinalIgnoreCase 
+		) {
 			using var enumerator = infos.GetEnumerator();
 			using var e = enumerator.ToExtended();
 			if (!e.MoveNext())
@@ -131,13 +136,13 @@ namespace EntryDateCopier {
 				throw new InvalidOperationException(@"More than one general EntryDateInfo found");
 			foreach (var path in paths) {
 				var fileName = Path.GetFileName(path);
-				while (e.Success && string.Compare(fileName, e.Current!.Path) > 0)
+				while (e.Success && string.Compare(fileName, e.Current!.Path, stringComparison) > 0)
 					e.MoveNext();
 				if (!e.Success && general is null)
 					break;
 				var isDirectory = path.IsDirectory();
 				EntryDateInfo? srcInfo = null;
-				if (e.Success && fileName == e.Current!.Path && e.Current.IsDirectory == isDirectory)
+				if (e.Success && string.Equals(fileName, e.Current!.Path, stringComparison) && e.Current.IsDirectory == isDirectory)
 					srcInfo = e.GetAndMoveNext();
 				else if (general is not null) {
 					if (general.IsDirectory is null || general.IsDirectory == isDirectory)

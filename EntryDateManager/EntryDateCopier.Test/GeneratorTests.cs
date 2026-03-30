@@ -5,15 +5,17 @@ using NUnit.Framework;
 namespace EntryDateCopier.Test {
 	public class GeneratorTests {
 		[Test]
+		[TestCase(@"R:\Models",1, @"R:\Models\Models.edi")]
 		public async Task GenerateSingleTest(string root, int depth, string output) {
 			var generator = new Generator(root) {
-				Fields = EntryDateFields.Creation | EntryDateFields.Modification
+				Fields = EntryDateFields.Creation | EntryDateFields.LastWrite
 			};
 			await generator.Generate(depth);
 			generator.SaveToFile(output);
 		}
 
 		[Test]
+		[TestCase(@"R:\Models", 2, @"R:\Models\Models.edi")]
         public async Task GenerateMultipleTest(string root, int depth, string output) {
 			var folders = Directory.GetDirectories(root);
 			var generator = new Generator(folders) {
